@@ -127,3 +127,22 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# Ignoring Structure
+!storage/STORAGE.md
+
+storage/models/*
+!storage/models/MODELS.md
+
+storage/plots/*
+!storage/plots/PLOTS.md
+
+storage/results/*
+!storage/results/RESULTS.md
+
+storage/logs/*
+!storage/logs/LOGS.md
+
+sandbox/*
+!sandbox/SANDBOX.md
