@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Editor
+.vscode/
+
 # C extensions
 *.so
 
@@ -132,16 +135,16 @@ dmypy.json
 # Ignoring Structure
 !storage/STORAGE.md
 
-storage/models/*
-!storage/models/MODELS.md
-
-storage/plots/*
-!storage/plots/PLOTS.md
-
 storage/results/*
-!storage/results/RESULTS.md
-
+storage/models/*
+storage/states/*
+storage/plots/*
 storage/logs/*
+
+!storage/results/RESULTS.md
+!storage/models/MODELS.md
+!storage/states/STATES.md
+!storage/plots/PLOTS.md
 !storage/logs/LOGS.md
 
 sandbox/*
