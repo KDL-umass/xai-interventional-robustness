@@ -44,12 +44,12 @@ TASKS:
 
 # Input parameters (seed, intv, agent_name) compare individual trajectories
 def compare_trajectories(intv=0, seed=0, agent_name="cnn"):
-    dir_path = "results/action_trajectories/{}/{}/{}/".format(intv, seed, agent_name)
+    dir_path = "storage/results/action_trajectories/{}/{}/{}/".format(intv, seed, agent_name)
     action_file = dir_path + str(agent_name) + ".txt"
     with open(action_file, "r") as f:
         seq = f.readlines()
 
-    dir_path_vanilla = "results/action_trajectories/{}/{}/{}/".format(
+    dir_path_vanilla = "storage/results/action_trajectories/{}/{}/{}/".format(
         -1, seed, agent_name
     )
     action_file_vanilla = dir_path_vanilla + str(agent_name) + ".txt"

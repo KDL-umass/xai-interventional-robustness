@@ -29,7 +29,7 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
         # Get JSON state
         if self.intv >= 0:
             with open(
-                "interventions/intervention_states/intervened_state_"
+                "storage/states/interventions/intervened_state_"
                 + str(self.intv)
                 + ".json"
             ) as f:

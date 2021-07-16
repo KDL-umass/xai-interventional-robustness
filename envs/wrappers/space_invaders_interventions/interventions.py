@@ -7,15 +7,17 @@ import matplotlib.pyplot as plt
 from toybox import Toybox, Input
 from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
-from .space_invaders_reset_wrapper import SpaceInvadersResetWrapper
-from space_invaders_wrapper.space_invaders_feature_vec_wrapper import (
+from envs.wrappers.space_invaders_interventions.reset_wrapper import (
+    SpaceInvadersResetWrapper,
+)
+from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 
 
 def write_intervention_json(state, count):
     with open(
-        "interventions/intervention_states/intervened_state_" + str(count) + ".json",
+        "storage/states/interventions/intervened_state_" + str(count) + ".json",
         "w",
     ) as outfile:
         json.dump(state, outfile)
@@ -181,17 +183,17 @@ def get_flip_shield_icons_json(count):
 def create_json_states():
     """Create JSON states for all interventions."""
     try:
-        os.rmdir("interventions/intervention_states")
+        os.rmdir("storage/states/interventions")
     except:
         print("", end="")
-    os.makedirs("interventions/intervention_states", exist_ok=True)
+    os.makedirs("storage/states/interventions", exist_ok=True)
     count = 0
     count = get_drop_one_enemy_json(count)
     count = get_shift_shields_interventions_json(count)
     count = get_shift_agent_interventions_json(count)
     count = get_drop_enemy_rowcol_interventions_json(count)
     count = get_flip_shield_icons_json(count)
-    print(f"Created {count} intervention states in `intervention_states/`.")
+    print(f"Created {count} intervention states in `interventions/`.")
     return count
 
 

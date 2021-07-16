@@ -1,4 +1,4 @@
-from envs.wrappers.space_invaders_wrapper.space_invaders_feature_vec_wrapper import (
+from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 import gym
@@ -48,7 +48,7 @@ def run_episode(
 
     # Create directory to store the trajectories for actions
     if save_actions:
-        action_path = "interventions/results/action_trajectories/{}/{}/{}/".format(
+        action_path = "storage/results/action_trajectories/{}/{}/{}/".format(
             env_name, seed, agent_name
         )
         if not os.path.exists(action_path):
@@ -143,7 +143,7 @@ def evaluate(agent_name, num_trials, vanilla, parallel, lives, save_images=False
         for (e, env) in enumerate(env_list):
             for t in range(num_trials):
                 print(
-                    f"Env {e+1}/{len(env_list)}, Trial {t+1}/{num_trials}, aka {round(((e * num_trials + t)+1) / (len(env_list) * num_trials), 2)}%"
+                    f"Env {e+1}/{len(env_list)}, Trial {t+1}/{num_trials}, aka {round(((e * num_trials + t)+1) / (len(env_list) * num_trials), 2)*100}%"
                 )
                 if vanilla:
                     intv = -1
@@ -218,11 +218,11 @@ def store_action_trajectories():
 
 if __name__ == "__main__":
     parallel = False
-    num_trials = 30
+    num_trials = 10
     lives = 1
     save_images = False
 
-    for agent_name in ["cnn", "random", "ddt"]:
+    for agent_name in ["random"]:
         # Interventions
         performance_matrix = evaluate(
             agent_name, num_trials, False, parallel, lives, save_images=save_images

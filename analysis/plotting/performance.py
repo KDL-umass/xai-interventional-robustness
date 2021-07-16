@@ -12,8 +12,8 @@ def plot_dist(intervention_name, vanilla_name, agent_name):
     plt.figure(figsize=(14, 5), facecolor="white")
     plt.rc("font", size=13)
 
-    interv = np.loadtxt("results/" + intervention_name + ".txt")
-    vanilla = np.loadtxt("results/" + vanilla_name + ".txt")
+    interv = np.loadtxt("storage/results/" + intervention_name + ".txt")
+    vanilla = np.loadtxt("storage/results/" + vanilla_name + ".txt")
 
     if len(interv.shape) == 1:
         interv = interv.reshape(1, -1)
@@ -48,12 +48,14 @@ def plot_vanilla_comparison(lives):
     plt.rc("font", size=13)
     plt.subplot(2, 2, 1)
 
-    random = np.loadtxt(f"results/random_performance_vanilla_lives_{lives}.txt")
-    ddt = np.loadtxt(f"results/ddt_performance_vanilla_lives_{lives}.txt")
-    cnn = np.loadtxt(f"results/cnn_performance_vanilla_lives_{lives}.txt")
+    random = np.loadtxt(f"storage/results/random_performance_vanilla_lives_{lives}.txt")
+    # ddt = np.loadtxt(f"storage/results/ddt_performance_vanilla_lives_{lives}.txt")
+    # cnn = np.loadtxt(f"storage/results/cnn_performance_vanilla_lives_{lives}.txt")
 
     maxscore = (
-        int(max(np.amax(random.ravel()), np.amax(ddt.ravel()), np.amax(cnn.ravel())))
+        int(
+            max(np.amax(random.ravel()))
+        )  # , np.amax(ddt.ravel()), np.amax(cnn.ravel())))
         + 50
     )
 
@@ -63,18 +65,18 @@ def plot_vanilla_comparison(lives):
     plt.xlabel("Return")
     plt.ylabel("Frequency")
 
-    plt.subplot(2, 2, 2)
-    plt.hist(ddt.ravel(), bins=range(0, maxscore, binwidth))
-    plt.title(f"DDT Performance Vanilla\nVanilla trials (seeds): {np.size(ddt)}")
-    plt.xlim(0, maxscore)
-    plt.xlabel("Return")
-    plt.ylabel("Frequency")
+    # plt.subplot(2, 2, 2)
+    # plt.hist(ddt.ravel(), bins=range(0, maxscore, binwidth))
+    # plt.title(f"DDT Performance Vanilla\nVanilla trials (seeds): {np.size(ddt)}")
+    # plt.xlim(0, maxscore)
+    # plt.xlabel("Return")
+    # plt.ylabel("Frequency")
 
-    plt.subplot(2, 2, 4)
-    plt.hist(cnn.ravel(), bins=range(0, maxscore, binwidth))
-    plt.title(f"CNN Performance Vanilla\nVanilla trials (seeds): {np.size(cnn)}")
-    plt.xlim(0, maxscore)
-    plt.xlabel("Return")
-    plt.ylabel("Frequency")
+    # plt.subplot(2, 2, 4)
+    # plt.hist(cnn.ravel(), bins=range(0, maxscore, binwidth))
+    # plt.title(f"CNN Performance Vanilla\nVanilla trials (seeds): {np.size(cnn)}")
+    # plt.xlim(0, maxscore)
+    # plt.xlabel("Return")
+    # plt.ylabel("Frequency")
 
     plt.tight_layout()

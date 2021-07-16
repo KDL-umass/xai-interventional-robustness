@@ -20,7 +20,7 @@ from toybox import Input
 from toybox.envs.atari import SpaceInvadersEnv
 from gym.spaces.box import Box
 
-from space_invaders_wrapper.wrappers import FeatureVecWrapper
+from envs.wrappers.feature_vec_wrapper import FeatureVecWrapper
 
 
 # constants from toybox code
@@ -29,39 +29,68 @@ NUM_ENEMIES = 36
 NUM_SHIELDS = 3
 
 idx = 0
-INDEX_OF_observation_count = idx; idx += 1
-INDEX_OF_score = idx; idx += 1
-INDEX_OF_num_lives = idx; idx += 1
-INDEX_OF_level_num = idx; idx += 1
-INDEX_OF_ship_x = idx; idx += 1
-INDEX_OF_ship_laser_mid_air = idx; idx += 1
-INDEX_OF_num_enemies = idx; idx += 1
-INDEX_OF_enemy_direction = idx; idx += 1
-INDEX_OF_lowest_enemy_height = idx; idx += 1
-INDEX_OF_below_enemy = idx; idx += 1
-INDEX_OF_in_danger = idx; idx += 1
-INDEX_OF_ufo_on_screen = idx; idx += 1
-INDEX_OF_ufo_sign_distance = idx; idx += 1
-INDEX_OF_partially_under_shield = idx; idx += 1
-INDEX_OF_completely_under_shield = idx; idx += 1
-INDEX_OF_sign_distance_closest_shield_partial = idx; idx += 1
-INDEX_OF_sign_distance_closest_shield_complete = idx; idx += 1
-INDEX_OF_sign_distance_closest_UN_shield_complete = idx; idx += 1
-INDEX_OF_num_shields = idx; idx += 1
-INDEX_OF_ship_laser_pos_x = idx; idx += 1
-INDEX_OF_ship_laser_pos_y = idx; idx += 1
-INDEX_OF_shield_y = idx; idx += 1
-INDEX_OF_shield_1x = idx; idx += 1
-INDEX_OF_shield_2x = idx; idx += 1
-INDEX_OF_shield_3x = idx; idx += 1
-INDEX_OF_enemy_xs_start = idx; idx += NUM_ENEMIES - 1
-INDEX_OF_enemy_xs_end = idx; idx += 1
+INDEX_OF_observation_count = idx
+idx += 1
+INDEX_OF_score = idx
+idx += 1
+INDEX_OF_num_lives = idx
+idx += 1
+INDEX_OF_level_num = idx
+idx += 1
+INDEX_OF_ship_x = idx
+idx += 1
+INDEX_OF_ship_laser_mid_air = idx
+idx += 1
+INDEX_OF_num_enemies = idx
+idx += 1
+INDEX_OF_enemy_direction = idx
+idx += 1
+INDEX_OF_lowest_enemy_height = idx
+idx += 1
+INDEX_OF_below_enemy = idx
+idx += 1
+INDEX_OF_in_danger = idx
+idx += 1
+INDEX_OF_ufo_on_screen = idx
+idx += 1
+INDEX_OF_ufo_sign_distance = idx
+idx += 1
+INDEX_OF_partially_under_shield = idx
+idx += 1
+INDEX_OF_completely_under_shield = idx
+idx += 1
+INDEX_OF_sign_distance_closest_shield_partial = idx
+idx += 1
+INDEX_OF_sign_distance_closest_shield_complete = idx
+idx += 1
+INDEX_OF_sign_distance_closest_UN_shield_complete = idx
+idx += 1
+INDEX_OF_num_shields = idx
+idx += 1
+INDEX_OF_ship_laser_pos_x = idx
+idx += 1
+INDEX_OF_ship_laser_pos_y = idx
+idx += 1
+INDEX_OF_shield_y = idx
+idx += 1
+INDEX_OF_shield_1x = idx
+idx += 1
+INDEX_OF_shield_2x = idx
+idx += 1
+INDEX_OF_shield_3x = idx
+idx += 1
+INDEX_OF_enemy_xs_start = idx
+idx += NUM_ENEMIES - 1
+INDEX_OF_enemy_xs_end = idx
+idx += 1
 
 
 class SpaceInvadersFeatureVecWrapper(FeatureVecWrapper):
     def __init__(self, tbenv):
         assert type(tbenv) == SpaceInvadersEnv
-        tbenv.observation_space = Box(low=-float("inf"), high=float("inf"), shape=(INDEX_OF_enemy_xs_end+1,))
+        tbenv.observation_space = Box(
+            low=-float("inf"), high=float("inf"), shape=(INDEX_OF_enemy_xs_end + 1,)
+        )
         self.timestep = 0
         super().__init__(tbenv)
 
