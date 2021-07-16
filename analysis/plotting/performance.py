@@ -54,7 +54,7 @@ def plot_vanilla_comparison(lives):
 
     maxscore = (
         int(
-            max(np.amax(random.ravel()))
+            max([np.amax(random.ravel())])
         )  # , np.amax(ddt.ravel()), np.amax(cnn.ravel())))
         + 50
     )

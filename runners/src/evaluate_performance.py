@@ -1,3 +1,4 @@
+from models.random import RandomAgent
 from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
@@ -17,7 +18,7 @@ from envs.wrappers.space_invaders_interventions.reset_wrapper import (
 
 
 def load_agent(agent_name, env, seed):
-    model = None
+    model = RandomAgent(env.action_space)
     # TODO: add ALL agents here, defaults to random
     return model
 
@@ -61,18 +62,8 @@ def run_episode(
     rewards = 0
     while not done:
         t = t + 1
-        if agent_name == "ddt":
-            action = agent.get_action(state)
-            state, reward, done, _ = env.step(action)
-        elif agent_name == "cnn":
-            action = agent.act(np.expand_dims(state, axis=0), 0.001, eval=True)
-            state, reward, done, _ = env.step(action[0].item())
-        elif agent_name == "random":
-            action = env.action_space.sample()
-            state, reward, done, _ = env.step(action)
-        else:
-            print("Error: Unknown agent specified.")
-            break
+        action = agent.get_action(state)
+        state, reward, done, _ = env.step(action)
 
         rewards += reward
         if save_images:
