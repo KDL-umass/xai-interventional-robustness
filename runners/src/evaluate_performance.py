@@ -89,7 +89,7 @@ def run_episode(
 
     if save_images:
         dir_path = get_image_path(env_name, seed, agent_name)
-        video_path = "interventions/results/videos/"
+        video_path = "storage/results/videos/"
         if not os.path.exists(video_path):
             os.makedirs(video_path)
         make_videos(
@@ -228,7 +228,7 @@ if __name__ == "__main__":
             agent_name, num_trials, False, parallel, lives, save_images=save_images
         )
         np.savetxt(
-            f"./interventions/results/{agent_name}_performance_lives_{lives}.txt",
+            f"storage/results/{agent_name}_performance_lives_{lives}.txt",
             performance_matrix,
         )
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
             agent_name, num_trials, True, parallel, 1, save_images=False
         )
         np.savetxt(
-            f"./interventions/results/{agent_name}_performance_vanilla_lives_{lives}.txt",
+            f"storage/results/{agent_name}_performance_vanilla_lives_{lives}.txt",
             performance_matrix,
         )
 
