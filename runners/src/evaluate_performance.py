@@ -1,62 +1,25 @@
-from space_invaders_wrapper.space_invaders_feature_vec_wrapper import (
+from models.random import RandomAgent
+from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 import gym
-from space_invaders_wrapper.wrappers import wrap_space_env
 import torch
 import numpy as np
 import random
 import os, sys
 
-from agents.ddt_agent import DDTAgent, load_ddt
-
-from IQN_agent import wrapper
-from IQN_agent.agent import IQN_Agent
-
 import torch.multiprocessing as mp
 
-from .video_utils import *
-from .space_invaders_interventions import get_env_list
-from .space_invaders_reset_wrapper import wrap_space_env_reset
+from envs.wrappers.space_invaders_interventions.video_utils import *
+from envs.wrappers.space_invaders_interventions.interventions import get_env_list
+from envs.wrappers.space_invaders_interventions.reset_wrapper import (
+    wrap_space_env_reset,
+)
 
 
 def load_agent(agent_name, env, seed):
-    if agent_name == "ddt":
-        ddt_path = (
-            "./modelpth/ddt_saved_models/29th_ddt_space_GPU_8_leaves_actor.pth.tar"
-        )
-        fda = load_ddt(ddt_path)
-        model = DDTAgent(bot_name="crispytester")
-        model.action_network = fda
-        model.value_network = fda
-
-    elif agent_name == "cnn":
-        eval_env = wrapper.wrap_env(env)
-        action_size = eval_env.action_space.n
-        state_size = eval_env.observation_space.shape
-
-        model = IQN_Agent(
-            state_size=state_size,
-            action_size=action_size,
-            network="iqn",
-            munchausen=0,
-            layer_size=512,
-            n_step=1,
-            BATCH_SIZE=32,
-            BUFFER_SIZE=10000,
-            LR=0.00025,
-            TAU=1e-3,
-            GAMMA=0.99,
-            N=8,
-            worker=1,
-            device="cuda:0" if torch.cuda.is_available() else torch.device("cpu"),
-            seed=seed,
-        )
-        model.qnetwork_local.load_state_dict(
-            torch.load("iqn2.pth", map_location=torch.device("cpu"))
-        )
-    elif agent_name == "random":
-        model = None
+    model = RandomAgent(env.action_space)
+    # TODO: add ALL agents here, defaults to random
     return model
 
 
@@ -66,11 +29,8 @@ def run_episode(
     """Run episode with provided arguments."""
 
     agent = load_agent(agent_name, env, seed)
-    if agent_name == "ddt":
-        env = wrap_space_env(env, buffer_size=4, intv=intv, lives=lives)
 
-    elif agent_name == "cnn":
-        env = wrapper.wrap_env(env, intv=intv, lives=lives)
+    # TODO: Add agent wrappers here.
 
     done = False
 
@@ -89,32 +49,21 @@ def run_episode(
 
     # Create directory to store the trajectories for actions
     if save_actions:
-        action_path = "interventions/results/action_trajectories/{}/{}/{}/".format(
+        action_path = "storage/results/action_trajectories/{}/{}/{}/".format(
             env_name, seed, agent_name
         )
         if not os.path.exists(action_path):
             os.makedirs(action_path)
 
-        # At the beginning of each call, erase the existing contents 
+        # At the beginning of each call, erase the existing contents
         f = open(action_path + "{}.txt".format(agent_name), "w")
         f.close()
-
 
     rewards = 0
     while not done:
         t = t + 1
-        if agent_name == "ddt":
-            action = agent.get_action(state)
-            state, reward, done, _ = env.step(action)
-        elif agent_name == "cnn":
-            action = agent.act(np.expand_dims(state, axis=0), 0.001, eval=True)
-            state, reward, done, _ = env.step(action[0].item())
-        elif agent_name == "random":
-            action = env.action_space.sample()
-            state, reward, done, _ = env.step(action)
-        else:
-            print("Error: Unknown agent specified.")
-            break
+        action = agent.get_action(state)
+        state, reward, done, _ = env.step(action)
 
         rewards += reward
         if save_images:
@@ -131,7 +80,7 @@ def run_episode(
 
     if save_images:
         dir_path = get_image_path(env_name, seed, agent_name)
-        video_path = "interventions/results/videos/"
+        video_path = "storage/results/videos/"
         if not os.path.exists(video_path):
             os.makedirs(video_path)
         make_videos(
@@ -185,7 +134,7 @@ def evaluate(agent_name, num_trials, vanilla, parallel, lives, save_images=False
         for (e, env) in enumerate(env_list):
             for t in range(num_trials):
                 print(
-                    f"Env {e+1}/{len(env_list)}, Trial {t+1}/{num_trials}, aka {round(((e * num_trials + t)+1) / (len(env_list) * num_trials), 2)}%"
+                    f"Env {e+1}/{len(env_list)}, Trial {t+1}/{num_trials}, aka {round(((e * num_trials + t)+1) / (len(env_list) * num_trials), 2)*100}%"
                 )
                 if vanilla:
                     intv = -1
@@ -260,17 +209,17 @@ def store_action_trajectories():
 
 if __name__ == "__main__":
     parallel = False
-    num_trials = 30
+    num_trials = 10
     lives = 1
     save_images = False
 
-    for agent_name in ["cnn", "random", "ddt"]:
+    for agent_name in ["random"]:
         # Interventions
         performance_matrix = evaluate(
             agent_name, num_trials, False, parallel, lives, save_images=save_images
         )
         np.savetxt(
-            f"./interventions/results/{agent_name}_performance_lives_{lives}.txt",
+            f"storage/results/{agent_name}_performance_lives_{lives}.txt",
             performance_matrix,
         )
 
@@ -279,7 +228,7 @@ if __name__ == "__main__":
             agent_name, num_trials, True, parallel, 1, save_images=False
         )
         np.savetxt(
-            f"./interventions/results/{agent_name}_performance_vanilla_lives_{lives}.txt",
+            f"storage/results/{agent_name}_performance_vanilla_lives_{lives}.txt",
             performance_matrix,
         )
 

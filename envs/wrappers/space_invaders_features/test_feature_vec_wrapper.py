@@ -3,7 +3,7 @@ import unittest
 import gym
 from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
-from .space_invaders_feature_vec_wrapper import *
+from envs.wrappers.space_invaders_features.feature_vec_wrapper import *
 
 
 class TestSpaceInvadersFeatureVecWrapper(unittest.TestCase):

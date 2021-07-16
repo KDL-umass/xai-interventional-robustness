@@ -15,7 +15,7 @@ def make_videos(dir_path, video_filename):
 
 
 def get_image_path(env_name, seed, agent_name):
-    return "interventions/results/frames/{}/{}/{}/".format(env_name, seed, agent_name)
+    return "storage/results/frames/{}/{}/{}/".format(env_name, seed, agent_name)
 
 
 def record_image(timestep, env, env_name, seed, agent_name):
