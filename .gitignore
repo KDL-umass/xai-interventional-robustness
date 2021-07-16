@@ -149,3 +149,5 @@ storage/logs/*
 
 sandbox/*
 !sandbox/SANDBOX.md
+
+runs/
