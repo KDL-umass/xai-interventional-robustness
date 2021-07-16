@@ -1,62 +1,24 @@
-from space_invaders_wrapper.space_invaders_feature_vec_wrapper import (
+from envs.wrappers.space_invaders_wrapper.space_invaders_feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 import gym
-from space_invaders_wrapper.wrappers import wrap_space_env
 import torch
 import numpy as np
 import random
 import os, sys
 
-from agents.ddt_agent import DDTAgent, load_ddt
-
-from IQN_agent import wrapper
-from IQN_agent.agent import IQN_Agent
-
 import torch.multiprocessing as mp
 
-from .video_utils import *
-from .space_invaders_interventions import get_env_list
-from .space_invaders_reset_wrapper import wrap_space_env_reset
+from envs.wrappers.space_invaders_interventions.video_utils import *
+from envs.wrappers.space_invaders_interventions.interventions import get_env_list
+from envs.wrappers.space_invaders_interventions.reset_wrapper import (
+    wrap_space_env_reset,
+)
 
 
 def load_agent(agent_name, env, seed):
-    if agent_name == "ddt":
-        ddt_path = (
-            "./modelpth/ddt_saved_models/29th_ddt_space_GPU_8_leaves_actor.pth.tar"
-        )
-        fda = load_ddt(ddt_path)
-        model = DDTAgent(bot_name="crispytester")
-        model.action_network = fda
-        model.value_network = fda
-
-    elif agent_name == "cnn":
-        eval_env = wrapper.wrap_env(env)
-        action_size = eval_env.action_space.n
-        state_size = eval_env.observation_space.shape
-
-        model = IQN_Agent(
-            state_size=state_size,
-            action_size=action_size,
-            network="iqn",
-            munchausen=0,
-            layer_size=512,
-            n_step=1,
-            BATCH_SIZE=32,
-            BUFFER_SIZE=10000,
-            LR=0.00025,
-            TAU=1e-3,
-            GAMMA=0.99,
-            N=8,
-            worker=1,
-            device="cuda:0" if torch.cuda.is_available() else torch.device("cpu"),
-            seed=seed,
-        )
-        model.qnetwork_local.load_state_dict(
-            torch.load("iqn2.pth", map_location=torch.device("cpu"))
-        )
-    elif agent_name == "random":
-        model = None
+    model = None
+    # TODO: add ALL agents here, defaults to random
     return model
 
 
@@ -66,11 +28,8 @@ def run_episode(
     """Run episode with provided arguments."""
 
     agent = load_agent(agent_name, env, seed)
-    if agent_name == "ddt":
-        env = wrap_space_env(env, buffer_size=4, intv=intv, lives=lives)
 
-    elif agent_name == "cnn":
-        env = wrapper.wrap_env(env, intv=intv, lives=lives)
+    # TODO: Add agent wrappers here.
 
     done = False
 
@@ -95,10 +54,9 @@ def run_episode(
         if not os.path.exists(action_path):
             os.makedirs(action_path)
 
-        # At the beginning of each call, erase the existing contents 
+        # At the beginning of each call, erase the existing contents
         f = open(action_path + "{}.txt".format(agent_name), "w")
         f.close()
-
 
     rewards = 0
     while not done:
