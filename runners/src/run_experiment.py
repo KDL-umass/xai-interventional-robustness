@@ -11,7 +11,8 @@ from all.presets.atari import (
     vqn
 )
 
-from envs.wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
+# from envs.wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
+from wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
 
 env_name = "SpaceInvaders"
 device = "cuda"
@@ -35,7 +36,7 @@ def main():
             'partition': '1080ti-long'
         })
     else:
-        run_experiment(agents, env, frames, render = args.render, logdir=logdir,
+        run_experiment(agents, env, frames, render = render, logdir=logdir,
         writer=writer)
 
 if __name__ == "__main__":
