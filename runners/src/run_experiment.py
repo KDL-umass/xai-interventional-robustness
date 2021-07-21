@@ -11,8 +11,7 @@ from all.presets.atari import (
     vqn
 )
 
-# from envs.wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
-from wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
+from envs.wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
 
 env_name = "SpaceInvaders"
 device = "cuda"
