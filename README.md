@@ -4,10 +4,10 @@ Experiments for XAI Interventional Robustness paper, Summer 2021.
 
 ## Setup
 
-To make everything reproducible and compatible with gypsum's CentOS, run the following shell script to create the venv and install the appropriate python packages.
+To make everything reproducible, use Python 3.7.X and install packages according to the requirements:
 
 ```bash
-sh setup.sh
+pip install -r requirements.txt
 ```
 
 ## Running
