@@ -151,3 +151,4 @@ sandbox/*
 !sandbox/SANDBOX.md
 
 runs/
+xai_ir

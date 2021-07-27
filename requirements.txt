@@ -1,0 +1,11 @@
+tabulate
+sklearn
+pymonad
+ujson
+wheel
+ctoybox==0.4.2
+gym[atari]==0.18.3
+git+git://github.com/toybox-rs/Toybox.git@domains#egg=toybox
+git+https://github.com/toybox-rs/ToyboxAgents@all-game-agents
+autonomous-learning-library[pytorch, all]
+
