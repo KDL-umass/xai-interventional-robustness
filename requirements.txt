@@ -83,7 +83,7 @@ threadpoolctl==2.2.0
 toml==0.10.2
 torch==1.8.1
 torch-testing==0.0.2
-git+git://github.com/toybox-rs/Toybox.git@domains#egg=toybox
+git+git://github.com/toybox-rs/Toybox.git
 tqdm==4.61.2
 typed-ast==1.4.3
 typing-extensions==3.10.0.0
