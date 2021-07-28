@@ -17,7 +17,8 @@ from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
 
 def write_intervention_json(state, count):
     with open(
-        "storage/states/interventions/intervened_state_" + str(count) + ".json", "w",
+        "storage/states/interventions/intervened_state_" + str(count) + ".json",
+        "w",
     ) as outfile:
         json.dump(state, outfile)
 
@@ -192,7 +193,7 @@ def create_json_states():
     count = get_shift_agent_interventions_json(count)
     count = get_drop_enemy_rowcol_interventions_json(count)
     count = get_flip_shield_icons_json(count)
-    print(f"Created {count} intervention states in `storage/states/interventions/`.")
+    print(f"Created {count} intervention states in `interventions/`.")
     return count
 
 
