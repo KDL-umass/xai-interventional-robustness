@@ -4,7 +4,7 @@ from all.presets import atari
 import argparse
 from all.presets.atari import a2c, dqn, vac, vpg, vsarsa, vqn
 
-from envs.wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
+from envs.wrappers.space_invaders.all_toybox_wrapper import ToyboxEnvironment
 
 env_name = "SpaceInvaders"
 device = "cuda"
