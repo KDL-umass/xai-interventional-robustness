@@ -6,6 +6,7 @@ Exposes the Toybox gym env to allow custom wrappers
 
 import gym
 from all.environments import GymEnvironment, DuplicateEnvironment
+
 from all.environments.atari_wrappers import (
     NoopResetEnv,
     MaxAndSkipEnv,

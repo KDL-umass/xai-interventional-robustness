@@ -4,8 +4,8 @@ from all.presets import atari
 import argparse
 from all.presets.atari import a2c, dqn, vac, vpg, vsarsa, vqn
 
-from envs.wrappers.space_invaders.all_toybox_wrapper import ToyboxEnvironment
-
+from envs.wrappers.space_invaders_features.all_toybox_wrapper import ToyboxEnvironment
+import numpy as np
 env_name = "SpaceInvaders"
 device = "cuda"
 frames = 10
@@ -13,18 +13,27 @@ render = False
 logdir = "runs"
 writer = "tensorboard"
 toybox = True
-test_episodes = 1
-
+agent_replicate_num = 10
+test_episodes = 100
 
 def main():
     if toybox:
         env = ToyboxEnvironment("SpaceInvadersToybox", device=device)
     else:
         env = AtariEnvironment(env_name, device=device)
+
+
     agents = [
         a2c.device(device),
-        # dqn.device(device),
+        dqn.device(device),
+        vac.device(device),
+        vpg.device(device),
+        vsarsa.device(device),
+        vqn.device(device)
     ]
+
+    agents = list(np.repeat(agents, agent_replicate_num))
+    
     if device == "cuda":
         SlurmExperiment(
             agents,
