@@ -31,7 +31,7 @@ interventions = True
 
 
 if interventions:
-    num_states_to_intervene_on = 1  # only default starting state
+    num_states_to_intervene_on = 2  # only default starting state
     start_horizon = 100  # sample from t=100
     sample_start_states(num_states_to_intervene_on, start_horizon)
     num_interventions = create_intervention_states(num_states_to_intervene_on)
