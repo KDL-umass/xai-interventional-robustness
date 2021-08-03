@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 
@@ -30,22 +31,24 @@ def policy_action_distribution(agt, env, obs, samples):
 
 
 def collect_action_distributions(agents, envs, samples):
-    dists = np.zeros((len(envs) * len(agents), envs[0].action_space.n))
+    n = len(envs) * len(agents)
+    dists = np.zeros((n, envs[0].action_space.n))
     row = 0
     for env in envs:
         for agt in agents:
             dists[row, :] = policy_action_distribution(agt, env, env.reset(), samples)
             row += 1
+            print(f"\r\r Sampling {round(row / n * 100)}% complete", end="")
     return dists
 
 
-def evaluate_interventions():
+def evaluate_interventions(agent_family):
     device = "cpu"
     # device = "cuda"
 
-    action_distribution_samples = 100
+    action_distribution_samples = 250
 
-    num_states_to_intervene_on = 2  # only default starting state
+    num_states_to_intervene_on = 25  # only default starting state
     start_horizon = 100  # sample from t=100
     sample_start_states(num_states_to_intervene_on, start_horizon)
     num_interventions = create_intervention_states(num_states_to_intervene_on)
@@ -62,14 +65,20 @@ def evaluate_interventions():
         for intv in range(num_interventions)
     ]
 
-    agent_family = "a2c"
-    agents = [load_agent(kc_model_root + "/a2c/preset.pt", device)]
+    agents = [load_agent(kc_model_root + f"/{agent_family}/preset.pt", device)]
 
     dists = collect_action_distributions(agents, envs, action_distribution_samples)
-    np.savetxt(f"storage/results/intervention_action_dists{agent_family}.txt", dists)
+
+    dir = f"storage/results/intervention_action_dists/{agent_family}/{len(agents)}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
+    os.makedirs(dir, exist_ok=True)
+
+    np.savetxt(
+        dir + f"/{num_interventions}_interventions.txt",
+        dists,
+    )
 
     # run_xai_experiment(agents, envs, device, frames, test_episodes)
 
 
 if __name__ == "__main__":
-    evaluate_interventions()
+    evaluate_interventions(agent_family="a2c")

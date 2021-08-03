@@ -170,7 +170,15 @@ def get_flip_shield_icons(env, state_num, count):
 
 def create_intervention_states(num_states):
     """Create JSON states for all interventions."""
-    os.makedirs("storage/states/interventions", exist_ok=True)
+    dir = "storage/states/interventions"
+    os.makedirs(dir, exist_ok=True)
+    path = dir + f"/{num_states-1}"
+    if os.path.isdir(path):
+        count = len(os.listdir(path))
+        print(
+            f"Skipping already created {count} interventions for {num_states} states."
+        )
+        return count
 
     for state_num in range(
         num_states
