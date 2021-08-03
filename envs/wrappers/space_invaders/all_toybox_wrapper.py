@@ -14,21 +14,26 @@ from all.environments.atari_wrappers import (
     WarpFrame,
     LifeLostEnv,
 )
-from .interventions.space_invaders_reset_wrapper import (
+from envs.wrappers.space_invaders.interventions.reset_wrapper import (
     SpaceInvadersResetWrapper,
 )
 
 
-class DefaultSpaceInvadersResetWrapper(SpaceInvadersResetWrapper):
-    def __init__(self, env):
-        super().__init__(env, intv=-1, lives=3)
+def customSpaceInvadersResetWrapper(state_num, intv, lives):
+    class CustomSpaceInvadersResetWrapper(SpaceInvadersResetWrapper):
+        def __init__(self, env):
+            super().__init__(env, state_num=state_num, intv=intv, lives=lives)
+
+    return CustomSpaceInvadersResetWrapper
 
 
 class ToyboxEnvironment(GymEnvironment):
     def __init__(
         self,
         name,
-        custom_wrapper: SpaceInvadersResetWrapper = DefaultSpaceInvadersResetWrapper,
+        custom_wrapper: SpaceInvadersResetWrapper = customSpaceInvadersResetWrapper(
+            state_num=0, intv=-1, lives=3
+        ),
         *args,
         **kwargs
     ):

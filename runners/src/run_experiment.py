@@ -1,13 +1,25 @@
+from envs.wrappers.space_invaders.interventions.start_states import sample_start_states
+from envs.wrappers.space_invaders.interventions.interventions import (
+    create_intervention_states,
+)
+import os
+from envs.wrappers.space_invaders.interventions.reset_wrapper import (
+    SpaceInvadersResetWrapper,
+)
 from all.experiments import SlurmExperiment, run_experiment
 from all.environments import AtariEnvironment
 from all.presets import atari
 import argparse
 from all.presets.atari import a2c, dqn, vac, vpg, vsarsa, vqn, ppo
 
-from envs.wrappers.space_invaders.all_toybox_wrapper import ToyboxEnvironment
+from envs.wrappers.space_invaders.all_toybox_wrapper import (
+    ToyboxEnvironment,
+    customSpaceInvadersResetWrapper,
+)
 import numpy as np
+
 env_name = "SpaceInvaders"
-device = "cuda"
+device = "cpu"
 frames = 1e2
 render = False
 logdir = "runs"
@@ -15,13 +27,35 @@ writer = "tensorboard"
 toybox = True
 agent_replicate_num = 2
 test_episodes = 2
+interventions = True
+
+
+if interventions:
+    num_states_to_intervene_on = 1  # only default starting state
+    start_horizon = 100  # sample from t=100
+    sample_start_states(num_states_to_intervene_on, start_horizon)
+    num_interventions = create_intervention_states(num_states_to_intervene_on)
+
 
 def main():
     if toybox:
-        env = ToyboxEnvironment("SpaceInvadersToybox", device=device)
+        if interventions:
+            env = [
+                ToyboxEnvironment(
+                    "SpaceInvadersToybox",
+                    device=device,
+                    custom_wrapper=customSpaceInvadersResetWrapper(
+                        state_num=state_num, intv=intv, lives=3
+                    ),
+                )
+                for state_num in range(num_states_to_intervene_on)
+                for intv in range(num_interventions)
+            ]
+        else:
+            env = ToyboxEnvironment("SpaceInvadersToybox", device=device)
+
     else:
         env = AtariEnvironment(env_name, device=device)
-
 
     agents = [
         a2c.device(device),
@@ -33,7 +67,7 @@ def main():
     ]
 
     agents = list(np.repeat(agents, agent_replicate_num))
-    
+
     if device == "cuda":
         SlurmExperiment(
             agents,
