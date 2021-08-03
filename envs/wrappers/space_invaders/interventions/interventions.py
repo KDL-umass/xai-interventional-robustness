@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from toybox import Toybox, Input
 from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
-from envs.wrappers.space_invaders_interventions.reset_wrapper import (
+from envs.wrappers.space_invaders.interventions.reset_wrapper import (
     SpaceInvadersResetWrapper,
 )
-from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
+from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 
@@ -193,7 +193,7 @@ def create_json_states():
     count = get_shift_agent_interventions_json(count)
     count = get_drop_enemy_rowcol_interventions_json(count)
     count = get_flip_shield_icons_json(count)
-    print(f"Created {count} intervention states in `interventions/`.")
+    print(f"Created {count} intervention states in `storage/states/interventions/`.")
     return count
 
 

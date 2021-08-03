@@ -1,5 +1,5 @@
 from models.random import RandomAgent
-from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
+from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 import gym
@@ -10,9 +10,9 @@ import os, sys
 
 import torch.multiprocessing as mp
 
-from envs.wrappers.space_invaders_interventions.video_utils import *
-from envs.wrappers.space_invaders_interventions.interventions import get_env_list
-from envs.wrappers.space_invaders_interventions.reset_wrapper import (
+from envs.wrappers.space_invaders.interventions.video_utils import *
+from envs.wrappers.space_invaders.interventions.interventions import get_env_list
+from envs.wrappers.space_invaders.interventions.reset_wrapper import (
     wrap_space_env_reset,
 )
 
