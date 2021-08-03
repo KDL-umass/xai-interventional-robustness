@@ -19,7 +19,7 @@ from envs.wrappers.space_invaders.all_toybox_wrapper import (
 import numpy as np
 
 env_name = "SpaceInvaders"
-device = "cpu"
+device = "cuda"
 frames = 1e2
 render = False
 logdir = "runs"
@@ -27,7 +27,7 @@ writer = "tensorboard"
 agent_replicate_num = 2
 test_episodes = 2
 toybox = True
-interventions = True
+interventions = False
 
 
 if interventions:
