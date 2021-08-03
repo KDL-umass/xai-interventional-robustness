@@ -170,10 +170,6 @@ def get_flip_shield_icons(env, state_num, count):
 
 def create_intervention_states(num_states):
     """Create JSON states for all interventions."""
-    try:
-        os.rmdir("storage/states/interventions")
-    except:
-        print("", end="")
     os.makedirs("storage/states/interventions", exist_ok=True)
 
     for state_num in range(

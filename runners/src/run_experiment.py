@@ -24,9 +24,9 @@ frames = 1e2
 render = False
 logdir = "runs"
 writer = "tensorboard"
-toybox = True
 agent_replicate_num = 2
 test_episodes = 2
+toybox = True
 interventions = True
 
 
