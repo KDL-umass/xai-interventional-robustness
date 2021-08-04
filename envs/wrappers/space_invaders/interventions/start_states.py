@@ -25,7 +25,7 @@ def get_start_env(state_num, lives=3):
 
 def sample_start_states(num_states, horizon):
     if os.path.isfile(get_start_state_path(num_states - 1)):
-        print("Not resampling new start states because they exist already.")
+        print("Skipping start state sampling because they exist already.")
         return
 
     agt = RandomAgent(gym.make(env_id).action_space)
