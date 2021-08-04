@@ -1,3 +1,11 @@
+import os
+
+import matplotlib
+
+font = {"size": 15}
+
+matplotlib.rc("font", **font)
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -15,10 +23,8 @@ def plot_action_dist(data, title, xmin, xmax):
 
 
 def shannon(dist):
-    res = 0
-    for i in range(len(dist)):
-        res += dist[i] * np.log(dist[i])
-    return -res
+    dist = dist + 1e-10  # eps to prevent div 0
+    return -np.sum(dist * np.log(dist))
 
 
 def js_divergence(dists):
@@ -29,18 +35,37 @@ def js_divergence(dists):
 
 
 def plot_js_divergence_matrix(data, title):
-    agent = data[0, :]
-    state = data[1, :]  # 0 indexed
-    intv = data[2, :]  # 0 indexed
+    agent = data[:, 0]
+    state = data[:, 1]  # 0 indexed
+    intv = data[:, 2]  # 0 indexed
 
     mat = np.zeros((np.max(state).astype(int) + 1, np.max(intv).astype(int) + 1))
 
-    for s in np.unique(state):
-        for i in np.unique(intv):
-            sel = data[data[1, :] == s * data[2, :] == i, :]
-            print(sel)
+    for s in np.unique(state).astype(int):
+        for i in np.unique(intv).astype(int):
+            si = (data[:, 1] == s) * (data[:, 2] == i)
+            wh = np.where(si)[0]
+            agents = data[wh, 3:]
+            assert len(data[wh, 0]) == len(np.unique(data[wh, 0]))
+            mat[s, i] = js_divergence(agents)
+
+    im = plt.matshow(mat, interpolation="none")
+    cbar = plt.colorbar(im)
+    cbar.set_label("JS Divergence of Action Distributions")
+    ax = plt.gca()
+    ax.tick_params(axis="x", top=False, bottom=True, labelbottom=True, labeltop=False)
+    plt.title(title)
+    plt.xlabel("Intervention Number")
+    plt.ylabel("State of Interest")
+
+    os.makedirs("storage/plots/jsdivmat", exist_ok=True)
+    plt.savefig(f"storage/plots/jsdivmat/{title}.png")
 
 
 if __name__ == "__main__":
-    dir = f"storage/results/intervention_action_dists/a2c/11_agents/30_states/t100_horizon"
-    plot_js_divergence_matrix(np.loadtxt(dir + "/88_interventions.txt"), "")
+    for fam in ["a2c", "dqn"]:
+        dir = f"storage/results/intervention_action_dists/{fam}/11_agents/30_states/t100_horizon"
+        plot_js_divergence_matrix(
+            np.loadtxt(dir + "/88_interventions.txt"),
+            f"JS Divergence of Actions for {fam}, 11 Agents, t=100 horizon",
+        )
