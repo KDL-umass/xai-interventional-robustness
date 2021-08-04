@@ -153,5 +153,7 @@ if __name__ == "__main__":
 
     print(f"Using device: {device}.")
 
-    evaluate_interventions(agent_family="a2c", device=device)
-    evaluate_interventions(agent_family="dqn", device=device)
+
+    for agent_family in model_locations:
+        print(f"Evaluating agent family: {agent_family}")
+        evaluate_interventions(agent_family=agent_family, device=device)
