@@ -72,7 +72,7 @@ def get_intervention_data_dir(
 
 def evaluate_interventions(agent_family, device):
     action_distribution_samples = 100
-    num_states_to_intervene_on = 100  # q in literature
+    num_states_to_intervene_on = 30  # q in literature
     start_horizon = 100  # sample from t=100
 
     sample_start_states(num_states_to_intervene_on, start_horizon)
