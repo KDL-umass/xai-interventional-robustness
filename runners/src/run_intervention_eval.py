@@ -2,7 +2,6 @@ import os
 import argparse
 import numpy as np
 import torch
-from torch._C import device
 
 from envs.wrappers.space_invaders.interventions.start_states import sample_start_states
 from envs.wrappers.space_invaders.interventions.interventions import (
@@ -152,7 +151,6 @@ if __name__ == "__main__":
         device = "cpu"
 
     print(f"Using device: {device}.")
-
 
     for agent_family in model_locations:
         print(f"Evaluating agent family: {agent_family}")
