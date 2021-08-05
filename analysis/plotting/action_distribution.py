@@ -63,9 +63,10 @@ def plot_js_divergence_matrix(data, title):
 
 
 if __name__ == "__main__":
+    n_agents = 10
     for fam in ["a2c", "dqn"]:
-        dir = f"storage/results/intervention_action_dists/{fam}/11_agents/30_states/t100_horizon"
+        dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/30_states/t100_horizon"
         plot_js_divergence_matrix(
             np.loadtxt(dir + "/88_interventions.txt"),
-            f"JS Divergence of Actions for {fam}, 11 Agents, t=100 horizon",
+            f"JS Divergence of Actions for {fam}, {n_agents} Agents, t=100 horizon",
         )
