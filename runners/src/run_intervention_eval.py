@@ -13,17 +13,17 @@ from envs.wrappers.space_invaders.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 
-kc_model_root = "/mnt/nfs/work1/jensen/kclary/all_models"
+# kc_model_root = "/mnt/nfs/work1/jensen/kclary/all_models"
 pp_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
 ka_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
 
 model_locations = {
     "a2c": [
-        kc_model_root + "/a2c",
+        # kc_model_root + "/a2c",
         *[pp_model_root + "/" + folder for folder in os.listdir(pp_model_root)],
     ],
     "dqn": [
-        kc_model_root + "/dqn",
+        # kc_model_root + "/dqn",
         *[ka_model_root + "/" + folder for folder in os.listdir(ka_model_root)],
     ],
 }
