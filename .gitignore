@@ -149,3 +149,8 @@ storage/logs/*
 
 sandbox/*
 !sandbox/SANDBOX.md
+
+runs/
+out/
+xai_ir
+experiment.sh

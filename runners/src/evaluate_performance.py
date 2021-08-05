@@ -1,5 +1,5 @@
 from models.random import RandomAgent
-from envs.wrappers.space_invaders_features.feature_vec_wrapper import (
+from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 import gym
@@ -10,11 +10,25 @@ import os, sys
 
 import torch.multiprocessing as mp
 
-from envs.wrappers.space_invaders_interventions.video_utils import *
-from envs.wrappers.space_invaders_interventions.interventions import get_env_list
-from envs.wrappers.space_invaders_interventions.reset_wrapper import (
-    wrap_space_env_reset,
-)
+from envs.wrappers.space_invaders.interventions.video_utils import *
+from envs.wrappers.space_invaders.interventions.interventions import get_intervened_environments
+from envs.wrappers.space_invaders.interventions.paths import env_id
+
+def get_env_list(want_feature_vec, vanilla, lives):
+    """
+    Get JSON intervention environments (if `vanilla` False), wrapped with feature vec if `want_feature_vec`.
+
+    If `vanilla` is provided, `lives` will be ignored.
+    """
+    if not vanilla:
+        envlist = get_intervened_environments(want_feature_vec, lives)
+    else:
+        env = gym.make(env_id)
+        if want_feature_vec:
+            env = SpaceInvadersFeatureVecWrapper(env)
+        envlist = [env]
+    return envlist
+
 
 
 def load_agent(agent_name, env, seed):

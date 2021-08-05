@@ -47,7 +47,7 @@ class FeatureVecWrapper(gym.ObservationWrapper):
         self.env.toybox.apply_action(action_input)
 
         if self.toybox.game_over():
-            print("GAME OVER")
+            # print("GAME OVER")
             info["cached_state"] = self.toybox.to_state_json()
 
         obs_state_vec = self.observation(1)

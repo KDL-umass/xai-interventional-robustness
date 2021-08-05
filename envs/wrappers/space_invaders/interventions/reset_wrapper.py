@@ -1,22 +1,25 @@
 from abc import abstractmethod
+from envs.wrappers.space_invaders.interventions.paths import (
+    get_intervention_dir,
+    get_start_state_path,
+)
 from typing import *
 import gym, json
 
 from toybox.envs.atari.space_invaders import SpaceInvadersEnv
-import toybox.interventions.space_invaders as spi
-import matplotlib.pyplot as plt
 
 
 class SpaceInvadersResetWrapper(gym.Wrapper):
     """Resets space invaders environment at the start of every episode to an intervened state."""
 
-    def __init__(self, tbenv: SpaceInvadersEnv, intv: int, lives: int):
+    def __init__(self, tbenv: SpaceInvadersEnv, state_num: int, intv: int, lives: int):
         super().__init__(tbenv)
         self.env = tbenv
         self.toybox = (
             tbenv.toybox
         )  # Why does this fail when ToyboxBaseEnv has a toybox attribute?
         self.intv = intv  # Intervention number 0 - ?
+        self.state_num = state_num
         self.lives = lives
 
     def reset(self):
@@ -29,16 +32,15 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
         # Get JSON state
         if self.intv >= 0:
             with open(
-                "storage/states/interventions/intervened_state_"
-                + str(self.intv)
-                + ".json"
+                f"{get_intervention_dir(self.state_num)}/{self.intv}.json",
             ) as f:
                 iv_state = json.load(f)
-            iv_state["lives"] = self.lives
 
         else:
-            iv_state = self.toybox.to_state_json()
-            iv_state["lives"] = self.lives
+            with open(get_start_state_path(self.state_num)) as f:
+                iv_state = json.load(f)
+
+        iv_state["lives"] = self.lives
 
         # Set state to the reset state
         self.env.cached_state = iv_state
@@ -47,22 +49,5 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
         return obs
 
 
-def wrap_space_env_reset(env, intv=-1, lives=1):
-    env = SpaceInvadersResetWrapper(env, intv, lives)
-    return env.reset()
-
-
 if __name__ == "__main__":
     pass
-    # # TEST 1: w/o FeatureVecWrapper
-    # env_id = "SpaceInvadersToyboxNoFrameskip-v4"
-    # env = gym.make(env_id)
-    # state = wrap_space_env_reset(env)
-    # print(state.shape)
-
-    # # # TEST 2: With additional wrappers
-    # env_id = "SpaceInvadersToyboxNoFrameskip-v4"
-    # env = gym.make(env_id)
-    # env = SpaceInvadersFeatureVecWrapper(env)
-    # state = wrap_space_env_reset(env)
-    # print(state.shape)
