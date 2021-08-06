@@ -34,17 +34,20 @@ def load_agent(dir, device):
     agt = agt.test_agent()
     return agt
 
-
-def policy_action_distribution(agt, env, obs, samples):
-    n = env.action_space.n
-    actions = np.zeros((samples,))
-    for i in range(samples):
-        act = agt.act(obs)
-        if type(act) == int:
-            actions[i] = act
-        else:
-            actions[i] = act.cpu().numpy()
-    dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
+def policy_action_distribution(agt, env, obs, samples, dist_type = "analytic"):
+    if dist_type == "analytic":
+        act, p_dist = agt.act(obs)
+        dist = p_dist.cpu().numpy()
+    else:
+        n = env.action_space.n
+        actions = np.zeros((samples,))
+        for i in range(samples):
+            act, p_dist = agt.act(obs)
+            if type(act) == int:
+                actions[i] = act
+            else:
+                actions[i] = act.cpu().numpy()
+        dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
     return dist
 
 

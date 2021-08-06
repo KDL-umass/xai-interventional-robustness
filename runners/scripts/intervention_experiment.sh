@@ -9,5 +9,5 @@
 #SBATCH --mem-per-cpu=4000
 #SBATCH --gres=gpu:1
 
-cd /home/jnkenney/xai-interventional-robustness/
-python /home/jnkenney/xai-interventional-robustness/runners/src/run_intervention_eval.py --gpu
+cd /home/ppruthi/xai-interventional-robustness/
+python /home/ppruthi/xai-interventional-robustness/runners/src/run_intervention_eval.py --gpu
