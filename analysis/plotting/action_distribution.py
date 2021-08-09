@@ -24,13 +24,13 @@ def plot_action_dist(data, title, xmin, xmax):
 
 def shannon(dist):
     dist = dist + 1e-10  # eps to prevent div 0
-    return -np.sum(dist * np.log(dist))
+    return -np.sum(dist * np.log2(dist))
 
 
 def js_divergence(dists):
     weight = 1 / len(dists)  # equally weight distributions
     left = shannon(np.sum(weight * dists, axis=1))  # sum along columns
-    right = sum([shannon(dist) for dist in dists])
+    right = sum([weight*shannon(dist) for dist in dists])
     return left - right
 
 def variance_max_actions(dists):
