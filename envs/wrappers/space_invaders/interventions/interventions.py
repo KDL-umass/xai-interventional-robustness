@@ -22,7 +22,7 @@ from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
 
 from envs.wrappers.space_invaders.interventions.start_states import (
     get_start_env,
-    get_start_state_path,
+    sample_start_states,
 )
 
 
@@ -187,10 +187,19 @@ def create_intervention_states(num_states):
 
         count = 0
         count = get_drop_one_enemy(env, state_num, count)
+        # print(f"Interventions 0-{count-1} drop one enemy.")
+        # prev = count
         count = get_shift_shields_interventions(env, state_num, count)
+        # print(f"Interventions {prev}-{count-1} shift shields.")
+        # prev = count
         count = get_shift_agent_interventions(env, state_num, count)
+        # print(f"Interventions {prev}-{count-1} shift agent starts.")
+        # prev = count
         count = get_drop_enemy_rowcol_interventions(env, state_num, count)
+        # print(f"Interventions {prev}-{count-1} drop row/col of enemies.")
+        # prev = count
         count = get_flip_shield_icons(env, state_num, count)
+        # print(f"Interventions {prev}-{count-1} flip shield icons vertically.")
         print(
             f"Created {count} intervention states for state {state_num} in `storage/states/interventions/`."
         )
@@ -234,4 +243,6 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
-    create_intervention_states(10)
+    num_states = 1
+    sample_start_states(num_states, 100)
+    create_intervention_states(num_states)
