@@ -95,7 +95,7 @@ def plot_max_action_divergence_matrix(data, title):
 
 
 if __name__ == "__main__":
-    n_agents = 11
+    n_agents = 10
     nstates = 30
     horizon = 100
     for fam in ["a2c", "dqn"]:

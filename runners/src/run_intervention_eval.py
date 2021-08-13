@@ -17,10 +17,10 @@ pp_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
 ka_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
 
 model_locations = {
-    "a2c": [
-        # kc_model_root + "/a2c",
-        *[pp_model_root + "/" + folder for folder in os.listdir(pp_model_root)],
-    ],
+    # "a2c": [
+    #     # kc_model_root + "/a2c",
+    #     *[pp_model_root + "/" + folder for folder in os.listdir(pp_model_root)],
+    # ],
     "dqn": [
         # kc_model_root + "/dqn",
         *[ka_model_root + "/" + folder for folder in os.listdir(ka_model_root)],
@@ -34,10 +34,21 @@ def load_agent(dir, device):
     agt = agt.test_agent()
     return agt
 
-def policy_action_distribution(agt, env, obs, samples, dist_type = "analytic"):
+
+agent_family_that_selects_max_action = ["dqn"]
+
+
+def policy_action_distribution(
+    agent_family, agt, env, obs, samples, dist_type="analytic"
+):
     if dist_type == "analytic":
         act, p_dist = agt.act(obs)
         dist = p_dist.cpu().numpy()
+        
+        if agent_family in agent_family_that_selects_max_action:
+            idx = np.argmax(dist)
+            dist = np.zeros(dist.shape)
+            dist[idx] = 1.0
     else:
         n = env.action_space.n
         actions = np.zeros((samples,))
@@ -51,7 +62,9 @@ def policy_action_distribution(agt, env, obs, samples, dist_type = "analytic"):
     return dist
 
 
-def collect_action_distributions(agents, envs, env_labels, samples):
+def collect_action_distributions(
+    agent_family, agents, envs, env_labels, samples, dist_type
+):
     n = len(envs) * len(agents)
     dists = np.zeros((n, envs[0].action_space.n + 3))
     row = 0
@@ -59,7 +72,9 @@ def collect_action_distributions(agents, envs, env_labels, samples):
         for e, env in enumerate(envs):
             dists[row, 0] = a
             dists[row, 1:3] = env_labels[e]
-            dists[row, 3:] = policy_action_distribution(agt, env, env.reset(), samples)
+            dists[row, 3:] = policy_action_distribution(
+                agent_family, agt, env, env.reset(), samples, dist_type
+            )
             row += 1
             print(f"\r\rSampling {round(row / n * 100)}% complete", end="")
     print()
@@ -101,10 +116,12 @@ def evaluate_interventions(agent_family, device):
     ]
     env_labels = [(i, -1) for i in range(num_states_to_intervene_on)]
     dists = collect_action_distributions(
+        agent_family,
         agents,
         envs,
         env_labels,
         action_distribution_samples,
+        dist_type="analytic",
     )
 
     # create header
@@ -134,7 +151,12 @@ def evaluate_interventions(agent_family, device):
         for intv in range(num_interventions)
     ]
     dists = collect_action_distributions(
-        agents, envs, env_labels, action_distribution_samples
+        agent_family,
+        agents,
+        envs,
+        env_labels,
+        action_distribution_samples,
+        dist_type="analytic",
     )
 
     np.savetxt(dir + f"/{num_interventions}_interventions.txt", dists, header=header)
@@ -158,3 +180,11 @@ if __name__ == "__main__":
     for agent_family in model_locations:
         print(f"Evaluating agent family: {agent_family}")
         evaluate_interventions(agent_family=agent_family, device=device)
+
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
