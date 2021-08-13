@@ -30,11 +30,13 @@ def shannon(dist):
 def js_divergence(dists):
     weight = 1 / len(dists)  # equally weight distributions
     left = shannon(np.sum(weight * dists, axis=1))  # sum along columns
-    right = sum([weight*shannon(dist) for dist in dists])
+    right = sum([weight * shannon(dist) for dist in dists])
     return left - right
 
+
 def variance_max_actions(dists):
-    return np.std(np.argmax(dists, axis = 1))
+    return np.std(np.argmax(dists, axis=1))
+
 
 def plot_js_divergence_matrix(data, title):
     agent = data[:, 0]
@@ -62,6 +64,7 @@ def plot_js_divergence_matrix(data, title):
 
     os.makedirs("storage/plots/jsdivmat", exist_ok=True)
     plt.savefig(f"storage/plots/jsdivmat/{title}.png")
+
 
 def plot_max_action_divergence_matrix(data, title):
     agent = data[:, 0]
@@ -91,16 +94,17 @@ def plot_max_action_divergence_matrix(data, title):
     plt.savefig(f"storage/plots/jsdivmat/{title}.png")
 
 
-
 if __name__ == "__main__":
-    n_agents = 10
+    n_agents = 11
+    nstates = 30
+    horizon = 100
     for fam in ["a2c", "dqn"]:
-        dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/30_states/t100_horizon"
+        dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
         plot_js_divergence_matrix(
             np.loadtxt(dir + "/88_interventions.txt"),
-            f"JS Divergence of Actions for {fam}, {n_agents} Agents, t=100 horizon",
+            f"JS Divergence of Actions for {fam}, {n_agents} Agents, t={horizon} horizon",
         )
         plot_max_action_divergence_matrix(
             np.loadtxt(dir + "/88_interventions.txt"),
-            f"Max action divergence matrix for {fam}, {n_agents} Agents, t=100 horizon",
+            f"Max action divergence matrix for {fam}, {n_agents} Agents, t={horizon} horizon",
         )
