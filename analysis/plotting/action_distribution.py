@@ -29,7 +29,7 @@ def shannon(dist):
 
 def js_divergence(dists):
     weight = 1 / len(dists)  # equally weight distributions
-    left = shannon(np.sum(weight * dists, axis=1))  # sum along columns
+    left = shannon(np.sum(weight * dists, axis=0))  # sum along columns
     right = sum([weight * shannon(dist) for dist in dists])
     return left - right
 
@@ -42,7 +42,6 @@ def plot_js_divergence_matrix(data, title):
     agent = data[:, 0]
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
-
     mat = np.zeros((np.max(state).astype(int) + 1, np.max(intv).astype(int) + 1))
 
     for s in np.unique(state).astype(int):
