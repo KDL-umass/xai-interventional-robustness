@@ -3,7 +3,10 @@ import argparse
 import numpy as np
 import torch
 
-from envs.wrappers.space_invaders.interventions.start_states import sample_start_states
+from envs.wrappers.space_invaders.interventions.start_states import (
+    sample_start_states,
+    sample_start_states_from_trajectory,
+)
 from envs.wrappers.space_invaders.interventions.interventions import (
     create_intervention_states,
 )
@@ -12,18 +15,30 @@ from envs.wrappers.space_invaders.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 
-# kc_model_root = "/mnt/nfs/work1/jensen/kclary/all_models"
-pp_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
-ka_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
+a2c_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
+a2c_supplementary = "/mnt/nfs/scratch1/kavery/a2c_76cd60f_2021-09-02_17:19:00_007989"
+dqn_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
+ddqn_model_root = "/mnt/nfs/scratch1/kavery/runs_ddqn_total_10"
+c51_model_root = "/mnt/nfs/scratch1/kavery/runs_c51_total_10"
+rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10"
 
 model_locations = {
-    # "a2c": [
-    #     # kc_model_root + "/a2c",
-    #     *[pp_model_root + "/" + folder for folder in os.listdir(pp_model_root)],
-    # ],
+    "a2c": [
+        a2c_supplementary,
+        *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
+    ],
     "dqn": [
-        # kc_model_root + "/dqn",
-        *[ka_model_root + "/" + folder for folder in os.listdir(ka_model_root)],
+        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
+    ],
+    "ddqn": [
+        *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)]
+    ],
+    "c51": [*[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)]],
+    "rainbow": [
+        *[
+            rainbow_model_root + "/" + folder
+            for folder in os.listdir(rainbow_model_root)
+        ]
     ],
 }
 
@@ -35,7 +50,7 @@ def load_agent(dir, device):
     return agt
 
 
-agent_family_that_selects_max_action = ["dqn"]
+agent_family_that_selects_max_action = ["dqn", "ddqn"]
 
 
 def policy_action_distribution(
@@ -43,8 +58,8 @@ def policy_action_distribution(
 ):
     if dist_type == "analytic":
         act, p_dist = agt.act(obs)
-        dist = p_dist.cpu().numpy()
-        
+        dist = p_dist.detach().cpu().numpy()
+
         if agent_family in agent_family_that_selects_max_action:
             idx = np.argmax(dist)
             dist = np.zeros(dist.shape)
@@ -87,20 +102,42 @@ def get_intervention_data_dir(
     return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
 
 
-def evaluate_interventions(agent_family, device):
+def get_trajectory_intervention_data_dir(
+    agent_family, num_agents, num_states_to_intervene_on
+):
+    return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
+
+
+def evaluate_interventions(agent_family, device, use_trajectory_starts):
     action_distribution_samples = 100
     num_states_to_intervene_on = 30  # q in literature
     start_horizon = 100  # sample from t=100
 
-    sample_start_states(num_states_to_intervene_on, start_horizon)
-    num_interventions = create_intervention_states(num_states_to_intervene_on)
-
-    # setup
+    # agent setup
     agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
-    dir = get_intervention_data_dir(
-        agent_family, len(agents), num_states_to_intervene_on, start_horizon
-    )
+
+    if use_trajectory_starts:
+        dir = get_trajectory_intervention_data_dir(
+            agent_family, len(agents), num_states_to_intervene_on
+        )
+    else:
+        dir = get_intervention_data_dir(
+            agent_family, len(agents), num_states_to_intervene_on, start_horizon
+        )
     os.makedirs(dir, exist_ok=True)
+
+    # state setup
+    assert len(agents) == 11
+    agent = agents.pop()
+
+    if use_trajectory_starts:
+        sample_start_states_from_trajectory(agent, num_states_to_intervene_on)
+        num_interventions = create_intervention_states(num_states_to_intervene_on, True)
+    else:
+        sample_start_states(num_states_to_intervene_on, start_horizon)
+        num_interventions = create_intervention_states(
+            num_states_to_intervene_on, False
+        )
 
     # vanilla
     print("Vanilla:")
@@ -109,7 +146,10 @@ def evaluate_interventions(agent_family, device):
             "SpaceInvadersToybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
-                state_num=state_num, intv=-1, lives=3
+                state_num=state_num,
+                intv=-1,
+                lives=3,
+                use_trajectory_starts=use_trajectory_starts,
             ),
         )
         for state_num in range(num_states_to_intervene_on)
@@ -139,7 +179,10 @@ def evaluate_interventions(agent_family, device):
             "SpaceInvadersToybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
-                state_num=state_num, intv=intv, lives=3
+                state_num=state_num,
+                intv=intv,
+                lives=3,
+                use_trajectory_starts=use_trajectory_starts,
             ),
         )
         for state_num in range(num_states_to_intervene_on)
@@ -179,7 +222,9 @@ if __name__ == "__main__":
 
     for agent_family in model_locations:
         print(f"Evaluating agent family: {agent_family}")
-        evaluate_interventions(agent_family=agent_family, device=device)
+        evaluate_interventions(
+            agent_family=agent_family, device=device, use_trajectory_starts=True
+        )
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")

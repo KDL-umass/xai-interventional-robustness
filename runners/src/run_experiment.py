@@ -48,7 +48,7 @@ def main():  # agent training
 
     agents = [
         a2c.device(device),
-        dqn.device(device),
+        # dqn.device(device),
         # vac.device(device),
         # vpg.device(device),
         # vsarsa.device(device),
