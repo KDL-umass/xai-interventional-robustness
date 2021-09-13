@@ -127,10 +127,9 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts):
     os.makedirs(dir, exist_ok=True)
 
     # state setup
-    assert len(agents) == 11
-    agent = agents.pop()
-
     if use_trajectory_starts:
+        assert len(agents) == 11
+        agent = agents[0] # first agent will be one sampled from
         sample_start_states_from_trajectory(agent, num_states_to_intervene_on)
         num_interventions = create_intervention_states(num_states_to_intervene_on, True)
     else:
