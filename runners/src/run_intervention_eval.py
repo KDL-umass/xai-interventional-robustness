@@ -72,7 +72,7 @@ def policy_action_distribution(
             if type(act) == int:
                 actions[i] = act
             else:
-                actions[i] = act.cpu().numpy()
+                actions[i] = act.detach().cpu().numpy()
         dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
     return dist
 
