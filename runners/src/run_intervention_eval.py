@@ -20,7 +20,7 @@ a2c_supplementary = "/mnt/nfs/scratch1/kavery/a2c_76cd60f_2021-09-02_17:19:00_00
 dqn_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
 ddqn_model_root = "/mnt/nfs/scratch1/kavery/runs_ddqn_total_10"
 c51_model_root = "/mnt/nfs/scratch1/kavery/runs_c51_total_10"
-rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10"
+# rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10" # rainbow not implemented in ALL
 
 model_locations = {
     "a2c": [
@@ -34,12 +34,12 @@ model_locations = {
         *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)]
     ],
     "c51": [*[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)]],
-    "rainbow": [
-        *[
-            rainbow_model_root + "/" + folder
-            for folder in os.listdir(rainbow_model_root)
-        ]
-    ],
+    # "rainbow": [
+    #     *[
+    #         rainbow_model_root + "/" + folder
+    #         for folder in os.listdir(rainbow_model_root)
+    #     ]
+    # ], # rainbow not implemented in ALL
 }
 
 
@@ -129,7 +129,7 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts):
     # state setup
     if use_trajectory_starts:
         assert len(agents) == 11
-        agent = agents[0] # first agent will be one sampled from
+        agent = agents[0]  # first agent will be one sampled from
         sample_start_states_from_trajectory(agent, num_states_to_intervene_on)
         num_interventions = create_intervention_states(num_states_to_intervene_on, True)
     else:
