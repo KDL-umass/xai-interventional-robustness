@@ -94,11 +94,16 @@ def plot_max_action_divergence_matrix(data, title):
 
 
 if __name__ == "__main__":
-    n_agents = 10
+    n_agents = 11
     nstates = 30
     horizon = 100
-    for fam in ["a2c", "dqn"]:
-        dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
+    use_trajectory_starts = True
+    
+    for fam in ["a2c", "dqn", "ddqn", "c51", "rainbow"]:
+        if use_trajectory_starts:
+            dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
+        else:
+            dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
         plot_js_divergence_matrix(
             np.loadtxt(dir + "/88_interventions.txt"),
             f"JS Divergence of Actions for {fam}, {n_agents} Agents, t={horizon} horizon",
