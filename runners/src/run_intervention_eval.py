@@ -20,7 +20,7 @@ a2c_supplementary = "/mnt/nfs/scratch1/kavery/a2c_76cd60f_2021-09-02_17:19:00_00
 dqn_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
 ddqn_model_root = "/mnt/nfs/scratch1/kavery/runs_ddqn_total_10"
 c51_model_root = "/mnt/nfs/scratch1/kavery/runs_c51_total_10"
-# rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10" # rainbow not implemented in ALL
+rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10"
 
 model_locations = {
     "a2c": [
@@ -34,12 +34,12 @@ model_locations = {
         *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)]
     ],
     "c51": [*[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)]],
-    # "rainbow": [
-    #     *[
-    #         rainbow_model_root + "/" + folder
-    #         for folder in os.listdir(rainbow_model_root)
-    #     ]
-    # ], # rainbow not implemented in ALL
+    "rainbow": [
+        *[
+            rainbow_model_root + "/" + folder
+            for folder in os.listdir(rainbow_model_root)
+        ]
+    ],
 }
 
 
@@ -50,7 +50,7 @@ def load_agent(dir, device):
     return agt
 
 
-agent_family_that_selects_max_action = ["dqn", "ddqn"]
+agent_family_that_selects_max_action = ["dqn", "ddqn", "c51", "rainbow"]
 
 
 def policy_action_distribution(
