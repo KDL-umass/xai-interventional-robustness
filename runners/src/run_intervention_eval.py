@@ -12,20 +12,31 @@ from envs.wrappers.space_invaders.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 
-# kc_model_root = "/mnt/nfs/work1/jensen/kclary/all_models"
-pp_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
-ka_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
+a2c_model_root = "/Users/kavery/Downloads/runs_a2c_total_10"
+dqn_model_root = "/Users/kavery/Downloads/runs_dqn_total_10"
+ddqn_model_root = "/Users/kavery/Downloads/runs_ddqn_total_10"
+rainbow_model_root = "/Users/kavery/Downloads/runs_rainbow_total_10"
+c51_model_root = "/Users/kavery/Downloads/runs_c51_total_10"
 
 model_locations = {
-    # "a2c": [
-    #     # kc_model_root + "/a2c",
-    #     *[pp_model_root + "/" + folder for folder in os.listdir(pp_model_root)],
-    # ],
+    "a2c": [
+        *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
+    ],
     "dqn": [
-        # kc_model_root + "/dqn",
-        *[ka_model_root + "/" + folder for folder in os.listdir(ka_model_root)],
+        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
+    ],
+    "ddqn": [
+        *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
+    ],
+    "rainbow": [
+        *[rainbow_model_root + "/" + folder for folder in os.listdir(rainbow_model_root)],
+    ],
+    "c51": [
+        *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
     ],
 }
+
+agent_family_that_selects_max_action = ["a2c", "dqn", "ddqn", "rainbow", "c51"]
 
 
 def load_agent(dir, device):
@@ -33,9 +44,6 @@ def load_agent(dir, device):
     agt = torch.load(path, map_location=torch.device(device))
     agt = agt.test_agent()
     return agt
-
-
-agent_family_that_selects_max_action = ["dqn"]
 
 
 def policy_action_distribution(
@@ -163,6 +171,7 @@ def evaluate_interventions(agent_family, device):
 
 
 if __name__ == "__main__":
+    # get_performance()
     parser = argparse.ArgumentParser(
         description="Process experiment settings.", add_help=True
     )

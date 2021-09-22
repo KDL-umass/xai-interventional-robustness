@@ -10,7 +10,7 @@ import os, sys
 
 import torch.multiprocessing as mp
 
-from envs.wrappers.space_invaders.interventions.video_utils import *
+from envs.wrappers.video_utils import *
 from envs.wrappers.space_invaders.interventions.interventions import get_intervened_environments
 from envs.wrappers.space_invaders.interventions.paths import env_id
 

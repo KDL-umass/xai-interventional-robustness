@@ -1,21 +1,43 @@
-import numpy as np
 from all.experiments import SlurmExperiment, run_experiment
 from all.environments import AtariEnvironment
-from all.presets.atari import a2c, dqn, vac, vpg, vsarsa, vqn, ppo
+from all.presets import atari
+import argparse
+from all.presets.atari import c51, rainbow, a2c, dqn, vac, vpg, vsarsa, vqn, ppo, ddqn
 
 from envs.wrappers.space_invaders.all_toybox_wrapper import ToyboxEnvironment
+import numpy as np
 
+env_name = "SpaceInvaders"
+device = "cuda"
+frames = 10e10
 render = False
 logdir = "runs"
 writer = "tensorboard"
-agent_replicate_num = 2
+toybox = True
+agent_replicate_num = 12
+test_episodes = 100
 
+def main():
+    if toybox:
+        env = ToyboxEnvironment("SpaceInvadersToybox", device=device)
+    else:
+        env = AtariEnvironment(env_name, device=device)
 
-def run_xai_experiment(agents, envs, device, frames, test_episodes):
+    agents = [
+        #a2c.device(device),
+        vqn.device(device),
+        # vac.device(device),
+        # vpg.device(device),
+        # vsarsa.device(device),
+        # vqn.device(device)
+    ]
+
+    agents = list(np.repeat(agents, agent_replicate_num))
+
     if device == "cuda":
         SlurmExperiment(
             agents,
-            envs,
+            env,
             frames,
             test_episodes=test_episodes,
             logdir=logdir,
@@ -25,39 +47,13 @@ def run_xai_experiment(agents, envs, device, frames, test_episodes):
     else:
         run_experiment(
             agents,
-            envs,
+            env,
             frames,
             render=render,
             logdir=logdir,
             writer=writer,
             test_episodes=test_episodes,
         )
-
-
-def main():  # agent training
-    device = "cpu"
-    toybox = True
-    test_episodes = 2
-    frames = 1e2
-
-    if toybox:
-        env = ToyboxEnvironment("SpaceInvadersToybox", device=device)
-
-    else:
-        env = AtariEnvironment("SpaceInvaders", device=device)
-
-    agents = [
-        a2c.device(device),
-        dqn.device(device),
-        # vac.device(device),
-        # vpg.device(device),
-        # vsarsa.device(device),
-        # vqn.device(device)
-    ]
-
-    agents = list(np.repeat(agents, agent_replicate_num))
-
-    run_xai_experiment(agents, env, device, frames, test_episodes)
 
 
 if __name__ == "__main__":
