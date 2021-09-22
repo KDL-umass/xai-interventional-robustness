@@ -17,6 +17,12 @@ from all.environments.atari_wrappers import (
 from envs.wrappers.space_invaders.interventions.reset_wrapper import (
     SpaceInvadersResetWrapper,
 )
+from envs.wrappers.breakout.interventions.reset_wrapper import (
+    BreakoutResetWrapper,
+)
+from envs.wrappers.amidar.interventions.reset_wrapper import (
+    AmidarResetWrapper,
+)
 
 
 def customSpaceInvadersResetWrapper(state_num, intv, lives):
@@ -25,6 +31,20 @@ def customSpaceInvadersResetWrapper(state_num, intv, lives):
             super().__init__(env, state_num=state_num, intv=intv, lives=lives)
 
     return CustomSpaceInvadersResetWrapper
+
+def customBreakoutResetWrapper(state_num, intv, lives):
+    class CustomBreakoutResetWrapper(BreakoutResetWrapper):
+        def __init__(self, env):
+            super().__init__(env, state_num=state_num, intv=intv, lives=lives)
+
+    return CustomBreakoutResetWrapper
+
+def customAmidarResetWrapper(state_num, intv, lives):
+    class CustomAmidarResetWrapper(AmidarResetWrapper):
+        def __init__(self, env):
+            super().__init__(env, state_num=state_num, intv=intv, lives=lives)
+
+    return CustomAmidarResetWrapper
 
 
 class ToyboxEnvironment(GymEnvironment):
