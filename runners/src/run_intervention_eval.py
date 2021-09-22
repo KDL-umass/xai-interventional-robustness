@@ -3,7 +3,10 @@ import argparse
 import numpy as np
 import torch
 
-from envs.wrappers.space_invaders.interventions.start_states import sample_start_states
+from envs.wrappers.space_invaders.interventions.start_states import (
+    sample_start_states,
+    sample_start_states_from_trajectory,
+)
 from envs.wrappers.space_invaders.interventions.interventions import (
     create_intervention_states,
 )
@@ -51,8 +54,8 @@ def policy_action_distribution(
 ):
     if dist_type == "analytic":
         act, p_dist = agt.act(obs)
-        dist = p_dist.cpu().numpy()
-        
+        dist = p_dist.detach().cpu().numpy()
+
         if agent_family in agent_family_that_selects_max_action:
             idx = np.argmax(dist)
             dist = np.zeros(dist.shape)
@@ -65,7 +68,7 @@ def policy_action_distribution(
             if type(act) == int:
                 actions[i] = act
             else:
-                actions[i] = act.cpu().numpy()
+                actions[i] = act.detach().cpu().numpy()
         dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
     return dist
 
@@ -95,20 +98,41 @@ def get_intervention_data_dir(
     return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
 
 
-def evaluate_interventions(agent_family, device):
+def get_trajectory_intervention_data_dir(
+    agent_family, num_agents, num_states_to_intervene_on
+):
+    return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
+
+
+def evaluate_interventions(agent_family, device, use_trajectory_starts):
     action_distribution_samples = 100
     num_states_to_intervene_on = 30  # q in literature
     start_horizon = 100  # sample from t=100
 
-    sample_start_states(num_states_to_intervene_on, start_horizon)
-    num_interventions = create_intervention_states(num_states_to_intervene_on)
-
-    # setup
+    # agent setup
     agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
-    dir = get_intervention_data_dir(
-        agent_family, len(agents), num_states_to_intervene_on, start_horizon
-    )
+
+    if use_trajectory_starts:
+        dir = get_trajectory_intervention_data_dir(
+            agent_family, len(agents), num_states_to_intervene_on
+        )
+    else:
+        dir = get_intervention_data_dir(
+            agent_family, len(agents), num_states_to_intervene_on, start_horizon
+        )
     os.makedirs(dir, exist_ok=True)
+
+    # state setup
+    if use_trajectory_starts:
+        assert len(agents) == 11
+        agent = agents[0]  # first agent will be one sampled from
+        sample_start_states_from_trajectory(agent, num_states_to_intervene_on)
+        num_interventions = create_intervention_states(num_states_to_intervene_on, True)
+    else:
+        sample_start_states(num_states_to_intervene_on, start_horizon)
+        num_interventions = create_intervention_states(
+            num_states_to_intervene_on, False
+        )
 
     # vanilla
     print("Vanilla:")
@@ -117,7 +141,10 @@ def evaluate_interventions(agent_family, device):
             "SpaceInvadersToybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
-                state_num=state_num, intv=-1, lives=3
+                state_num=state_num,
+                intv=-1,
+                lives=3,
+                use_trajectory_starts=use_trajectory_starts,
             ),
         )
         for state_num in range(num_states_to_intervene_on)
@@ -147,7 +174,10 @@ def evaluate_interventions(agent_family, device):
             "SpaceInvadersToybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
-                state_num=state_num, intv=intv, lives=3
+                state_num=state_num,
+                intv=intv,
+                lives=3,
+                use_trajectory_starts=use_trajectory_starts,
             ),
         )
         for state_num in range(num_states_to_intervene_on)
@@ -188,7 +218,9 @@ if __name__ == "__main__":
 
     for agent_family in model_locations:
         print(f"Evaluating agent family: {agent_family}")
-        evaluate_interventions(agent_family=agent_family, device=device)
+        evaluate_interventions(
+            agent_family=agent_family, device=device, use_trajectory_starts=True
+        )
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")

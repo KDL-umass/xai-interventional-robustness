@@ -25,10 +25,16 @@ from envs.wrappers.amidar.interventions.reset_wrapper import (
 )
 
 
-def customSpaceInvadersResetWrapper(state_num, intv, lives):
+def customSpaceInvadersResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomSpaceInvadersResetWrapper(SpaceInvadersResetWrapper):
         def __init__(self, env):
-            super().__init__(env, state_num=state_num, intv=intv, lives=lives)
+            super().__init__(
+                env,
+                state_num=state_num,
+                intv=intv,
+                lives=lives,
+                use_trajectory_starts=use_trajectory_starts,
+            )
 
     return CustomSpaceInvadersResetWrapper
 
@@ -52,7 +58,7 @@ class ToyboxEnvironment(GymEnvironment):
         self,
         name,
         custom_wrapper: SpaceInvadersResetWrapper = customSpaceInvadersResetWrapper(
-            state_num=0, intv=-1, lives=3
+            state_num=0, intv=-1, lives=3, use_trajectory_starts=False
         ),
         *args,
         **kwargs
