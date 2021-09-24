@@ -1,1 +1,1 @@
-from envs.wrappers.space_invaders.all_toybox_wrapper import ToyboxEnvironment
+from envs.wrappers.all_toybox_wrapper import ToyboxEnvironment

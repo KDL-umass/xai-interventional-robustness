@@ -1,6 +1,8 @@
 import os
 
-env_id = "SpaceInvadersToyboxNoFrameskip-v4"
+space_invaders_env_id = "SpaceInvadersToyboxNoFrameskip-v4"
+amidar_env_id = "AmidarToyboxNoFrameskip-v4"
+breakout_env_id = "BreakoutToyboxNoFrameskip-v4"
 
 
 def get_intervention_dir(state_num, use_trajectory_starts):

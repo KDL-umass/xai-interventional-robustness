@@ -4,7 +4,7 @@ from all.presets import atari
 import argparse
 from all.presets.atari import c51, rainbow, a2c, dqn, vac, vpg, vsarsa, vqn, ppo, ddqn
 
-from envs.wrappers.space_invaders.all_toybox_wrapper import ToyboxEnvironment
+from envs.wrappers.all_toybox_wrapper import ToyboxEnvironment
 import numpy as np
 
 env_name = "SpaceInvaders"
@@ -19,7 +19,7 @@ test_episodes = 100
 
 def main():
     if toybox:
-        env = ToyboxEnvironment("SpaceInvadersToybox", device=device)
+        env = ToyboxEnvironment(env_name+"Toybox", device=device)
     else:
         env = AtariEnvironment(env_name, device=device)
 

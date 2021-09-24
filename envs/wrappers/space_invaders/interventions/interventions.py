@@ -9,9 +9,9 @@ from copy import deepcopy
 from toybox import Toybox, Input
 from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
-from envs.wrappers.space_invaders.interventions.paths import (
+from envs.wrappers.paths import (
     get_intervention_dir,
-    env_id,
+    space_invaders_env_id,
 )
 from envs.wrappers.space_invaders.interventions.reset_wrapper import (
     SpaceInvadersResetWrapper,
@@ -20,8 +20,7 @@ from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
     SpaceInvadersFeatureVecWrapper,
 )
 
-
-from envs.wrappers.space_invaders.interventions.start_states import (
+from envs.wrappers.start_states import (
     get_start_env,
     sample_start_states,
     sample_start_states_from_trajectory,
@@ -92,7 +91,7 @@ def get_shift_agent_interventions(env, state_num, count, use_trajectory_starts):
 
 def get_ship_speed_interventions(env, state_num, count, use_trajectory_starts):
     """Set the agent's firing rate to be faster."""
-    env = gym.make(env_id)
+    env = gym.make(space_invaders_env_id)
 
     speeds = list(range(1, 10))
 
@@ -111,7 +110,7 @@ def get_ship_speed_interventions(env, state_num, count, use_trajectory_starts):
 
 def get_shift_shields_interventions(env, state_num, count, use_trajectory_starts):
     """Slightly shift the shields."""
-    env = gym.make(env_id)
+    env = gym.make(space_invaders_env_id)
 
     shift_sizes = list(range(-25, 25, 5))
 
@@ -132,7 +131,7 @@ def get_remove_shield_interventions(env, state_num, count, use_trajectory_starts
     num_shields = len(env.toybox.state_to_json()["shields"])
 
     for sh in range(num_shields):
-        env = gym.make(env_id)
+        env = gym.make(space_invaders_env_id)
         state = env.toybox.state_to_json()
         del state["shield"][sh]
 
@@ -220,7 +219,7 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
 def get_single_intervened_environment(
     state_num, intervention_number, want_feature_vec, lives
 ):
-    env = gym.make(env_id)
+    env = gym.make(space_invaders_env_id)
     if want_feature_vec:
         env = SpaceInvadersFeatureVecWrapper(env)
     env = SpaceInvadersResetWrapper(
@@ -259,6 +258,6 @@ if __name__ == "__main__":
     create_intervention_states(num_states, False)
 
     num_states = 26
-    agent = RandomAgent(gym.make(env_id).action_space)
+    agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     sample_start_states_from_trajectory(agent, num_states)
     create_intervention_states(num_states, True)

@@ -83,21 +83,16 @@ def subplot_returns_100(ax, env, data, lines, timesteps=-1):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 5))
 
 
-def get_performance():
+def get_performance(environment="SpaceInvaders"):
     for agent_family in model_locations.keys():
         arys = np.array([])
         csvs = np.array([dir for dir in model_locations[agent_family]])
-        # csvs = csvs.flatten()
-        # print(csvs)
-        csvs = [dir+"/SpaceInvadersToybox/returns-test.csv" for dir in csvs]
-        # print(csvs)
+        csvs = [dir+"/"+environment+"Toybox/returns-test.csv" for dir in csvs]
         for csv in csvs:
             with open(csv) as filename:
                 ary = np.loadtxt(filename, delimiter=",")
-            # print(ary)
             arys = np.append(arys, ary, axis=0)
         arys = arys.reshape(-1,3)
-        # print(arys)
         avgs = np.average(arys, axis=0)
         print(agent_family)
         print(avgs[1])

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from envs.wrappers.space_invaders.interventions.paths import (
+from envs.wrappers.paths import (
     get_intervention_dir,
     get_start_state_path,
 )

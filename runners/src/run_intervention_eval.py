@@ -3,16 +3,19 @@ import argparse
 import numpy as np
 import torch
 
-from envs.wrappers.space_invaders.interventions.start_states import (
+from envs.wrappers.start_states import (
     sample_start_states,
-    sample_start_states_from_trajectory,
-)
-from envs.wrappers.space_invaders.interventions.interventions import (
-    create_intervention_states,
-)
-from envs.wrappers.space_invaders.all_toybox_wrapper import (
+    sample_start_states_from_trajectory
+) 
+import envs.wrappers.space_invaders.interventions.interventions as si_interventions 
+import envs.wrappers.amidar.interventions.interventions as amidar_interventions 
+import envs.wrappers.breakout.interventions.interventions as breakout_interventions 
+
+from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
     customSpaceInvadersResetWrapper,
+    customAmidarResetWrapper, 
+    customBreakoutResetWrapper
 )
 
 a2c_model_root = "/Users/kavery/Downloads/runs_a2c_total_10"
@@ -104,7 +107,7 @@ def get_trajectory_intervention_data_dir(
     return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
 
 
-def evaluate_interventions(agent_family, device, use_trajectory_starts):
+def evaluate_interventions(agent_family, device, use_trajectory_starts, environment="SpaceInvaders"):
     action_distribution_samples = 100
     num_states_to_intervene_on = 30  # q in literature
     start_horizon = 100  # sample from t=100
@@ -126,19 +129,28 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts):
     if use_trajectory_starts:
         assert len(agents) == 11
         agent = agents[0]  # first agent will be one sampled from
-        sample_start_states_from_trajectory(agent, num_states_to_intervene_on)
-        num_interventions = create_intervention_states(num_states_to_intervene_on, True)
+        sample_start_states_from_trajectory(agent, num_states_to_intervene_on, environment)
+        if environment == "SpaceInvaders":
+            num_interventions = si_interventions.create_intervention_states(num_states_to_intervene_on, True)
+        elif environment == "Amidar":
+            num_interventions = amidar_interventions.create_intervention_states(num_states_to_intervene_on, True)
+        else:
+            num_interventions = breakout_interventions.create_intervention_states(num_states_to_intervene_on, True)
+    
     else:
-        sample_start_states(num_states_to_intervene_on, start_horizon)
-        num_interventions = create_intervention_states(
-            num_states_to_intervene_on, False
-        )
+        sample_start_states(num_states_to_intervene_on, start_horizon, environment)
+        if environment == "SpaceInvaders":
+            num_interventions = si_interventions.create_intervention_states(num_states_to_intervene_on, False)
+        elif environment == "Amidar":
+            num_interventions = amidar_interventions.create_intervention_states(num_states_to_intervene_on, False)
+        else:
+            num_interventions = breakout_interventions.create_intervention_states(num_states_to_intervene_on, False)
 
     # vanilla
     print("Vanilla:")
     envs = [
         ToyboxEnvironment(
-            "SpaceInvadersToybox",
+            environment+"Toybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
                 state_num=state_num,
@@ -171,7 +183,7 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts):
     print("Interventions:")
     envs = [
         ToyboxEnvironment(
-            "SpaceInvadersToybox",
+            environment+"Toybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
                 state_num=state_num,
