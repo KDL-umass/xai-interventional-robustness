@@ -6,15 +6,15 @@ from envs.wrappers.paths import (
 from typing import *
 import gym, json
 
-from toybox.envs.atari.space_invaders import SpaceInvadersEnv
+from toybox.envs.atari.breakout import BreakoutEnv
 
 
-class SpaceInvadersResetWrapper(gym.Wrapper):
-    """Resets space invaders environment at the start of every episode to an intervened state."""
+class BreakoutResetWrapper(gym.Wrapper):
+    """Resets breakout environment at the start of every episode to an intervened state."""
 
     def __init__(
         self,
-        tbenv: SpaceInvadersEnv,
+        tbenv: BreakoutEnv,
         state_num: int,
         intv: int,
         lives: int,

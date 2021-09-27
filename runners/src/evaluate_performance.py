@@ -10,23 +10,40 @@ import os, sys
 
 import torch.multiprocessing as mp
 
-from envs.wrappers.space_invaders.interventions.video_utils import *
-from envs.wrappers.space_invaders.interventions.interventions import get_intervened_environments
-from envs.wrappers.space_invaders.interventions.paths import env_id
+from envs.wrappers.video_utils import *
+from envs.wrappers.space_invaders.interventions.interventions import get_si_intervened_environments
+from envs.wrappers.amidar.interventions.interventions import get_amidar_intervened_environments
+from envs.wrappers.breakout.interventions.interventions import get_breakout_intervened_environments
+from envs.wrappers.paths import space_invaders_env_id, amidar_env_id, breakout_env_id
 
-def get_env_list(want_feature_vec, vanilla, lives):
+def get_env_list(want_feature_vec, vanilla, lives, environment="SpaceInvaders"):
     """
     Get JSON intervention environments (if `vanilla` False), wrapped with feature vec if `want_feature_vec`.
 
     If `vanilla` is provided, `lives` will be ignored.
     """
-    if not vanilla:
-        envlist = get_intervened_environments(want_feature_vec, lives)
+    if environment == "SpaceInvaders":
+        if not vanilla:
+            envlist = get_si_intervened_environments(want_feature_vec, lives)
+        else:
+            env = gym.make(space_invaders_env_id)
+            if want_feature_vec:
+                env = SpaceInvadersFeatureVecWrapper(env)
+            envlist = [env]
+    
+    elif environment == "Amidar":
+        if not vanilla:
+            envlist = get_amidar_intervened_environments(want_feature_vec, lives)
+        else:
+            env = gym.make(amidar_env_id)
+            envlist = [env]
     else:
-        env = gym.make(env_id)
-        if want_feature_vec:
-            env = SpaceInvadersFeatureVecWrapper(env)
-        envlist = [env]
+        if not vanilla:
+            envlist = get_breakout_intervened_environments(want_feature_vec, lives)
+        else:
+            env = gym.make(breakout_env_id)
+            envlist = [env]
+
     return envlist
 
 
@@ -162,65 +179,6 @@ def evaluate(agent_name, num_trials, vanilla, parallel, lives, save_images=False
         return reward_list  # returning full reward list for statistical analysis
 
 
-def store_action_trajectories():
-    """
-    Function to store the action trajectories for seeds 0-29 for different interventions.
-    """
-    # Store action trajectories to compare the resulting trajectories with and without interventions.
-    for s in range(30):
-        for agent_name in ["cnn", "ddt", "random"]:
-            print("Agent name: ", agent_name)
-            save_images = False
-            save_actions = True
-            seed = s
-            lives = 1
-
-            # Without interventions
-            vanilla = True
-            intv = -1
-            env_list = get_env_list(want_feature_vec(agent_name), vanilla, lives)
-            env = env_list[intv]
-            env_name = intv
-
-            print("Seed: ", seed, " Vanilla: ", vanilla)
-
-            run_episode(
-                agent_name,
-                env,
-                seed,
-                env_name,
-                intv=-1,
-                lives=lives,
-                save_images=save_images,
-                save_actions=save_actions,
-            )
-
-            print("######################################")
-
-            # With interventions
-            vanilla = False
-            env_list = get_env_list(want_feature_vec(agent_name), vanilla, lives)
-            for intv in range(87):
-                env = env_list[intv]
-                env_name = intv
-
-                print("Seed: ", seed, " Vanilla: ", vanilla, "Intervention: ", intv)
-
-                run_episode(
-                    agent_name,
-                    env,
-                    seed,
-                    env_name,
-                    intv=intv,
-                    lives=lives,
-                    save_images=save_images,
-                    save_actions=save_actions,
-                )
-
-            print("######################################")
-            print("######################################")
-
-
 if __name__ == "__main__":
     parallel = False
     num_trials = 10
@@ -246,59 +204,3 @@ if __name__ == "__main__":
             performance_matrix,
         )
 
-    # # visualize play for an agent for given intervention and seed.
-    # agent_name = "cnn"
-    # save_images = True
-    # vanilla = False
-    # seed = 2
-    # intv = 0
-    # lives = 1
-    # env_list = get_env_list(want_feature_vec(agent_name), vanilla, lives)
-    # env = env_list[intv]
-    # env_name = intv
-    # run_episode(
-    #     agent_name,
-    #     env,
-    #     seed,
-    #     env_name,
-    #     intv,
-    #     lives,
-    #     save_images=save_images,
-    # )
-
-    # Action trajectories
-    # store_action_trajectories()
-
-    """
-    # Print out action sequences for DDT agent under the "shift agent" intervention
-    # Single instance
-    intv = 70
-    seed = 0
-    vanilla = False
-    agent_name = "ddt"
-    lives = 1
-    save_actions = True
-    save_images = False
-    
-    env_list = get_env_list(want_feature_vec(agent_name), vanilla, lives)
-    env = env_list[intv]
-    env_name = intv
-    
-    print("Intervention: ", intv)
-    print("##########################")
-    run_episode(agent_name, env, seed, env_name, intv, lives, save_images=save_images, save_actions=save_actions)
-    print("##########################")
-
-    # Vanilla trial; change intervention and flag
-    intv = -1
-    vanilla = True
-    
-    env_list = get_env_list(want_feature_vec(agent_name), vanilla, lives)
-    env = env_list[intv]
-    env_name = intv
-
-    print("Intervention: NONE")
-    print("##########################")
-    run_episode(agent_name, env, seed, env_name, intv, lives, save_images=save_images, save_actions=save_actions)
-    print("##########################")
-    """
