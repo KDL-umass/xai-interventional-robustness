@@ -3,19 +3,21 @@ import argparse
 import numpy as np
 import torch
 
+from analysis.src.js_divergence import js_divergence
+
 from envs.wrappers.start_states import (
     sample_start_states,
-    sample_start_states_from_trajectory
-) 
-import envs.wrappers.space_invaders.interventions.interventions as si_interventions 
-import envs.wrappers.amidar.interventions.interventions as amidar_interventions 
-import envs.wrappers.breakout.interventions.interventions as breakout_interventions 
+    sample_start_states_from_trajectory,
+)
+import envs.wrappers.space_invaders.interventions.interventions as si_interventions
+import envs.wrappers.amidar.interventions.interventions as amidar_interventions
+import envs.wrappers.breakout.interventions.interventions as breakout_interventions
 
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
     customSpaceInvadersResetWrapper,
-    customAmidarResetWrapper, 
-    customBreakoutResetWrapper
+    customAmidarResetWrapper,
+    customBreakoutResetWrapper,
 )
 
 a2c_model_root = "/Users/kavery/Downloads/runs_a2c_total_10"
@@ -25,21 +27,18 @@ rainbow_model_root = "/Users/kavery/Downloads/runs_rainbow_total_10"
 c51_model_root = "/Users/kavery/Downloads/runs_c51_total_10"
 
 model_locations = {
-    "a2c": [
-        *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
-    ],
-    "dqn": [
-        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
-    ],
+    "a2c": [*[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],],
+    "dqn": [*[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],],
     "ddqn": [
         *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
     ],
     "rainbow": [
-        *[rainbow_model_root + "/" + folder for folder in os.listdir(rainbow_model_root)],
+        *[
+            rainbow_model_root + "/" + folder
+            for folder in os.listdir(rainbow_model_root)
+        ],
     ],
-    "c51": [
-        *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
-    ],
+    "c51": [*[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],],
 }
 
 agent_family_that_selects_max_action = ["a2c", "dqn", "ddqn", "rainbow", "c51"]
@@ -63,7 +62,7 @@ def policy_action_distribution(
             idx = np.argmax(dist)
             dist = np.zeros(dist.shape)
             dist[idx] = 1.0
-    else:
+    elif dist_type == "empirical":
         n = env.action_space.n
         actions = np.zeros((samples,))
         for i in range(samples):
@@ -73,6 +72,8 @@ def policy_action_distribution(
             else:
                 actions[i] = act.detach().cpu().numpy()
         dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
+    else:
+        raise ValueError("Dist unknown")
     return dist
 
 
@@ -82,8 +83,8 @@ def collect_action_distributions(
     n = len(envs) * len(agents)
     dists = np.zeros((n, envs[0].action_space.n + 3))
     row = 0
-    for a, agt in enumerate(agents):
-        for e, env in enumerate(envs):
+    for e, env in enumerate(envs):
+        for a, agt in enumerate(agents):
             dists[row, 0] = a
             dists[row, 1:3] = env_labels[e]
             dists[row, 3:] = policy_action_distribution(
@@ -93,6 +94,27 @@ def collect_action_distributions(
             print(f"\r\rSampling {round(row / n * 100)}% complete", end="")
     print()
     return dists
+
+
+def get_js_divergence(agent_family, agents, envs, env_labels):
+    n = len(envs)
+    result_table = np.zeros((n, 4))  # env_labels + js_divergence = 4 cols
+    row = 0
+    for e, env in enumerate(envs):
+        result_table[row, 1:3] = env_labels[e]
+
+        actions = np.zeros((len(agents), envs[0].action_space.n))
+        for a, agt in enumerate(agents):
+            actions[a, :] = policy_action_distribution(
+                agent_family, agt, env, env.reset(), 1, "empirical"
+            )
+
+        result_table[row, 3] = js_divergence(actions)
+
+        row += 1
+        print(f"\r\rSampling {round(row / n * 100)}% complete", end="")
+    print()
+    return result_table
 
 
 def get_intervention_data_dir(
@@ -107,7 +129,9 @@ def get_trajectory_intervention_data_dir(
     return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
 
 
-def evaluate_interventions(agent_family, device, use_trajectory_starts, environment="SpaceInvaders"):
+def evaluate_interventions(
+    agent_family, device, use_trajectory_starts, environment="SpaceInvaders"
+):
     action_distribution_samples = 100
     num_states_to_intervene_on = 30  # q in literature
     start_horizon = 100  # sample from t=100
@@ -129,28 +153,42 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts, environm
     if use_trajectory_starts:
         assert len(agents) == 11
         agent = agents[0]  # first agent will be one sampled from
-        sample_start_states_from_trajectory(agent, num_states_to_intervene_on, environment)
+        sample_start_states_from_trajectory(
+            agent, num_states_to_intervene_on, environment
+        )
         if environment == "SpaceInvaders":
-            num_interventions = si_interventions.create_intervention_states(num_states_to_intervene_on, True)
+            num_interventions = si_interventions.create_intervention_states(
+                num_states_to_intervene_on, True
+            )
         elif environment == "Amidar":
-            num_interventions = amidar_interventions.create_intervention_states(num_states_to_intervene_on, True)
+            num_interventions = amidar_interventions.create_intervention_states(
+                num_states_to_intervene_on, True
+            )
         else:
-            num_interventions = breakout_interventions.create_intervention_states(num_states_to_intervene_on, True)
-    
+            num_interventions = breakout_interventions.create_intervention_states(
+                num_states_to_intervene_on, True
+            )
+
     else:
         sample_start_states(num_states_to_intervene_on, start_horizon, environment)
         if environment == "SpaceInvaders":
-            num_interventions = si_interventions.create_intervention_states(num_states_to_intervene_on, False)
+            num_interventions = si_interventions.create_intervention_states(
+                num_states_to_intervene_on, False
+            )
         elif environment == "Amidar":
-            num_interventions = amidar_interventions.create_intervention_states(num_states_to_intervene_on, False)
+            num_interventions = amidar_interventions.create_intervention_states(
+                num_states_to_intervene_on, False
+            )
         else:
-            num_interventions = breakout_interventions.create_intervention_states(num_states_to_intervene_on, False)
+            num_interventions = breakout_interventions.create_intervention_states(
+                num_states_to_intervene_on, False
+            )
 
     # vanilla
     print("Vanilla:")
     envs = [
         ToyboxEnvironment(
-            environment+"Toybox",
+            environment + "Toybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
                 state_num=state_num,
@@ -183,7 +221,7 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts, environm
     print("Interventions:")
     envs = [
         ToyboxEnvironment(
-            environment+"Toybox",
+            environment + "Toybox",
             device=device,
             custom_wrapper=customSpaceInvadersResetWrapper(
                 state_num=state_num,
