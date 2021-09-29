@@ -30,11 +30,15 @@ model_locations = {
         *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
         a2c_supplementary,
     ],
-    "dqn": [*[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],],
+    "dqn": [
+        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
+    ],
     "ddqn": [
         *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
     ],
-    "c51": [*[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],],
+    "c51": [
+        *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
+    ],
     "rainbow": [
         *[
             rainbow_model_root + "/" + folder
@@ -135,7 +139,7 @@ def state_setup(
 
 def evaluate_interventions(agent_family, environment, device):
     action_distribution_samples = 100
-    num_states_to_intervene_on = 100
+    num_states_to_intervene_on = 40
     dist_type = "analytic"
 
     start_horizon = 100  # sample from t=100
@@ -197,7 +201,9 @@ if __name__ == "__main__":
     for agent_family in model_locations:
         print(f"Evaluating agent family: {agent_family}")
         evaluate_interventions(
-            agent_family=agent_family, environment="SpaceInvaders", device=device,
+            agent_family=agent_family,
+            environment="SpaceInvaders",
+            device=device,
         )
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
@@ -207,4 +213,3 @@ if __name__ == "__main__":
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
-
