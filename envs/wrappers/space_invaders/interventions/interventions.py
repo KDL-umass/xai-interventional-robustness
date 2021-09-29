@@ -10,6 +10,7 @@ from toybox import Toybox, Input
 from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
 from envs.wrappers.paths import (
+    check_intervention_dir,
     get_intervention_dir,
     space_invaders_env_id,
 )
@@ -29,8 +30,7 @@ from envs.wrappers.start_states import (
 
 def write_intervention_json(state, state_num, count, use_trajectory_starts):
     with open(
-        f"{get_intervention_dir(state_num, use_trajectory_starts)}/{count}.json",
-        "w",
+        f"{get_intervention_dir(state_num, use_trajectory_starts)}/{count}.json", "w",
     ) as outfile:
         json.dump(state, outfile)
 
@@ -171,22 +171,17 @@ def get_flip_shield_icons(env, state_num, count, use_trajectory_starts):
 
 def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     """Create JSON states for all interventions."""
-    dir = "storage/states/interventions"
-    if use_trajectory_starts:
-        dir = "storage/states/trajectory_interventions"
-    os.makedirs(dir, exist_ok=True)
-
-    path = dir + f"/{num_states-1}"
-    if os.path.isdir(path):
+    print(f"num states is {num_states}")
+    check, path = check_intervention_dir(num_states - 1, use_trajectory_starts)
+    if check:
         count = len(os.listdir(path))
         print(
             f"Skipping already created {count} interventions for {num_states} states."
         )
         return count
 
-    for state_num in range(
-        num_states
-    ):  # 0th state is the default start state of the game
+    for state_num in range(num_states):
+        # 0th state is the default start state of the game
         env = get_start_env(
             state_num, lives=3, use_trajectory_starts=use_trajectory_starts
         )
@@ -212,7 +207,7 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         # prev = count
         count = get_flip_shield_icons(env, state_num, count, use_trajectory_starts)
         # print(f"Interventions {prev}-{count-1} flip shield icons vertically.")
-        print(f"Created {count} intervention states for state {state_num} in `{dir}`.")
+        print(f"Created {count} intervention states for state {state_num} in `{path}`.")
     return count
 
 

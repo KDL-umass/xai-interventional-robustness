@@ -106,37 +106,29 @@ def state_setup(
 ):
     if use_trajectory_starts:
         assert len(agents) == 11
-        agent = agents[0]  # first agent will be one sampled from
+        agent = agents.pop()  # first agent will be one sampled from
         sample_start_states_from_trajectory(
             agent, num_states_to_intervene_on, environment
         )
-        if environment == "SpaceInvaders":
-            num_interventions = si_interventions.create_intervention_states(
-                num_states_to_intervene_on, True
-            )
-        elif environment == "Amidar":
-            num_interventions = amidar_interventions.create_intervention_states(
-                num_states_to_intervene_on, True
-            )
-        else:
-            num_interventions = breakout_interventions.create_intervention_states(
-                num_states_to_intervene_on, True
-            )
-
     else:
         sample_start_states(num_states_to_intervene_on, start_horizon, environment)
-        if environment == "SpaceInvaders":
-            num_interventions = si_interventions.create_intervention_states(
-                num_states_to_intervene_on, False
-            )
-        elif environment == "Amidar":
-            num_interventions = amidar_interventions.create_intervention_states(
-                num_states_to_intervene_on, False
-            )
-        else:
-            num_interventions = breakout_interventions.create_intervention_states(
-                num_states_to_intervene_on, False
-            )
+
+    if environment == "SpaceInvaders":
+        num_interventions = si_interventions.create_intervention_states(
+            num_states_to_intervene_on, use_trajectory_starts
+        )
+    elif environment == "Amidar":
+        num_interventions = amidar_interventions.create_intervention_states(
+            num_states_to_intervene_on, use_trajectory_starts
+        )
+    elif environment == "Breakout":
+        num_interventions = breakout_interventions.create_intervention_states(
+            num_states_to_intervene_on, use_trajectory_starts
+        )
+    else:
+        raise ValueError(
+            "Unknown environment supplied. Please use SpaceInvaders, Amidar, or Breakout."
+        )
 
     return num_interventions
 

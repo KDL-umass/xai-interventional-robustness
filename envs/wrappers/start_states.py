@@ -18,15 +18,18 @@ from envs.wrappers.paths import (
     amidar_env_id,
     breakout_env_id,
 )
-from envs.wrappers.space_invaders.interventions.reset_wrapper import SpaceInvadersResetWrapper
+from envs.wrappers.space_invaders.interventions.reset_wrapper import (
+    SpaceInvadersResetWrapper,
+)
 from envs.wrappers.amidar.interventions.reset_wrapper import AmidarResetWrapper
 from envs.wrappers.breakout.interventions.reset_wrapper import BreakoutResetWrapper
 
 
 def get_start_env(state_num, lives, use_trajectory_starts, environment="SpaceInvaders"):
-    if not os.path.isfile(get_start_state_path(state_num, False)):
+    if not os.path.isfile(get_start_state_path(state_num, use_trajectory_starts)):
+        with_suffix = "" if use_trajectory_starts else "out"
         raise RuntimeError(
-            "Start states have not been created yet. Please sample start states."
+            f"Start states up to {state_num} for {lives} lives with {with_suffix} trajectory have not been created yet. Please sample start states."
         )
     if environment == "SpaceInvaders":
         env = gym.make(space_invaders_env_id)
@@ -101,9 +104,9 @@ def sample_start_states(num_states, horizon, environment="SpaceInvaders"):
 
 
 def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInvaders"):
-    if os.path.isfile(get_start_state_path(num_states - 1, True)):
-        print("Skipping start state sampling because they exist already.")
-        return
+    # if os.path.isfile(get_start_state_path(num_states - 1, True)):
+    #     print("Skipping start state sampling because they exist already.")
+    #     return
 
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
@@ -112,10 +115,7 @@ def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInv
     else:
         random_agent = RandomAgent(gym.make(breakout_env_id).action_space)
 
-    env = ToyboxEnvironment(
-        environment+"Toybox",
-        device="cpu",
-    )
+    env = ToyboxEnvironment(environment + "Toybox", device="cpu",)
 
     obs = env.reset()
     action, probs = agent.act(obs)
@@ -142,9 +142,13 @@ def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInv
             env = gym.make(space_invaders_env_id)
         elif environment == "Amidar":
             env = gym.make(amidar_env_id)
-        else:
+        elif environment == "Breakout":
             env = gym.make(breakout_env_id)
-            
+        else:
+            raise ValueError(
+                f"Unknown environment: {environment}. Select SpaceInvaders, Amidar, or Breakout."
+            )
+
         obs = env.reset()
         env.toybox.write_state_json(state)
         for _ in range(5):
@@ -170,4 +174,6 @@ def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInv
     with open(get_start_state_path(0, True), "w") as f:
         json.dump(state, f)
 
-    print(f"Created {num_states} start states from trajectory.")
+    print(
+        f"Created {num_states} start states from trajectory near {get_start_state_path(0, True)}."
+    )
