@@ -80,7 +80,11 @@ def get_trajectory_intervention_data_dir(
 
 
 def agent_setup(
-    agent_family, use_trajectory_starts, num_states_to_intervene_on, start_horizon, sample_js_div
+    agent_family,
+    use_trajectory_starts,
+    num_states_to_intervene_on,
+    start_horizon,
+    sample_js_div,
 ):
     agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
 
@@ -90,7 +94,11 @@ def agent_setup(
         )
     else:
         dir = get_intervention_data_dir(
-            agent_family, len(agents), num_states_to_intervene_on, start_horizon, sample_js_div
+            agent_family,
+            len(agents),
+            num_states_to_intervene_on,
+            start_horizon,
+            sample_js_div,
         )
     os.makedirs(dir, exist_ok=True)
     return agents, dir
@@ -142,16 +150,20 @@ def state_setup(
 
 def evaluate_interventions(agent_family, device, use_trajectory_starts, environment):
     action_distribution_samples = 100
-    num_states_to_intervene_on = 3
+    num_states_to_intervene_on = 100
     dist_type = "analytic"
 
     start_horizon = 100  # sample from t=100
 
     sample_js_div = True  # use new js divergence sampling
-    js_div_samples = 10
+    js_div_samples = 100
 
     agents, dir = agent_setup(
-        agent_family, use_trajectory_starts, num_states_to_intervene_on, start_horizon, sample_js_div
+        agent_family,
+        use_trajectory_starts,
+        num_states_to_intervene_on,
+        start_horizon,
+        sample_js_div,
     )
 
     num_interventions = state_setup(
