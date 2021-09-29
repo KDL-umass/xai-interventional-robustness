@@ -1,6 +1,5 @@
 import os
 import argparse
-import numpy as np
 import torch
 
 from runners.src.action_evaluation import *
@@ -12,13 +11,6 @@ from envs.wrappers.start_states import (
 import envs.wrappers.space_invaders.interventions.interventions as si_interventions
 import envs.wrappers.amidar.interventions.interventions as amidar_interventions
 import envs.wrappers.breakout.interventions.interventions as breakout_interventions
-
-from envs.wrappers.all_toybox_wrapper import (
-    ToyboxEnvironment,
-    customSpaceInvadersResetWrapper,
-    customAmidarResetWrapper,
-    customBreakoutResetWrapper,
-)
 
 # a2c_model_root = "/Users/kavery/Downloads/runs_a2c_total_10"
 # dqn_model_root = "/Users/kavery/Downloads/runs_dqn_total_10"
@@ -85,6 +77,7 @@ def agent_setup(
     num_states_to_intervene_on,
     start_horizon,
     sample_js_div,
+    device,
 ):
     agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
 
@@ -148,12 +141,13 @@ def state_setup(
     return num_interventions
 
 
-def evaluate_interventions(agent_family, device, use_trajectory_starts, environment):
+def evaluate_interventions(agent_family, environment, device):
     action_distribution_samples = 100
     num_states_to_intervene_on = 100
     dist_type = "analytic"
 
     start_horizon = 100  # sample from t=100
+    use_trajectory_starts = True
 
     sample_js_div = True  # use new js divergence sampling
     js_div_samples = 100
@@ -164,6 +158,7 @@ def evaluate_interventions(agent_family, device, use_trajectory_starts, environm
         num_states_to_intervene_on,
         start_horizon,
         sample_js_div,
+        device,
     )
 
     num_interventions = state_setup(
@@ -210,10 +205,7 @@ if __name__ == "__main__":
     for agent_family in model_locations:
         print(f"Evaluating agent family: {agent_family}")
         evaluate_interventions(
-            agent_family=agent_family,
-            device=device,
-            use_trajectory_starts=True,
-            environment="SpaceInvaders",
+            agent_family=agent_family, environment="SpaceInvaders", device=device,
         )
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
