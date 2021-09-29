@@ -1,8 +1,8 @@
 #!/bin/sh
 
 #SBATCH --job-name=xai_interventional_robustness
-#SBATCH --output=out/xai_%A_%a.out
-#SBATCH --error=out/xai_%A_%a.err
+#SBATCH --output=storage/logs/xai_%A_%a.out
+#SBATCH --error=storage/logs/xai_%A_%a.err
 #SBATCH --array=0-0
 #SBATCH --partition=1080ti-long
 #SBATCH --ntasks=1
