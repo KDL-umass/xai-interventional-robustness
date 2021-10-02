@@ -30,7 +30,8 @@ from envs.wrappers.start_states import (
 
 def write_intervention_json(state, state_num, count, use_trajectory_starts):
     with open(
-        f"{get_intervention_dir(state_num, use_trajectory_starts)}/{count}.json", "w",
+        f"{get_intervention_dir(state_num, use_trajectory_starts)}/{count}.json",
+        "w",
     ) as outfile:
         json.dump(state, outfile)
 
@@ -254,5 +255,5 @@ if __name__ == "__main__":
 
     num_states = 26
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
-    sample_start_states_from_trajectory(agent, num_states)
+    sample_start_states_from_trajectory(agent, num_states, "SpaceInvaders", "cpu")
     create_intervention_states(num_states, True)

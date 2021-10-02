@@ -18,17 +18,24 @@ import envs.wrappers.breakout.interventions.interventions as breakout_interventi
 # rainbow_model_root = "/Users/kavery/Downloads/runs_rainbow_total_10"
 # c51_model_root = "/Users/kavery/Downloads/runs_c51_total_10"
 
-a2c_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
-a2c_supplementary = "/mnt/nfs/scratch1/kavery/a2c_76cd60f_2021-09-02_17:19:00_007989"
-dqn_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
-ddqn_model_root = "/mnt/nfs/scratch1/kavery/runs_ddqn_total_10"
-c51_model_root = "/mnt/nfs/scratch1/kavery/runs_c51_total_10"
-rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10"
+# a2c_model_root = "/mnt/nfs/scratch1/ppruthi/runs_a2c_total_10"
+# a2c_supplementary = "/mnt/nfs/scratch1/kavery/a2c_76cd60f_2021-09-02_17:19:00_007989"
+# dqn_model_root = "/mnt/nfs/scratch1/kavery/runs_dqn_total_10"
+# ddqn_model_root = "/mnt/nfs/scratch1/kavery/runs_ddqn_total_10"
+# c51_model_root = "/mnt/nfs/scratch1/kavery/runs_c51_total_10"
+# rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10"
+
+a2c_model_root = "storage/models/a2c"
+dqn_model_root = "storage/models/dqn"
+ddqn_model_root = "storage/models/ddqn"
+c51_model_root = "storage/models/c51"
+rainbow_model_root = "storage/models/rainbow"
+
 
 model_locations = {
     "a2c": [
         *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
-        a2c_supplementary,
+        # a2c_supplementary,
     ],
     "dqn": [
         *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
@@ -107,12 +114,13 @@ def state_setup(
     num_states_to_intervene_on,
     start_horizon,
     environment,
+    device,
 ):
     if use_trajectory_starts:
         assert len(agents) == 11
         agent = agents.pop()  # first agent will be one sampled from
         sample_start_states_from_trajectory(
-            agent, num_states_to_intervene_on, environment
+            agent, num_states_to_intervene_on, environment, device
         )
     else:
         sample_start_states(num_states_to_intervene_on, start_horizon, environment)
@@ -139,7 +147,7 @@ def state_setup(
 
 def evaluate_interventions(agent_family, environment, device):
     action_distribution_samples = 100
-    num_states_to_intervene_on = 40
+    num_states_to_intervene_on = 10
     dist_type = "analytic"
 
     start_horizon = 100  # sample from t=100
@@ -163,6 +171,7 @@ def evaluate_interventions(agent_family, environment, device):
         num_states_to_intervene_on,
         start_horizon,
         environment,
+        device,
     )
 
     num_samples = js_div_samples if sample_js_div else action_distribution_samples

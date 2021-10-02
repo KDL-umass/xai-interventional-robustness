@@ -103,7 +103,7 @@ def sample_start_states(num_states, horizon, environment="SpaceInvaders"):
     print(f"Created {num_states} start states.")
 
 
-def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInvaders"):
+def sample_start_states_from_trajectory(agent, num_states, environment, device):
     # if os.path.isfile(get_start_state_path(num_states - 1, True)):
     #     print("Skipping start state sampling because they exist already.")
     #     return
@@ -115,7 +115,10 @@ def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInv
     else:
         random_agent = RandomAgent(gym.make(breakout_env_id).action_space)
 
-    env = ToyboxEnvironment(environment + "Toybox", device="cpu",)
+    env = ToyboxEnvironment(
+        environment + "Toybox",
+        device=device,
+    )
 
     obs = env.reset()
     action, probs = agent.act(obs)
