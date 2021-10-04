@@ -174,12 +174,12 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     """Create JSON states for all interventions."""
     print(f"num states is {num_states}")
     check, path = check_intervention_dir(num_states - 1, use_trajectory_starts)
-    if check:
-        count = len(os.listdir(path))
-        print(
-            f"Skipping already created {count} interventions for {num_states} states."
-        )
-        return count
+    # if check:
+    #     count = len(os.listdir(path))
+    #     print(
+    #         f"Skipping already created {count} interventions for {num_states} states."
+    #     )
+    #     return count
 
     for state_num in range(num_states):
         # 0th state is the default start state of the game

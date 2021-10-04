@@ -72,8 +72,8 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
 
-    os.makedirs("storage/plots/jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/jsdivmat/{title}.png")
+    os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
+    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
 
 
 # def plot_individual_distributions(agents, mat):
@@ -117,34 +117,39 @@ def plot_max_action_divergence_matrix(data, title):
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
 
-    os.makedirs("storage/plots/jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/jsdivmat/{title}.png")
+    os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
+    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
 
 
 if __name__ == "__main__":
     n_agents = 11
-    nstates = 30
+    nstates = 10
     horizon = 100
     use_trajectory_starts = True
+    jsdivsampling = True
+    folder = "intervention_js_div" if jsdivsampling else "intervention_action_dists"
 
     for fam in ["a2c", "dqn", "ddqn", "c51", "rainbow"]:
         if use_trajectory_starts:
-            dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
+            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
         else:
-            dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
+            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
+
+        vdata = np.loadtxt(dir + "/vanilla.txt")
+        data = np.loadtxt(dir + "/88_interventions.txt")
         plot_js_divergence_matrix(
-            np.loadtxt(dir + "/88_interventions.txt"),
-            np.loadtxt(dir + "/vanilla.txt"),
-            f"Normalized JS Divergence of Actions for {fam}, {n_agents} Agents, t={horizon} horizon",
+            data,
+            vdata,
+            f"Normalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=True,
         )
         plot_js_divergence_matrix(
-            np.loadtxt(dir + "/88_interventions.txt"),
-            np.loadtxt(dir + "/vanilla.txt"),
-            f"Unnormalized JS Divergence of Actions for {fam}, {n_agents} Agents, t={horizon} horizon",
+            data,
+            vdata,
+            f"Unnormalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=False,
         )
         plot_max_action_divergence_matrix(
-            np.loadtxt(dir + "/88_interventions.txt"),
-            f"Max action divergence matrix for {fam}, {n_agents} Agents, t={horizon} horizon",
+            data,
+            f"Max action divergence matrix for {fam}, {n_agents} Agents, ({nstates} states)",
         )

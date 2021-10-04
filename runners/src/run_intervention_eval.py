@@ -30,6 +30,7 @@ dqn_model_root = "storage/models/dqn"
 ddqn_model_root = "storage/models/ddqn"
 c51_model_root = "storage/models/c51"
 rainbow_model_root = "storage/models/rainbow"
+vsarsa_model_root = "storage/models/vsarsa"
 
 
 model_locations = {
@@ -146,15 +147,15 @@ def state_setup(
 
 
 def evaluate_interventions(agent_family, environment, device):
-    action_distribution_samples = 100
-    num_states_to_intervene_on = 10
+    action_distribution_samples = 30
+    num_states_to_intervene_on = 30
     dist_type = "analytic"
 
     start_horizon = 100  # sample from t=100
     use_trajectory_starts = True
 
     sample_js_div = True  # use new js divergence sampling
-    js_div_samples = 100
+    js_div_samples = 30
 
     agents, dir = agent_setup(
         agent_family,
