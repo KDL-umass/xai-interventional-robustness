@@ -153,4 +153,5 @@ sandbox/*
 runs/
 out/
 xai_ir
+ir
 experiment.sh
