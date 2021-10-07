@@ -32,6 +32,7 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
     van_state = vanilla[:, 1]  # 0 indexed
+
     intv_mat = np.zeros((np.max(state).astype(int) + 1, np.max(intv).astype(int) + 1))
     van_mat = np.zeros((np.max(state).astype(int) + 1, 1))
     mat = np.concatenate((van_mat, intv_mat), axis=1)

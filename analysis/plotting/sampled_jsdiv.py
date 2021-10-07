@@ -13,14 +13,18 @@ import numpy as np
 def plot_js_divergence_matrix(data, vanilla, title, normalize):
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
+    samples = data[:, 3]
 
     nstates = np.max(state).astype(int) + 1
+    assert nstates == len(vanilla)
+
     nintv = np.max(intv).astype(int) + 1
+    print(f"nstates {nstates} nintv {nintv}")
 
     intv_mat = np.zeros((nstates, nintv))
     for s in range(nstates):
         for i in range(nintv):
-            intv_mat[s, i] = data[s * i, 3] / np.log2(10)
+            intv_mat[s, i] = samples[s * nintv + i] / np.log2(10)
 
     van_mat = vanilla[:, 3] / np.log2(10)
     if normalize:

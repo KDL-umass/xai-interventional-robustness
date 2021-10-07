@@ -8,7 +8,14 @@ from envs.wrappers.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 
-agent_family_that_selects_max_action = ["a2c", "dqn", "ddqn", "rainbow", "c51"]
+agent_family_that_selects_max_action = [
+    "a2c",
+    "dqn",
+    "ddqn",
+    "rainbow",
+    "c51",
+    "vsarsa",
+]
 
 
 def load_agent(dir, device):
@@ -91,6 +98,10 @@ def get_action_distribution_header(envs):
 
 
 def average_js_divergence(agent_family, agents, envs, env_labels, num_samples):
+    if agent_family in agent_family_that_selects_max_action:
+        # only need to run one iteration
+        return get_js_divergence(agent_family, agents, envs, env_labels)
+
     dists = []
     for i in range(num_samples):
         dist = get_js_divergence(agent_family, agents, envs, env_labels)
@@ -141,7 +152,12 @@ def evaluate_action_distributions(
         )
     else:
         dists = collect_action_distributions(
-            agent_family, agents, envs, env_labels, num_samples, dist_type,
+            agent_family,
+            agents,
+            envs,
+            env_labels,
+            num_samples,
+            dist_type,
         )
 
     header = get_action_distribution_header(envs)

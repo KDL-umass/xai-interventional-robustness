@@ -53,9 +53,10 @@ model_locations = {
             for folder in os.listdir(rainbow_model_root)
         ],
     ],
+    "vsarsa": [
+        *[vsarsa_model_root + "/" + folder for folder in os.listdir(vsarsa_model_root)],
+    ],
 }
-
-agent_family_that_selects_max_action = ["a2c", "dqn", "ddqn", "rainbow", "c51"]
 
 
 def load_agent(dir, device):
