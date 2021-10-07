@@ -11,6 +11,12 @@ def get_intervention_dir(state_num, use_trajectory_starts):
     return f"storage/states/{prefix}interventions/{state_num}"
 
 
+def check_intervention_dir(state_num, use_trajectory_starts):
+    prefix = "trajectory_" if use_trajectory_starts else ""
+    path = f"storage/states/{prefix}interventions/{state_num}"
+    return os.path.isdir(path), path
+
+
 def get_start_state_path(state_num, use_trajectory_starts):
     prefix = "trajectory_" if use_trajectory_starts else ""
     os.makedirs(f"storage/states/{prefix}starts", exist_ok=True)
