@@ -89,12 +89,16 @@ def get_js_divergence(agent_family, agents, envs, env_labels):
     return result_table
 
 
-def get_action_distribution_header(envs):
+def get_action_distribution_header(envs, sample_jsdiv):
     header = "agent,state,intv,"
-    for a in range(envs[0].action_space.n):
-        header += "action_" + str(a) + ","
-    header = header[:-1]  # remove last comma
-    return header
+    if sample_jsdiv:
+        header += "jsdiv"
+
+    else:
+        for a in range(envs[0].action_space.n):
+            header += "action_" + str(a) + ","
+        header = header[:-1]  # remove last comma
+        return header
 
 
 def average_js_divergence(agent_family, agents, envs, env_labels, num_samples):
@@ -160,7 +164,7 @@ def evaluate_action_distributions(
             dist_type,
         )
 
-    header = get_action_distribution_header(envs)
+    header = get_action_distribution_header(envs, sample_js_div)
 
     if len(interventions) == 1:
         np.savetxt(dir + "/vanilla.txt", dists, header=header)
