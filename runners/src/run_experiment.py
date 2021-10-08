@@ -7,9 +7,9 @@ from all.presets.atari import c51, rainbow, a2c, dqn, vac, vpg, vsarsa, vqn, ppo
 from envs.wrappers.all_toybox_wrapper import ToyboxEnvironment
 import numpy as np
 
-env_name = "SpaceInvaders"
+env_name = "Amidar"
 device = "cuda"
-frames = 10e10
+frames = 2e7+1
 render = False
 logdir = "runs"
 writer = "tensorboard"

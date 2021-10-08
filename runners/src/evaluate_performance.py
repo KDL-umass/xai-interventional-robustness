@@ -33,13 +33,13 @@ def get_env_list(want_feature_vec, vanilla, lives, environment="SpaceInvaders"):
     
     elif environment == "Amidar":
         if not vanilla:
-            envlist = get_amidar_intervened_environments(want_feature_vec, lives)
+            envlist = get_amidar_intervened_environments(lives)
         else:
             env = gym.make(amidar_env_id)
             envlist = [env]
     else:
         if not vanilla:
-            envlist = get_breakout_intervened_environments(want_feature_vec, lives)
+            envlist = get_breakout_intervened_environments(lives)
         else:
             env = gym.make(breakout_env_id)
             envlist = [env]

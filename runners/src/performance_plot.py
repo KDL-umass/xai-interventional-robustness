@@ -2,22 +2,25 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+vqn_model_root = "/Users/kavery/Downloads/runs_vqn_snapshots"
 model_locations = {
-    "a2c": [
-        *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
-    ],
-    "dqn": [
-        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
-    ],
-    "ddqn": [
-        *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
-    ],
-    "rainbow": [
-        *[rainbow_model_root + "/" + folder for folder in os.listdir(rainbow_model_root)],
-    ],
-    "c51": [
-        *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
+    # "a2c": [
+    #     *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
+    # ],
+    # "dqn": [
+    #     *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
+    # ],
+    # "ddqn": [
+    #     *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
+    # ],
+    # "rainbow": [
+    #     *[rainbow_model_root + "/" + folder for folder in os.listdir(rainbow_model_root)],
+    # ],
+    # "c51": [
+    #     *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
+    # ],
+    "vqn": [
+        *[vqn_model_root + "/" + folder for folder in os.listdir(vqn_model_root)],
     ],
 }
 
@@ -32,7 +35,7 @@ def plot_returns_100(runs_dir, timesteps=-1):
         ax = axes[i]
         subplot_returns_100(ax, env, data[env], lines, timesteps=timesteps)
     fig.legend(list(lines.values()), list(lines.keys()), loc="center right")
-    plt.savefig("a2c_returns.png")
+    plt.savefig("vqn_returns.png")
 
 
 def load_returns_100_data(runs_dir):
@@ -100,4 +103,4 @@ def get_performance(environment="SpaceInvaders"):
 
 
 if __name__=='__main__':
-    plot_returns_100("/Users/kavery/Downloads/runs_a2c_total_10")
+    plot_returns_100("/Users/kavery/Downloads/runs_vqn_snapshots")

@@ -24,7 +24,8 @@ from envs.wrappers.breakout.interventions.reset_wrapper import BreakoutResetWrap
 
 
 def get_start_env(state_num, lives, use_trajectory_starts, environment="SpaceInvaders"):
-    if not os.path.isfile(get_start_state_path(state_num, False)):
+    if not os.path.isfile(get_start_state_path(state_num, False, environment)):
+        print(get_start_state_path(state_num, False, environment))
         raise RuntimeError(
             "Start states have not been created yet. Please sample start states."
         )
@@ -60,9 +61,9 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment="SpaceInv
 
 
 def sample_start_states(num_states, horizon, environment="SpaceInvaders"):
-    if os.path.isfile(get_start_state_path(num_states - 1, False)):
-        print("Skipping start state sampling because they exist already.")
-        return
+    # if os.path.isfile(get_start_state_path(num_states - 1, False)):
+    #     print("Skipping start state sampling because they exist already.")
+    #     return
 
     if environment == "SpaceInvaders":
         agt = RandomAgent(gym.make(space_invaders_env_id).action_space)
@@ -94,16 +95,16 @@ def sample_start_states(num_states, horizon, environment="SpaceInvaders"):
 
         state = env.toybox.state_to_json()
 
-        with open(get_start_state_path(state_num, False), "w") as f:
+        with open(get_start_state_path(state_num, False, environment), "w") as f:
             json.dump(state, f)
 
     print(f"Created {num_states} start states.")
 
 
 def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInvaders"):
-    if os.path.isfile(get_start_state_path(num_states - 1, True)):
-        print("Skipping start state sampling because they exist already.")
-        return
+    # if os.path.isfile(get_start_state_path(num_states - 1, True)):
+    #     print("Skipping start state sampling because they exist already.")
+    #     return
 
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
@@ -160,14 +161,14 @@ def sample_start_states_from_trajectory(agent, num_states, environment="SpaceInv
         # write out sampled state
         state = env.toybox.state_to_json()
 
-        with open(get_start_state_path(state_num, True), "w") as f:
+        with open(get_start_state_path(state_num, True, environment), "w") as f:
             json.dump(state, f)
 
     # 0th state is always standard start
 
     obs = env.reset()
     state = env.toybox.state_to_json()
-    with open(get_start_state_path(0, True), "w") as f:
+    with open(get_start_state_path(0, True, environment), "w") as f:
         json.dump(state, f)
 
     print(f"Created {num_states} start states from trajectory.")
