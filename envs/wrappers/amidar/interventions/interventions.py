@@ -96,19 +96,6 @@ def get_shift_agent_interventions(env, state_num, count, use_trajectory_starts):
 
 def get_remove_tile_interventions(env, state_num, count, use_trajectory_starts):
     """Drop a tile."""
-    # print(env)
-    # with AmidarIntervention(Toybox("amidar")) as intervention:
-    #     tiles = intervention.filter_tiles(pred=lambda t: t.encode == Tile.Painted)
-    #     print(len(tiles))
-    #     for x, tile in enumerate(tiles): 
-    #         if x%10 == 0:
-    #             print(tile.encode)
-    #             intervention.set_tile_tag(tile, Tile.Empty)
-    #             state = env.toybox.state_to_json()
-    #             write_intervention_json(state, state_num, count, use_trajectory_starts)
-    #             count = count + 1
-    # tiles = len(env.toybox.state_to_json()["enemies"])
-
     state = env.toybox.state_to_json()
     num_rows = len(state["board"]["tiles"])
     erase = [5,0,6,31,10,14,
@@ -184,13 +171,9 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         count = 0
         
         count = get_remove_tile_interventions(env, state_num, count, use_trajectory_starts)
-
         count = get_add_tile_interventions(env, state_num, count, use_trajectory_starts)
-        
         count = get_drop_one_enemy(env, state_num, count, use_trajectory_starts)
-        
         count = get_shift_enemy_interventions(env, state_num, count, use_trajectory_starts)
-
         count = get_shift_agent_interventions(env, state_num, count, use_trajectory_starts)
 
         print(f"Created {count} intervention states for state {state_num} in `{dir}`.")

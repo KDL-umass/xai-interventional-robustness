@@ -34,70 +34,141 @@ def write_intervention_json(state, state_num, count, use_trajectory_starts):
 
 # BRICK INTERVENTIONS
 
+def get_drop_brick_col_interventions(env, state_num, count, use_trajectory_starts):
+    """Drop column of blocks."""
+    state = env.toybox.state_to_json()
+    num_cols = 18
 
-def get_add_brick_row_interventions(env, state_num, count, use_trajectory_starts):
-    """Add row of blocks."""
-    count += 1
+    for col in range(num_cols):
+        state = Toybox("breakout").state_to_json()
+
+        for i in range(len(state["bricks"])):
+            if col == state["bricks"][i]["col"]:
+                # print(row)
+                # print(state["bricks"][i]["row"])
+                state["bricks"][i]["alive"] = False
+
+        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        count = count + 1
+
+        # env.toybox.write_state_json(state)
+        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Breakout/images/"
+        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
+
     return count
 
 
-def get_drop_brick_rowcol_interventions(env, state_num, count, use_trajectory_starts):
+def get_drop_brick_row_interventions(env, state_num, count, use_trajectory_starts):
     """Drop row or column of blocks."""
-    count = count + 1
+    state = env.toybox.state_to_json()
+    num_rows = 6
+
+    for row in range(num_rows):
+        state = Toybox("breakout").state_to_json()
+
+        for i in range(len(state["bricks"])):
+            if row == state["bricks"][i]["row"]:
+                # print(row)
+                # print(state["bricks"][i]["row"])
+                state["bricks"][i]["alive"] = False
+
+        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        
+        count = count + 1
+
+        # env.toybox.write_state_json(state)
+        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Breakout/images/"
+        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
+
     return count
 
 
 # PADDLE INTERVENTIONS #
 
 
-def get_shift_agent_interventions(env, state_num, count, use_trajectory_starts):
+def get_shift_paddle_interventions(env, state_num, count, use_trajectory_starts):
     """Start the agent in different positions."""
-    count = count + 1
+    state = env.toybox.state_to_json()
+    xs = [30.0, 90.0, 160.0, 210.0]
+    for x in xs:
+        state = Toybox("breakout").state_to_json()
+        state["paddle"]["position"]["x"] = x
+        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        count = count + 1
+
+        # env.toybox.write_state_json(state)
+        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Breakout/images/"
+        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
+
     return count
 
 
-def get_agent_speed_interventions(env, state_num, count, use_trajectory_starts):
+def get_paddle_speed_interventions(env, state_num, count, use_trajectory_starts):
     """Set the agent's speed."""
-    count = count + 1
+    state = env.toybox.state_to_json()
+    speeds = [1.0, 2.0, 3.0, 5.0, 6.0, 7.0]
+    for speed in speeds:
+        state = Toybox("breakout").state_to_json()
+        state["paddle_speed"] = speed
+        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        count = count + 1
+
+        # env.toybox.write_state_json(state)
+        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Breakout/images/"
+        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
 
     return count
 
 
-def get_agent_width_interventions(env, state_num, count, use_trajectory_starts):
+def get_paddle_width_interventions(env, state_num, count, use_trajectory_starts):
     """Change the width of the paddle"""
-    count = count + 1
-    return count
+    state = env.toybox.state_to_json()
+    widths = [6.0, 12.0, 36.0, 48.0]
+    for width in widths:
+        state = Toybox("breakout").state_to_json()
+        state["paddle_width"] = width
+        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        count = count + 1
 
+        # env.toybox.write_state_json(state)
+        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Breakout/images/"
+        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
+
+    return count
 
 # BALL INTERVENTTIONS #
 
 
-def get_shift_ball_interventions(env, state_num, count, use_trajectory_starts):
+def get_ball_radius_interventions(env, state_num, count, use_trajectory_starts):
     """Start the ball in different positions."""
-    count = count + 1
+    state = env.toybox.state_to_json()
+    radii = [0.5, 1.0, 3.0, 4.0]
+    for radius in radii:
+        state = Toybox("breakout").state_to_json()
+        state["ball_radius"] = radius
+        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        count = count + 1
+
+        # env.toybox.write_state_json(state)
+        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Breakout/images/"
+        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
+
     return count
-
-
-def get_ball_speed_interventions(env, state_num, count, use_trajectory_starts):
-    """Drop a shield."""
-    count = count + 1
-    return count
-
 
 def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     """Create JSON states for all interventions."""
-    dir = "storage/states/interventions/breakout"
+    dir = "storage/states/interventions/Breakout"
     if use_trajectory_starts:
-        dir = "storage/states/trajectory_interventions/breakout"
+        dir = "storage/states/trajectory_interventions/Breakout"
     os.makedirs(dir, exist_ok=True)
 
     path = dir + f"/{num_states-1}"
-    if os.path.isdir(path):
-        count = len(os.listdir(path))
-        print(
-            f"Skipping already created {count} interventions for {num_states} states."
-        )
-        return count
+    # if os.path.isdir(path):
+    #     count = len(os.listdir(path))
+    #     print(
+    #         f"Skipping already created {count} interventions for {num_states} states."
+    #     )
+    #     return count
 
     for state_num in range(
         num_states
@@ -107,17 +178,12 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         )
 
         count = 0
-        # count = get_drop_one_enemy(env, state_num, count, use_trajectory_starts)
-        # count = get_shift_shields_interventions(
-        #     env, state_num, count, use_trajectory_starts
-        # )
-        # count = get_shift_agent_interventions(
-        #     env, state_num, count, use_trajectory_starts
-        # )
-        # count = get_drop_enemy_rowcol_interventions(
-        #     env, state_num, count, use_trajectory_starts
-        # )
-        # count = get_flip_shield_icons(env, state_num, count, use_trajectory_starts)
+        count = get_paddle_width_interventions(env, state_num, count, use_trajectory_starts)
+        count = get_paddle_speed_interventions(env, state_num, count, use_trajectory_starts)
+        count = get_shift_paddle_interventions(env, state_num, count, use_trajectory_starts)
+        count = get_ball_radius_interventions(env, state_num, count, use_trajectory_starts)
+        count = get_drop_brick_row_interventions(env, state_num, count, use_trajectory_starts)
+        count = get_drop_brick_col_interventions(env, state_num, count, use_trajectory_starts)
         
         print(f"Created {count} intervention states for state {state_num} in `{dir}`.")
     return count
@@ -160,9 +226,12 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
+    # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/starts/Breakout/0.json"
+    # Toybox("breakout").save_frame_image(dir_path + "{}.png".format(0))
+
     num_states = 1
     sample_start_states(num_states, 100, "Breakout")
-    # create_intervention_states(num_states, False)
+    create_intervention_states(num_states, False)
 
     # num_states = 26
     # agent = RandomAgent(gym.make(breakout_env_id).action_space)
