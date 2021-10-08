@@ -104,16 +104,14 @@ def sample_start_states(num_states, horizon, environment="SpaceInvaders"):
 
 
 def sample_start_states_from_trajectory(agent, num_states, environment, device):
-    # if os.path.isfile(get_start_state_path(num_states - 1, True)):
-    #     print("Skipping start state sampling because they exist already.")
-    #     return
-
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     elif environment == "Amidar":
         random_agent = RandomAgent(gym.make(amidar_env_id).action_space)
-    else:
+    elif environment == "Breakout":
         random_agent = RandomAgent(gym.make(breakout_env_id).action_space)
+    else:
+        raise ValueError("Unknown environment requested.")
 
     env = ToyboxEnvironment(
         environment + "Toybox",
@@ -121,7 +119,7 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
     )
 
     obs = env.reset()
-    action, probs = agent.act(obs)
+    action, _ = agent.act(obs)
 
     trajectory = [env.toybox.state_to_json()]
     done = False

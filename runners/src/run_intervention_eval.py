@@ -31,6 +31,8 @@ ddqn_model_root = "storage/models/ddqn"
 c51_model_root = "storage/models/c51"
 rainbow_model_root = "storage/models/rainbow"
 vsarsa_model_root = "storage/models/vsarsa"
+vqn_model_root = "storage/models/vqn"
+ppo_model_root = "storage/models/ppo"
 
 
 model_locations = {
@@ -56,11 +58,23 @@ model_locations = {
     "vsarsa": [
         *[vsarsa_model_root + "/" + folder for folder in os.listdir(vsarsa_model_root)],
     ],
+    "vqn": [
+        *[vqn_model_root + "/" + folder for folder in os.listdir(vqn_model_root)],
+    ],
+    "ppo": [
+        *[ppo_model_root + "/" + folder for folder in os.listdir(ppo_model_root)],
+    ],
 }
 
+agent_family_with_checkpointing = ["vqn", "ppo"]
 
-def load_agent(dir, device):
-    path = dir + "/preset.pt"
+
+def load_agent(dir, device, checkpoint=None):
+    if checkpoint is None:
+        path = dir + "/preset.pt"
+    else:
+        path = dir + f"/preset{checkpoint}.pt"
+
     agt = torch.load(path, map_location=torch.device(device))
     agt = agt.test_agent()
     return agt
@@ -92,7 +106,13 @@ def agent_setup(
     sample_js_div,
     device,
 ):
-    agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
+    if agent_family in agent_family_with_checkpointing:
+        # TODO this is a temp fix until all families have checkpointing
+        agents = [
+            load_agent(dir, device, 10000000) for dir in model_locations[agent_family]
+        ]
+    else:
+        agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
 
     if use_trajectory_starts:
         dir = get_trajectory_intervention_data_dir(

@@ -189,25 +189,25 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
 
         count = 0
         count = get_drop_one_enemy(env, state_num, count, use_trajectory_starts)
-        # print(f"Interventions 0-{count-1} drop one enemy.")
-        # prev = count
+        print(f"Interventions 0-{count-1} drop one enemy.")
+        prev = count
         count = get_shift_shields_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"Interventions {prev}-{count-1} shift shields.")
-        # prev = count
+        print(f"Interventions {prev}-{count-1} shift shields.")
+        prev = count
         count = get_shift_agent_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"Interventions {prev}-{count-1} shift agent starts.")
-        # prev = count
+        print(f"Interventions {prev}-{count-1} shift agent starts.")
+        prev = count
         count = get_drop_enemy_rowcol_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"Interventions {prev}-{count-1} drop row/col of enemies.")
-        # prev = count
+        print(f"Interventions {prev}-{count-1} drop row/col of enemies.")
+        prev = count
         count = get_flip_shield_icons(env, state_num, count, use_trajectory_starts)
-        # print(f"Interventions {prev}-{count-1} flip shield icons vertically.")
+        print(f"Interventions {prev}-{count-1} flip shield icons vertically.")
         print(f"Created {count} intervention states for state {state_num} in `{path}`.")
     return count
 
@@ -249,11 +249,11 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
-    num_states = 1
-    sample_start_states(num_states, 100)
-    create_intervention_states(num_states, False)
+    # num_states = 1
+    # sample_start_states(num_states, 100)
+    # create_intervention_states(num_states, False)
 
-    num_states = 26
+    num_states = 30
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     sample_start_states_from_trajectory(agent, num_states, "SpaceInvaders", "cpu")
     create_intervention_states(num_states, True)

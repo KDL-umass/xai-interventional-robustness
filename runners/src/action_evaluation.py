@@ -9,12 +9,12 @@ from envs.wrappers.all_toybox_wrapper import (
 )
 
 agent_family_that_selects_max_action = [
-    "a2c",
     "dqn",
     "ddqn",
     "rainbow",
     "c51",
     "vsarsa",
+    "vqn",
 ]
 
 
@@ -93,6 +93,7 @@ def get_action_distribution_header(envs, sample_jsdiv):
     header = "agent,state,intv,"
     if sample_jsdiv:
         header += "jsdiv"
+        return header
 
     else:
         for a in range(envs[0].action_space.n):

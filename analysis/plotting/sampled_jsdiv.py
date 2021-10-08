@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_js_divergence_matrix(data, vanilla, title, normalize):
+def plot_js_divergence_matrix(data, vanilla, title, normalize, fname=None):
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
     samples = data[:, 3]
@@ -46,9 +46,13 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
     plt.title(title)
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
+    plt.tight_layout()
 
     os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
+    if fname is not None:
+        plt.savefig(f"storage/plots/sampled_jsdivmat/{fname}.png", bbox_inches="tight")
+    else:
+        plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
 
 
 if __name__ == "__main__":
@@ -56,19 +60,37 @@ if __name__ == "__main__":
     nstates = 30
     folder = "intervention_js_div"
 
-    for fam in ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa"]:
+    families = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
+
+    for fam in families:
         dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
         vdata = np.loadtxt(dir + "/vanilla.txt")
         data = np.loadtxt(dir + "/88_interventions.txt")
         plot_js_divergence_matrix(
             data,
             vdata,
-            f"Normalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
+            f"Normalized Sampled JS Divergence over Actions for {fam}",
             normalize=True,
+            fname=f"jsdiv_{fam}_normalized",
         )
         plot_js_divergence_matrix(
             data,
             vdata,
-            f"Unnormalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
+            f"Unnormalized Sampled JS Divergence over Actions for {fam}",
             normalize=False,
+            fname=f"jsdiv_{fam}",
         )
+
+    print()
+    print("\\begin{tabular}{ccc}")
+    print("Family & Unnormalized & Normalized \\\\")
+    for fam in families:
+        print(
+            fam
+            + " & \\includegraphics[width=0.4\\textwidth]{plots/jsdiv_"
+            + fam
+            + ".png} & \includegraphics[width=0.4\\textwidth]{plots/jsdiv_"
+            + fam
+            + "_normalized.png}\\\\"
+        )
+    print("\\end{tabular}")
