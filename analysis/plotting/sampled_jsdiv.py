@@ -46,41 +46,17 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize, fname=None):
     plt.title(title)
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
-    plt.tight_layout()
 
     os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
     if fname is not None:
         plt.savefig(f"storage/plots/sampled_jsdivmat/{fname}.png", bbox_inches="tight")
     else:
-        plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
+        plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png", bbox_inches="tight")
+
+    return van_mat.mean(), intv_mat.mean()
 
 
-if __name__ == "__main__":
-    n_agents = 11
-    nstates = 30
-    folder = "intervention_js_div"
-
-    families = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
-
-    for fam in families:
-        dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
-        vdata = np.loadtxt(dir + "/vanilla.txt")
-        data = np.loadtxt(dir + "/88_interventions.txt")
-        plot_js_divergence_matrix(
-            data,
-            vdata,
-            f"Normalized Sampled JS Divergence over Actions for {fam}",
-            normalize=True,
-            fname=f"jsdiv_{fam}_normalized",
-        )
-        plot_js_divergence_matrix(
-            data,
-            vdata,
-            f"Unnormalized Sampled JS Divergence over Actions for {fam}",
-            normalize=False,
-            fname=f"jsdiv_{fam}",
-        )
-
+def print_image_name_table(families):
     print()
     print("\\begin{tabular}{ccc}")
     print("Family & Unnormalized & Normalized \\\\")
@@ -94,3 +70,74 @@ if __name__ == "__main__":
             + "_normalized.png}\\\\"
         )
     print("\\end{tabular}")
+
+
+def print_values_table(
+    families, checkpoints, vanilla_dict, unnormalized_dict, normalized_dict
+):
+    F = len(families)
+    C = len(checkpoints)
+    table = np.zeros((F, C, 3))
+
+    print()
+    print("\\begin{tabular}{|l|l|c|c|c|}\\hline")
+    print("Family & Checkpoint & Original & Unnormalized & Normalized \\\\\\hline")
+
+    for f, fam in enumerate(families):
+        for c, check in enumerate(checkpoints):
+            v = vanilla_dict[fam][check]
+            u = unnormalized_dict[fam][check]
+            n = normalized_dict[fam][check]
+            table[f, c, :] = v, u, n
+
+            print(f"{fam} & {check} & {v} & {u} & {n} \\\\\\hline")
+    print("\\end{tabular}")
+
+    return table
+
+
+if __name__ == "__main__":
+    n_agents = 11
+    nstates = 30
+    folder = "intervention_js_div"
+
+    families = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
+    # checkpoints = [str(100 * 10 ** i) for i in range(6)]
+    checkpoints = [""]
+
+    vanilla_dict = {}
+    unnormalized_dict = {}
+    normalized_dict = {}
+
+    for fam in families:
+
+        vanilla_dict[fam] = {}
+        unnormalized_dict[fam] = {}
+        normalized_dict[fam] = {}
+
+        for check in checkpoints:
+            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
+            vdata = np.loadtxt(dir + f"/vanilla{check}.txt")
+            data = np.loadtxt(dir + f"/88_interventions{check}.txt")
+            _, normalized_dict[fam][check] = plot_js_divergence_matrix(
+                data,
+                vdata,
+                f"Normalized Sampled JS Divergence over Actions for {fam} at {check}",
+                normalize=True,
+                fname=f"jsdiv_{fam}{check}_normalized",
+            )
+            (
+                vanilla_dict[fam][check],
+                unnormalized_dict[fam][check],
+            ) = plot_js_divergence_matrix(
+                data,
+                vdata,
+                f"Unnormalized Sampled JS Divergence over Actions for {fam} at {check}",
+                normalize=False,
+                fname=f"jsdiv_{fam}{check}",
+            )
+
+    print_image_name_table(families)
+    print_values_table(
+        families, checkpoints, vanilla_dict, unnormalized_dict, normalized_dict
+    )
