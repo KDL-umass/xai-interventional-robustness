@@ -2,24 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-model_locations = {
-    "a2c": [
-        *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
-    ],
-    "dqn": [
-        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
-    ],
-    "ddqn": [
-        *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
-    ],
-    "rainbow": [
-        *[rainbow_model_root + "/" + folder for folder in os.listdir(rainbow_model_root)],
-    ],
-    "c51": [
-        *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
-    ],
-}
+from runners.src.run_intervention_eval import model_locations
 
 
 def plot_returns_100(runs_dir, timesteps=-1):
@@ -32,7 +15,7 @@ def plot_returns_100(runs_dir, timesteps=-1):
         ax = axes[i]
         subplot_returns_100(ax, env, data[env], lines, timesteps=timesteps)
     fig.legend(list(lines.values()), list(lines.keys()), loc="center right")
-    plt.savefig("a2c_returns.png")
+    plt.savefig("storage/plots/returns.png")
 
 
 def load_returns_100_data(runs_dir):
@@ -73,31 +56,31 @@ def subplot_returns_100(ax, env, data, lines, timesteps=-1):
         if agent in lines:
             ax.plot(x, mean, label=agent, color=lines[agent].get_color())
         else:
-            line, = ax.plot(x, mean, label=agent)
+            (line,) = ax.plot(x, mean, label=agent)
             lines[agent] = line
         ax.fill_between(
             x, mean + std, mean - std, alpha=0.2, color=lines[agent].get_color()
         )
         ax.set_title(env)
         ax.set_xlabel("timesteps")
-        ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 5))
+        ax.ticklabel_format(style="sci", axis="x", scilimits=(0, 5))
 
 
 def get_performance(environment="SpaceInvaders"):
     for agent_family in model_locations.keys():
         arys = np.array([])
         csvs = np.array([dir for dir in model_locations[agent_family]])
-        csvs = [dir+"/"+environment+"Toybox/returns-test.csv" for dir in csvs]
+        csvs = [dir + "/" + environment + "Toybox/returns-test.csv" for dir in csvs]
         for csv in csvs:
             with open(csv) as filename:
                 ary = np.loadtxt(filename, delimiter=",")
             arys = np.append(arys, ary, axis=0)
-        arys = arys.reshape(-1,3)
+        arys = arys.reshape(-1, 3)
         avgs = np.average(arys, axis=0)
         print(agent_family)
         print(avgs[1])
         print(avgs[2])
 
 
-if __name__=='__main__':
-    plot_returns_100("/Users/kavery/Downloads/runs_a2c_total_10")
+if __name__ == "__main__":
+    plot_returns_100("storage/models/dqn/")

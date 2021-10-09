@@ -66,7 +66,7 @@ model_locations = {
     ],
 }
 
-agent_family_with_checkpointing = ["vqn", "ppo"]
+agent_family_with_checkpointing = ["vqn", "ppo", "dqn"]
 
 
 def load_agent(dir, device, checkpoint=None):
@@ -104,12 +104,13 @@ def agent_setup(
     num_states_to_intervene_on,
     start_horizon,
     sample_js_div,
+    checkpoint,
     device,
 ):
     if agent_family in agent_family_with_checkpointing:
         # TODO this is a temp fix until all families have checkpointing
         agents = [
-            load_agent(dir, device, 10000000) for dir in model_locations[agent_family]
+            load_agent(dir, device, checkpoint) for dir in model_locations[agent_family]
         ]
     else:
         agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
@@ -178,12 +179,15 @@ def evaluate_interventions(agent_family, environment, device):
     sample_js_div = True  # use new js divergence sampling
     js_div_samples = 30
 
+    checkpoint = 10000000
+
     agents, dir = agent_setup(
         agent_family,
         use_trajectory_starts,
         num_states_to_intervene_on,
         start_horizon,
         sample_js_div,
+        checkpoint,
         device,
     )
 
