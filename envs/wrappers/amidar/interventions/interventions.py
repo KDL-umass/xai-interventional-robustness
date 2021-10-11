@@ -271,11 +271,11 @@ def get_all_intervened_environments(num_states, lives):
 
 
 if __name__ == "__main__":
-    num_states = 10
+    num_states = 2
     sample_start_states(num_states, 0, "Amidar")
     create_intervention_states(num_states, False)
 
-    num_states = 10
+    num_states = 2
     agent = RandomAgent(gym.make(amidar_env_id).action_space)
     sample_start_states_from_trajectory(agent, num_states, environment="Amidar")
     create_intervention_states(num_states, True)

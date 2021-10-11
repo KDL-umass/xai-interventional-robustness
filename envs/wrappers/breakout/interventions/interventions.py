@@ -235,11 +235,11 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
-    # num_states = 1
-    # sample_start_states(num_states, 100, "Breakout")
-    # create_intervention_states(num_states, False)
+    num_states = 2
+    sample_start_states(num_states, 100, "Breakout")
+    create_intervention_states(num_states, False)
 
-    num_states = 5
+    num_states = 2
     agent = RandomAgent(gym.make(breakout_env_id).action_space)
     sample_start_states_from_trajectory(agent, num_states, "Breakout")
     create_intervention_states(num_states, True)
