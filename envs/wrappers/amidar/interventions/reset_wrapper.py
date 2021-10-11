@@ -40,7 +40,7 @@ class AmidarResetWrapper(gym.Wrapper):
         # Get JSON state
         if self.intv >= 0:
             with open(
-                f"{get_intervention_dir(self.state_num, self.use_trajectory_starts, "Amidar")}/{self.intv}.json",
+                f"{get_intervention_dir(self.state_num, self.use_trajectory_starts, \"Amidar\")}/{self.intv}.json",
             ) as f:
                 iv_state = json.load(f)
 

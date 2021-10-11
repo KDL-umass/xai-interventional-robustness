@@ -26,7 +26,7 @@ from envs.wrappers.start_states import (
 
 def write_intervention_json(state, state_num, count, use_trajectory_starts):
     with open(
-        f"{get_intervention_dir(state_num, use_trajectory_starts, "Amidar")}/{count}.json",
+        f"{get_intervention_dir(state_num, use_trajectory_starts, \"Amidar\")}/{count}.json",
         "w",
     ) as outfile:
         json.dump(state, outfile)
