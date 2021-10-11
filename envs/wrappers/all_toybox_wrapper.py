@@ -57,9 +57,7 @@ class ToyboxEnvironment(GymEnvironment):
     def __init__(
         self,
         name,
-        custom_wrapper: SpaceInvadersResetWrapper = customSpaceInvadersResetWrapper(
-            state_num=0, intv=-1, lives=3, use_trajectory_starts=False
-        ),
+        custom_wrapper,
         *args,
         **kwargs
     ):
@@ -82,6 +80,7 @@ class ToyboxEnvironment(GymEnvironment):
         # initialize
         super().__init__(env, *args, **kwargs)
         self._name = name
+        self._custom_wrapper = custom_wrapper
 
     @property
     def name(self):
@@ -90,7 +89,7 @@ class ToyboxEnvironment(GymEnvironment):
     def duplicate(self, n):
         return DuplicateEnvironment(
             [
-                ToyboxEnvironment(self._name, *self._args, **self._kwargs)
+                ToyboxEnvironment(self._name, self._custom_wrapper, *self._args, **self._kwargs)
                 for _ in range(n)
             ]
         )
