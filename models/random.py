@@ -10,5 +10,5 @@ class RandomAgent(object):
     def get_action(self, observation):
         return self.action_space.sample()
 
-    def act(self, observation, reward, done):
-        return self.action_space.sample()
+    def act(self, observation):
+        return self.action_space.sample(), []

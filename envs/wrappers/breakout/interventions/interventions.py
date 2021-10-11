@@ -12,6 +12,7 @@ from toybox.interventions.breakout import BreakoutIntervention
 from envs.wrappers.paths import (
     get_intervention_dir,
     breakout_env_id,
+    get_root_intervention_dir,
 )
 from envs.wrappers.breakout.interventions.reset_wrapper import (
     BreakoutResetWrapper,
@@ -34,6 +35,7 @@ def write_intervention_json(state, state_num, count, use_trajectory_starts):
 
 
 # BRICK INTERVENTIONS
+
 
 def get_drop_brick_col_interventions(env, state_num, count, use_trajectory_starts):
     """Drop column of blocks."""
@@ -74,7 +76,7 @@ def get_drop_brick_row_interventions(env, state_num, count, use_trajectory_start
                 state["bricks"][i]["alive"] = False
 
         write_intervention_json(state, state_num, count, use_trajectory_starts)
-        
+
         count = count + 1
 
         # env.toybox.write_state_json(state)
@@ -137,6 +139,7 @@ def get_paddle_width_interventions(env, state_num, count, use_trajectory_starts)
 
     return count
 
+
 # BALL INTERVENTTIONS #
 
 
@@ -156,36 +159,41 @@ def get_ball_radius_interventions(env, state_num, count, use_trajectory_starts):
 
     return count
 
+
 def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     """Create JSON states for all interventions."""
-    dir = "storage/states/interventions/Breakout"
-    if use_trajectory_starts:
-        dir = "storage/states/trajectory_interventions/Breakout"
-    os.makedirs(dir, exist_ok=True)
-
-    path = dir + f"/{num_states-1}"
-    # if os.path.isdir(path):
-    #     count = len(os.listdir(path))
-    #     print(
-    #         f"Skipping already created {count} interventions for {num_states} states."
-    #     )
-    #     return count
+    dir = get_root_intervention_dir(use_trajectory_starts, "Breakout")
 
     for state_num in range(
         num_states
     ):  # 0th state is the default start state of the game
         env = get_start_env(
-            state_num, lives=3, use_trajectory_starts=use_trajectory_starts, environment="Breakout"
+            state_num,
+            lives=3,
+            use_trajectory_starts=use_trajectory_starts,
+            environment="Breakout",
         )
 
         count = 0
-        count = get_paddle_width_interventions(env, state_num, count, use_trajectory_starts)
-        count = get_paddle_speed_interventions(env, state_num, count, use_trajectory_starts)
-        count = get_shift_paddle_interventions(env, state_num, count, use_trajectory_starts)
-        count = get_ball_radius_interventions(env, state_num, count, use_trajectory_starts)
-        count = get_drop_brick_row_interventions(env, state_num, count, use_trajectory_starts)
-        count = get_drop_brick_col_interventions(env, state_num, count, use_trajectory_starts)
-        
+        count = get_paddle_width_interventions(
+            env, state_num, count, use_trajectory_starts
+        )
+        count = get_paddle_speed_interventions(
+            env, state_num, count, use_trajectory_starts
+        )
+        count = get_shift_paddle_interventions(
+            env, state_num, count, use_trajectory_starts
+        )
+        count = get_ball_radius_interventions(
+            env, state_num, count, use_trajectory_starts
+        )
+        count = get_drop_brick_row_interventions(
+            env, state_num, count, use_trajectory_starts
+        )
+        count = get_drop_brick_col_interventions(
+            env, state_num, count, use_trajectory_starts
+        )
+
         print(f"Created {count} intervention states for state {state_num} in `{dir}`.")
     return count
 
@@ -227,14 +235,11 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
-    # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/starts/Breakout/0.json"
-    # Toybox("breakout").save_frame_image(dir_path + "{}.png".format(0))
+    # num_states = 1
+    # sample_start_states(num_states, 100, "Breakout")
+    # create_intervention_states(num_states, False)
 
-    num_states = 1
-    sample_start_states(num_states, 100, "Breakout")
-    create_intervention_states(num_states, False)
-
-    # num_states = 26
-    # agent = RandomAgent(gym.make(breakout_env_id).action_space)
-    # sample_start_states_from_trajectory(agent, num_states)
-    # create_intervention_states(num_states, True)
+    num_states = 5
+    agent = RandomAgent(gym.make(breakout_env_id).action_space)
+    sample_start_states_from_trajectory(agent, num_states, "Breakout")
+    create_intervention_states(num_states, True)

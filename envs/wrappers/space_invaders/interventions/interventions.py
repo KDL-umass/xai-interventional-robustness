@@ -11,6 +11,7 @@ from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
 from envs.wrappers.paths import (
     get_intervention_dir,
+    get_root_intervention_dir,
     space_invaders_env_id,
 )
 from envs.wrappers.space_invaders.interventions.reset_wrapper import (
@@ -172,24 +173,16 @@ def get_flip_shield_icons(env, state_num, count, use_trajectory_starts):
 
 def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     """Create JSON states for all interventions."""
-    dir = "storage/states/interventions"
-    if use_trajectory_starts:
-        dir = "storage/states/trajectory_interventions"
-    os.makedirs(dir, exist_ok=True)
-
-    path = dir + f"/{num_states-1}"
-    if os.path.isdir(path):
-        count = len(os.listdir(path))
-        print(
-            f"Skipping already created {count} interventions for {num_states} states."
-        )
-        return count
+    dir = get_root_intervention_dir(use_trajectory_starts, "SpaceInvaders")
 
     for state_num in range(
         num_states
     ):  # 0th state is the default start state of the game
         env = get_start_env(
-            state_num, lives=3, use_trajectory_starts=use_trajectory_starts
+            state_num,
+            lives=3,
+            use_trajectory_starts=use_trajectory_starts,
+            environment="SpaceInvaders",
         )
 
         count = 0
@@ -254,11 +247,11 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
-    num_states = 1
-    sample_start_states(num_states, 100)
-    create_intervention_states(num_states, False)
+    # num_states = 1
+    # sample_start_states(num_states, 100)
+    # create_intervention_states(num_states, False)
 
-    num_states = 26
+    num_states = 2
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     sample_start_states_from_trajectory(agent, num_states)
     create_intervention_states(num_states, True)
