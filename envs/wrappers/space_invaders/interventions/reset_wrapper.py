@@ -47,7 +47,7 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
 
         else:
             with open(
-                get_start_state_path(self.state_num, self.use_trajectory_starts)
+                get_start_state_path(self.state_num, self.use_trajectory_starts, environment)
             ) as f:
                 iv_state = json.load(f)
 
