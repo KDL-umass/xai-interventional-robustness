@@ -38,9 +38,10 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
     def on_episode_start(self):
         """On the start of each episode, set the state to the JSON state according to the intervention."""
         # Get JSON state
+        environment = "SpaceInvaders"
         if self.intv >= 0:
             with open(
-                f"{get_intervention_dir(self.state_num, self.use_trajectory_starts, \"SpaceInvaders\")}/{self.intv}.json",
+                f"{get_intervention_dir(self.state_num, self.use_trajectory_starts, environment)}/{self.intv}.json",
             ) as f:
                 iv_state = json.load(f)
 
