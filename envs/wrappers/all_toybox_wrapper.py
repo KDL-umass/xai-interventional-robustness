@@ -38,14 +38,14 @@ def customSpaceInvadersResetWrapper(state_num, intv, lives, use_trajectory_start
 
     return CustomSpaceInvadersResetWrapper
 
-def customBreakoutResetWrapper(state_num, intv, lives):
+def customBreakoutResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomBreakoutResetWrapper(BreakoutResetWrapper):
         def __init__(self, env):
             super().__init__(env, state_num=state_num, intv=intv, lives=lives, use_trajectory_starts=use_trajectory_starts,)
 
     return CustomBreakoutResetWrapper
 
-def customAmidarResetWrapper(state_num, intv, lives):
+def customAmidarResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomAmidarResetWrapper(AmidarResetWrapper):
         def __init__(self, env):
             super().__init__(env, state_num=state_num, intv=intv, lives=lives, use_trajectory_starts=use_trajectory_starts,)
