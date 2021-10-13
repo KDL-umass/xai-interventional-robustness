@@ -25,45 +25,23 @@ import envs.wrappers.breakout.interventions.interventions as breakout_interventi
 # c51_model_root = "/mnt/nfs/scratch1/kavery/runs_c51_total_10"
 # rainbow_model_root = "/mnt/nfs/scratch1/kavery/runs_rainbow_total_10"
 
-a2c_model_root = "storage/models/a2c"
-dqn_model_root = "storage/models/dqn"
-ddqn_model_root = "storage/models/ddqn"
-c51_model_root = "storage/models/c51"
-rainbow_model_root = "storage/models/rainbow"
-vsarsa_model_root = "storage/models/vsarsa"
-vqn_model_root = "storage/models/vqn"
-ppo_model_root = "storage/models/ppo"
 
+def model_root(model, env):
+    return f"storage/models/{env}/{model}"
+
+
+model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
+supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
 
 model_locations = {
-    "a2c": [
-        *[a2c_model_root + "/" + folder for folder in os.listdir(a2c_model_root)],
-        # a2c_supplementary,
-    ],
-    "dqn": [
-        *[dqn_model_root + "/" + folder for folder in os.listdir(dqn_model_root)],
-    ],
-    "ddqn": [
-        *[ddqn_model_root + "/" + folder for folder in os.listdir(ddqn_model_root)],
-    ],
-    "c51": [
-        *[c51_model_root + "/" + folder for folder in os.listdir(c51_model_root)],
-    ],
-    "rainbow": [
-        *[
-            rainbow_model_root + "/" + folder
-            for folder in os.listdir(rainbow_model_root)
-        ],
-    ],
-    "vsarsa": [
-        *[vsarsa_model_root + "/" + folder for folder in os.listdir(vsarsa_model_root)],
-    ],
-    "vqn": [
-        *[vqn_model_root + "/" + folder for folder in os.listdir(vqn_model_root)],
-    ],
-    "ppo": [
-        *[ppo_model_root + "/" + folder for folder in os.listdir(ppo_model_root)],
-    ],
+    fam: {
+        env: [
+            model_root(fam, env) + "/" + folder
+            for folder in os.listdir(model_root(fam, env))
+        ]
+        for env in supported_environments
+    }
+    for fam in model_names
 }
 
 agent_family_with_checkpointing = ["vqn", "ppo", "dqn"]
@@ -100,6 +78,7 @@ def get_trajectory_intervention_data_dir(
 
 def agent_setup(
     agent_family,
+    environment,
     use_trajectory_starts,
     num_states_to_intervene_on,
     start_horizon,
@@ -110,10 +89,14 @@ def agent_setup(
     if agent_family in agent_family_with_checkpointing:
         # TODO this is a temp fix until all families have checkpointing
         agents = [
-            load_agent(dir, device, checkpoint) for dir in model_locations[agent_family]
+            load_agent(dir, device, checkpoint)
+            for dir in model_locations[agent_family][environment]
         ]
     else:
-        agents = [load_agent(dir, device) for dir in model_locations[agent_family]]
+        agents = [
+            load_agent(dir, device)
+            for dir in model_locations[agent_family][environment]
+        ]
 
     if use_trajectory_starts:
         dir = get_trajectory_intervention_data_dir(
@@ -183,6 +166,7 @@ def evaluate_interventions(agent_family, environment, device):
 
     agents, dir = agent_setup(
         agent_family,
+        environment,
         use_trajectory_starts,
         num_states_to_intervene_on,
         start_horizon,
@@ -234,12 +218,13 @@ if __name__ == "__main__":
     print(f"Using device: {device}.")
 
     for agent_family in model_locations:
-        print(f"Evaluating agent family: {agent_family}")
-        evaluate_interventions(
-            agent_family=agent_family,
-            environment="SpaceInvaders",
-            device=device,
-        )
+        for environment in model_locations[agent_family]:
+            print(f"Evaluating agent family: {agent_family}")
+            evaluate_interventions(
+                agent_family=agent_family,
+                environment=environment,
+                device=device,
+            )
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
