@@ -104,31 +104,36 @@ def collect_action_distributions(
 
 
 def get_intervention_data_dir(
-    agent_family, num_agents, num_states_to_intervene_on, start_horizon, sample_js_div
+    agent_family,
+    environment,
+    num_agents,
+    num_states_to_intervene_on,
+    start_horizon,
+    sample_js_div,
 ):
     if sample_js_div:
-        return f"storage/results/intervention_js_div/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
+        return f"storage/results/intervention_js_div/{environment}/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
     else:
-        return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
+        return f"storage/results/intervention_action_dists/{environment}/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/t{start_horizon}_horizon"
 
 
 def get_trajectory_intervention_data_dir(
-    agent_family, num_agents, num_states_to_intervene_on, sample_js_div
+    agent_family, environment, num_agents, num_states_to_intervene_on, sample_js_div
 ):
     if sample_js_div:
-        return f"storage/results/intervention_js_div/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
+        return f"storage/results/intervention_js_div/{environment}/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
     else:
-        return f"storage/results/intervention_action_dists/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
+        return f"storage/results/intervention_action_dists/{environment}/{agent_family}/{num_agents}_agents/{num_states_to_intervene_on}_states/trajectory/"
 
 
 def agent_setup(
     agent_family,
     environment,
+    checkpoint,
     use_trajectory_starts,
     num_states_to_intervene_on,
     start_horizon,
     sample_js_div,
-    checkpoint,
     device,
 ):
     if agent_family in agent_family_with_checkpointing:
@@ -143,13 +148,22 @@ def agent_setup(
             for dir in model_locations[agent_family][environment]
         ]
 
+    assert len(agents) >= 11, f"Len agents is {len(agents)}"
+    if len(agents) > 11:
+        [agents.pop() for _ in range(11, len(agents))]
+
     if use_trajectory_starts:
         dir = get_trajectory_intervention_data_dir(
-            agent_family, len(agents), num_states_to_intervene_on, sample_js_div
+            agent_family,
+            environment,
+            len(agents),
+            num_states_to_intervene_on,
+            sample_js_div,
         )
     else:
         dir = get_intervention_data_dir(
             agent_family,
+            environment,
             len(agents),
             num_states_to_intervene_on,
             start_horizon,
@@ -161,16 +175,16 @@ def agent_setup(
 
 def state_setup(
     agents,
+    environment,
     use_trajectory_starts,
     num_states_to_intervene_on,
     start_horizon,
-    environment,
+    device,
 ):
     if use_trajectory_starts:
-        assert len(agents) == 11
         agent = agents.pop()  # first agent will be one sampled from
         sample_start_states_from_trajectory(
-            agent, num_states_to_intervene_on, environment
+            agent, num_states_to_intervene_on, environment, device
         )
     else:
         sample_start_states(num_states_to_intervene_on, start_horizon, environment)
@@ -204,33 +218,36 @@ def evaluate_interventions(agent_family, environment, device):
     use_trajectory_starts = True
 
     sample_js_div = True  # use new js divergence sampling
-    js_div_samples = 1
+    js_div_samples = 30
 
     checkpoint = 10000000
 
     agents, dir = agent_setup(
         agent_family,
         environment,
+        checkpoint,
         use_trajectory_starts,
         num_states_to_intervene_on,
         start_horizon,
         sample_js_div,
-        checkpoint,
         device,
     )
 
     num_interventions = state_setup(
         agents,
+        environment,
         use_trajectory_starts,
         num_states_to_intervene_on,
         start_horizon,
-        environment,
+        device,
     )
 
     num_samples = js_div_samples if sample_js_div else action_distribution_samples
 
     evaluate_distributions(
         agent_family,
+        environment,
+        checkpoint,
         agents,
         use_trajectory_starts,
         num_states_to_intervene_on,
@@ -238,7 +255,6 @@ def evaluate_interventions(agent_family, environment, device):
         num_samples,
         sample_js_div,
         dist_type,
-        environment,
         device,
         dir,
     )

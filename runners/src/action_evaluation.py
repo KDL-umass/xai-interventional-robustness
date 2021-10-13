@@ -72,6 +72,7 @@ def collect_action_distributions(
 
 def get_js_divergence(agent_family, agents, envs, env_labels):
     n = len(envs)
+    m = len(agents)
     result_table = np.zeros((n, 4))  # env_labels + js_divergence = 4 cols
     row = 0
     for e, env in enumerate(envs):
@@ -82,10 +83,15 @@ def get_js_divergence(agent_family, agents, envs, env_labels):
             actions[a, :] = policy_action_distribution(
                 agent_family, agt, env, env.reset(), 1, "empirical"
             )
+            print(
+                f"\r\rSampling {round((e*m + a) / (n*m-1) * 100)}% complete",
+                end="",
+            )
 
         result_table[row, 3] = js_divergence(actions)
 
         row += 1
+    print()
     return result_table
 
 
@@ -119,6 +125,8 @@ def average_js_divergence(agent_family, agents, envs, env_labels, num_samples):
 
 def evaluate_action_distributions(
     agent_family,
+    environment,
+    checkpoint,
     agents,
     use_trajectory_starts,
     num_states_to_intervene_on,
@@ -126,7 +134,6 @@ def evaluate_action_distributions(
     num_samples,
     sample_js_div,
     dist_type,
-    environment,
     device,
     dir,
 ):
@@ -168,10 +175,12 @@ def evaluate_action_distributions(
     header = get_action_distribution_header(envs, sample_js_div)
 
     if len(interventions) == 1:
-        np.savetxt(dir + "/vanilla.txt", dists, header=header)
+        np.savetxt(dir + f"/vanilla{checkpoint}.txt", dists, header=header)
     else:
         np.savetxt(
-            dir + f"/{len(interventions)}_interventions.txt", dists, header=header
+            dir + f"/{len(interventions)}_interventions{checkpoint}.txt",
+            dists,
+            header=header,
         )
 
     pass
@@ -179,6 +188,8 @@ def evaluate_action_distributions(
 
 def evaluate_distributions(
     agent_family,
+    environment,
+    checkpoint,
     agents,
     use_trajectory_starts,
     num_states_to_intervene_on,
@@ -186,13 +197,14 @@ def evaluate_distributions(
     num_samples,
     sample_js_div,
     dist_type,
-    environment,
     device,
     dir,
 ):
     # vanilla
     evaluate_action_distributions(
         agent_family,
+        environment,
+        checkpoint,
         agents,
         use_trajectory_starts,
         num_states_to_intervene_on,
@@ -200,7 +212,6 @@ def evaluate_distributions(
         num_samples,
         sample_js_div,
         dist_type,
-        environment,
         device,
         dir,
     )
@@ -208,6 +219,8 @@ def evaluate_distributions(
     # interventions
     evaluate_action_distributions(
         agent_family,
+        environment,
+        checkpoint,
         agents,
         use_trajectory_starts,
         num_states_to_intervene_on,
@@ -215,7 +228,6 @@ def evaluate_distributions(
         num_samples,
         sample_js_div,
         dist_type,
-        environment,
         device,
         dir,
     )
