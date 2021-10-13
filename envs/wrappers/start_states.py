@@ -79,18 +79,7 @@ def sample_start_states(num_states, horizon, environment):
         raise ValueError("Unknown environment specified.")
 
     for state_num in range(num_states):
-        # env = ToyboxEnvironment(environment, passThroughWrapper)
         env = ToyboxEnvironment(environment + "Toybox", passThroughWrapper)
-        print(env)
-        # if environment == "SpaceInvaders":
-        #     # env = gym.make(space_invaders_env_id)
-        # elif environment == "Amidar":
-        #     env = ToyboxEnvironment(environment, passThroughWrapper)
-        #     # env = gym.make(amidar_env_id)
-        # elif environment == "Breakout":
-        #     env = gym.make(breakout_env_id)
-        # else:
-        #     raise ValueError("Unknown environment specified.")
 
         obs = env.reset()
         t = 0
@@ -117,19 +106,16 @@ def sample_start_states(num_states, horizon, environment):
 def sample_start_states_from_trajectory(agent, num_states, environment):
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
-        # env = gym.make(space_invaders_env_id)
     elif environment == "Amidar":
         random_agent = RandomAgent(gym.make(amidar_env_id).action_space)
-        # env = gym.make(amidar_env_id)
     elif environment == "Breakout":
         random_agent = RandomAgent(gym.make(breakout_env_id).action_space)
-        # env = gym.make(breakout_env_id)
     else:
         raise ValueError("Unknown environment specified.")
 
     print(environment)
     env = ToyboxEnvironment(environment + "Toybox", passThroughWrapper)
-    # print(env)
+
     obs = env.reset()
     action, _ = agent.act(obs)
 
