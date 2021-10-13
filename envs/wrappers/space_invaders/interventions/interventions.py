@@ -10,8 +10,8 @@ from toybox import Toybox, Input
 from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
 from envs.wrappers.paths import (
-    check_intervention_dir,
     get_intervention_dir,
+    get_root_intervention_dir,
     space_invaders_env_id,
 )
 from envs.wrappers.space_invaders.interventions.reset_wrapper import (
@@ -29,8 +29,9 @@ from envs.wrappers.start_states import (
 
 
 def write_intervention_json(state, state_num, count, use_trajectory_starts):
+    environment = "SpaceInvaders"
     with open(
-        f"{get_intervention_dir(state_num, use_trajectory_starts)}/{count}.json",
+        f"{get_intervention_dir(state_num, use_trajectory_starts, environment)}/{count}.json",
         "w",
     ) as outfile:
         json.dump(state, outfile)
@@ -172,19 +173,15 @@ def get_flip_shield_icons(env, state_num, count, use_trajectory_starts):
 
 def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     """Create JSON states for all interventions."""
-    print(f"num states is {num_states}")
-    check, path = check_intervention_dir(num_states - 1, use_trajectory_starts)
-    # if check:
-    #     count = len(os.listdir(path))
-    #     print(
-    #         f"Skipping already created {count} interventions for {num_states} states."
-    #     )
-    #     return count
+    dir = get_root_intervention_dir(use_trajectory_starts, "SpaceInvaders")
 
     for state_num in range(num_states):
         # 0th state is the default start state of the game
         env = get_start_env(
-            state_num, lives=3, use_trajectory_starts=use_trajectory_starts
+            state_num,
+            lives=3,
+            use_trajectory_starts=use_trajectory_starts,
+            environment="SpaceInvaders",
         )
 
         count = 0
@@ -249,11 +246,10 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 
 
 if __name__ == "__main__":
-    # num_states = 1
-    # sample_start_states(num_states, 100)
-    # create_intervention_states(num_states, False)
+    num_states = 1
+    sample_start_states(num_states, 100, "SpaceInvaders")
+    create_intervention_states(num_states, False)
 
-    num_states = 30
+    num_states = 2
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
-    sample_start_states_from_trajectory(agent, num_states, "SpaceInvaders", "cpu")
-    create_intervention_states(num_states, True)
+    sample_start_states_from_trajectory(agent, num_states, "SpaceInvaders")

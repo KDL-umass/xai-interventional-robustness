@@ -60,6 +60,49 @@ def load_agent(dir, device, checkpoint=None):
     return agt
 
 
+def policy_action_distribution(
+    agent_family, agt, env, obs, samples, dist_type="analytic"
+):
+    if dist_type == "analytic":
+        act, p_dist = agt.act(obs)
+        dist = p_dist.detach().cpu().numpy()
+
+        if agent_family in agent_family_that_selects_max_action:
+            idx = np.argmax(dist)
+            dist = np.zeros(dist.shape)
+            dist[idx] = 1.0
+    else:
+        n = env.action_space.n
+        actions = np.zeros((samples,))
+        for i in range(samples):
+            act, p_dist = agt.act(obs)
+            if type(act) == int:
+                actions[i] = act
+            else:
+                actions[i] = act.detach().cpu().numpy()
+        dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
+    return dist
+
+
+def collect_action_distributions(
+    agent_family, agents, envs, env_labels, samples, dist_type
+):
+    n = len(envs) * len(agents)
+    dists = np.zeros((n, envs[0].action_space.n + 3))
+    row = 0
+    for a, agt in enumerate(agents):
+        for e, env in enumerate(envs):
+            dists[row, 0] = a
+            dists[row, 1:3] = env_labels[e]
+            dists[row, 3:] = policy_action_distribution(
+                agent_family, agt, env, env.reset(), samples, dist_type
+            )
+            row += 1
+            print(f"\r\rSampling {round(row / n * 100)}% complete", end="")
+    print()
+    return dists
+
+
 def get_intervention_data_dir(
     agent_family, num_agents, num_states_to_intervene_on, start_horizon, sample_js_div
 ):
@@ -122,13 +165,12 @@ def state_setup(
     num_states_to_intervene_on,
     start_horizon,
     environment,
-    device,
 ):
     if use_trajectory_starts:
         assert len(agents) == 11
         agent = agents.pop()  # first agent will be one sampled from
         sample_start_states_from_trajectory(
-            agent, num_states_to_intervene_on, environment, device
+            agent, num_states_to_intervene_on, environment
         )
     else:
         sample_start_states(num_states_to_intervene_on, start_horizon, environment)
@@ -155,14 +197,14 @@ def state_setup(
 
 def evaluate_interventions(agent_family, environment, device):
     action_distribution_samples = 30
-    num_states_to_intervene_on = 30
+    num_states_to_intervene_on = 1
     dist_type = "analytic"
 
     start_horizon = 100  # sample from t=100
     use_trajectory_starts = True
 
     sample_js_div = True  # use new js divergence sampling
-    js_div_samples = 30
+    js_div_samples = 1
 
     checkpoint = 10000000
 
@@ -183,7 +225,6 @@ def evaluate_interventions(agent_family, environment, device):
         num_states_to_intervene_on,
         start_horizon,
         environment,
-        device,
     )
 
     num_samples = js_div_samples if sample_js_div else action_distribution_samples
@@ -220,13 +261,14 @@ if __name__ == "__main__":
     print(f"Using device: {device}.")
 
     for agent_family in model_locations:
-        for environment in model_locations[agent_family]:
-            print(f"Evaluating agent family: {agent_family}")
-            evaluate_interventions(
-                agent_family=agent_family,
-                environment=environment,
-                device=device,
-            )
+        # for environment in model_locations[agent_family]:
+        environment = "SpaceInvaders"
+        print(f"Evaluating agent family: {agent_family}")
+        evaluate_interventions(
+            agent_family=agent_family,
+            environment=environment,
+            device=device,
+        )
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")

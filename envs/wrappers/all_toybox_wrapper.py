@@ -25,6 +25,10 @@ from envs.wrappers.amidar.interventions.reset_wrapper import (
 )
 
 
+def passThroughWrapper(env):
+    return env
+
+
 def customSpaceInvadersResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomSpaceInvadersResetWrapper(SpaceInvadersResetWrapper):
         def __init__(self, env):
@@ -38,31 +42,37 @@ def customSpaceInvadersResetWrapper(state_num, intv, lives, use_trajectory_start
 
     return CustomSpaceInvadersResetWrapper
 
-def customBreakoutResetWrapper(state_num, intv, lives):
+
+def customBreakoutResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomBreakoutResetWrapper(BreakoutResetWrapper):
         def __init__(self, env):
-            super().__init__(env, state_num=state_num, intv=intv, lives=lives)
+            super().__init__(
+                env,
+                state_num=state_num,
+                intv=intv,
+                lives=lives,
+                use_trajectory_starts=use_trajectory_starts,
+            )
 
     return CustomBreakoutResetWrapper
 
-def customAmidarResetWrapper(state_num, intv, lives):
+
+def customAmidarResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomAmidarResetWrapper(AmidarResetWrapper):
         def __init__(self, env):
-            super().__init__(env, state_num=state_num, intv=intv, lives=lives)
+            super().__init__(
+                env,
+                state_num=state_num,
+                intv=intv,
+                lives=lives,
+                use_trajectory_starts=use_trajectory_starts,
+            )
 
     return CustomAmidarResetWrapper
 
 
 class ToyboxEnvironment(GymEnvironment):
-    def __init__(
-        self,
-        name,
-        custom_wrapper: SpaceInvadersResetWrapper = customSpaceInvadersResetWrapper(
-            state_num=0, intv=-1, lives=3, use_trajectory_starts=False
-        ),
-        *args,
-        **kwargs
-    ):
+    def __init__(self, name, custom_wrapper, *args, **kwargs):
         # need these for duplication
         self._args = args
         self._kwargs = kwargs
@@ -82,6 +92,7 @@ class ToyboxEnvironment(GymEnvironment):
         # initialize
         super().__init__(env, *args, **kwargs)
         self._name = name
+        self._custom_wrapper = custom_wrapper
 
     @property
     def name(self):
@@ -90,7 +101,9 @@ class ToyboxEnvironment(GymEnvironment):
     def duplicate(self, n):
         return DuplicateEnvironment(
             [
-                ToyboxEnvironment(self._name, *self._args, **self._kwargs)
+                ToyboxEnvironment(
+                    self._name, self._custom_wrapper, *self._args, **self._kwargs
+                )
                 for _ in range(n)
             ]
         )
