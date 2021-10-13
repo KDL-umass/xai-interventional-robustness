@@ -27,7 +27,9 @@ import envs.wrappers.breakout.interventions.interventions as breakout_interventi
 
 
 def model_root(model, env):
-    return f"storage/models/{env}/{model}"
+    dir = f"storage/models/{env}/{model}"
+    os.makedirs(dir, exist_ok=True)
+    return dir
 
 
 model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]

@@ -2,19 +2,26 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from runners.src.run_intervention_eval import model_locations, supported_environments
+from runners.src.run_intervention_eval import (
+    model_locations,
+    model_root,
+    supported_environments,
+)
 
 
-def plot_returns_100(runs_dir, fname, timesteps=-1):
+def plot_returns_100(env, fam, timesteps=-1):
+    runs_dir = model_root(fam, env)
     data = load_returns_100_data(runs_dir)
+    if len(data) == 0:
+        return
     lines = {}
     fig, axes = plt.subplots(1, len(data))
     if len(data) == 1:
         axes = [axes]
-    for i, env in enumerate(sorted(data.keys())):
+    for i, environment in enumerate(sorted(data.keys())):
         ax = axes[i]
-        subplot_returns_100(ax, env, data[env], lines, timesteps=timesteps)
-    plt.title(f"{env} performance: {fname}")
+        subplot_returns_100(ax, env, data[environment], lines, timesteps=timesteps)
+    plt.title(f"{env} performance: {fam}")
     plt.xlabel("Training Frames")
     plt.ylabel("Return")
     fig.legend(
@@ -23,8 +30,8 @@ def plot_returns_100(runs_dir, fname, timesteps=-1):
         loc="center left",
         bbox_to_anchor=(0.9, 0.5),
     )
-    os.makedirs("storage/plots/returns/", exist_ok=True)
-    plt.savefig(f"storage/plots/returns/{fname}_returns.png", bbox_inches="tight")
+    os.makedirs(f"storage/plots/returns/{env}", exist_ok=True)
+    plt.savefig(f"storage/plots/returns/{env}/{fam}_returns.png", bbox_inches="tight")
 
 
 def load_returns_100_data(runs_dir):
@@ -33,7 +40,7 @@ def load_returns_100_data(runs_dir):
     def add_data(agent, env, file):
         if env not in data:
             data[env] = {}
-        data[env][agent] = np.genfromtxt(file, delimiter=",").reshape((-1, 3))
+        data[env][agent] = np.loadtxt(file, delimiter=",")  # .reshape((-1, 3))
 
     count = 1
     for agent_dir in os.listdir(runs_dir):
@@ -86,8 +93,10 @@ def plot_family_performance(parent_runs_dir, env):
     plt.ylabel("Return")
     plt.title(f"{env} performance")
     plt.legend(loc="upper left")
-    os.makedirs("storage/plots/returns/", exist_ok=True)
-    plt.savefig(f"storage/plots/returns/all_family_returns.png", bbox_inches="tight")
+    os.makedirs(f"storage/plots/returns/{env}", exist_ok=True)
+    plt.savefig(
+        f"storage/plots/returns/{env}/all_family_returns.png", bbox_inches="tight"
+    )
 
 
 def get_family_performance(runs_parent_dir):
@@ -95,6 +104,10 @@ def get_family_performance(runs_parent_dir):
     for fam in model_locations:
         data = load_returns_100_data(runs_parent_dir + f"/{fam}")
         plist = []
+
+        if len(data.keys()) == 0:
+            continue
+
         for key in data["SpaceInvadersToybox"]:
             plist.append(data["SpaceInvadersToybox"][key])
 
@@ -142,7 +155,7 @@ if __name__ == "__main__":
 
     for fam in model_locations:
         for env in model_locations[fam]:
-            plot_returns_100(f"storage/models/{env}/{fam}/", fam)
+            plot_returns_100(env, fam)
 
     for env in supported_environments:
         plot_family_performance("storage/models/", env)
