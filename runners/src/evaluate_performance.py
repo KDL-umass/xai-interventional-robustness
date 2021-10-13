@@ -11,10 +11,17 @@ import os, sys
 import torch.multiprocessing as mp
 
 from envs.wrappers.video_utils import *
-from envs.wrappers.space_invaders.interventions.interventions import get_si_intervened_environments
-from envs.wrappers.amidar.interventions.interventions import get_amidar_intervened_environments
-from envs.wrappers.breakout.interventions.interventions import get_breakout_intervened_environments
+from envs.wrappers.space_invaders.interventions.interventions import (
+    get_si_intervened_environments,
+)
+from envs.wrappers.amidar.interventions.interventions import (
+    get_amidar_intervened_environments,
+)
+from envs.wrappers.breakout.interventions.interventions import (
+    get_breakout_intervened_environments,
+)
 from envs.wrappers.paths import space_invaders_env_id, amidar_env_id, breakout_env_id
+
 
 def get_env_list(want_feature_vec, vanilla, lives, environment="SpaceInvaders"):
     """
@@ -30,7 +37,7 @@ def get_env_list(want_feature_vec, vanilla, lives, environment="SpaceInvaders"):
             if want_feature_vec:
                 env = SpaceInvadersFeatureVecWrapper(env)
             envlist = [env]
-    
+
     elif environment == "Amidar":
         if not vanilla:
             envlist = get_amidar_intervened_environments(lives)
@@ -45,7 +52,6 @@ def get_env_list(want_feature_vec, vanilla, lives, environment="SpaceInvaders"):
             envlist = [env]
 
     return envlist
-
 
 
 def load_agent(agent_name, env, seed):
@@ -203,4 +209,3 @@ if __name__ == "__main__":
             f"storage/results/{agent_name}_performance_vanilla_lives_{lives}.txt",
             performance_matrix,
         )
-

@@ -25,6 +25,10 @@ from envs.wrappers.amidar.interventions.reset_wrapper import (
 )
 
 
+def passThroughWrapper(env):
+    return env
+
+
 def customSpaceInvadersResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomSpaceInvadersResetWrapper(SpaceInvadersResetWrapper):
         def __init__(self, env):
@@ -38,29 +42,37 @@ def customSpaceInvadersResetWrapper(state_num, intv, lives, use_trajectory_start
 
     return CustomSpaceInvadersResetWrapper
 
+
 def customBreakoutResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomBreakoutResetWrapper(BreakoutResetWrapper):
         def __init__(self, env):
-            super().__init__(env, state_num=state_num, intv=intv, lives=lives, use_trajectory_starts=use_trajectory_starts,)
+            super().__init__(
+                env,
+                state_num=state_num,
+                intv=intv,
+                lives=lives,
+                use_trajectory_starts=use_trajectory_starts,
+            )
 
     return CustomBreakoutResetWrapper
+
 
 def customAmidarResetWrapper(state_num, intv, lives, use_trajectory_starts):
     class CustomAmidarResetWrapper(AmidarResetWrapper):
         def __init__(self, env):
-            super().__init__(env, state_num=state_num, intv=intv, lives=lives, use_trajectory_starts=use_trajectory_starts,)
+            super().__init__(
+                env,
+                state_num=state_num,
+                intv=intv,
+                lives=lives,
+                use_trajectory_starts=use_trajectory_starts,
+            )
 
     return CustomAmidarResetWrapper
 
 
 class ToyboxEnvironment(GymEnvironment):
-    def __init__(
-        self,
-        name,
-        custom_wrapper,
-        *args,
-        **kwargs
-    ):
+    def __init__(self, name, custom_wrapper, *args, **kwargs):
         # need these for duplication
         self._args = args
         self._kwargs = kwargs
@@ -89,7 +101,9 @@ class ToyboxEnvironment(GymEnvironment):
     def duplicate(self, n):
         return DuplicateEnvironment(
             [
-                ToyboxEnvironment(self._name, self._custom_wrapper, *self._args, **self._kwargs)
+                ToyboxEnvironment(
+                    self._name, self._custom_wrapper, *self._args, **self._kwargs
+                )
                 for _ in range(n)
             ]
         )

@@ -8,6 +8,7 @@ matplotlib.rc("font", **font)
 
 import matplotlib.pyplot as plt
 import numpy as np
+from analysis.src.js_divergence import js_divergence
 
 
 def plot_action_dist(data, title, xmin, xmax):
@@ -22,18 +23,6 @@ def plot_action_dist(data, title, xmin, xmax):
             plt.ylabel("Action Frequency")
 
 
-def shannon(dist):
-    dist = dist + 1e-10  # eps to prevent div 0
-    return -np.sum(dist * np.log2(dist))
-
-
-def js_divergence(dists):
-    weight = 1 / len(dists)  # equally weight distributions
-    left = shannon(np.sum(weight * dists, axis=0))  # sum along columns
-    right = sum([weight * shannon(dist) for dist in dists])
-    return left - right
-
-
 def variance_max_actions(dists):
     return np.std(np.argmax(dists, axis=1))
 
@@ -43,6 +32,7 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
     van_state = vanilla[:, 1]  # 0 indexed
+
     intv_mat = np.zeros((np.max(state).astype(int) + 1, np.max(intv).astype(int) + 1))
     van_mat = np.zeros((np.max(state).astype(int) + 1, 1))
     mat = np.concatenate((van_mat, intv_mat), axis=1)
@@ -83,8 +73,8 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
 
-    os.makedirs("storage/plots/jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/jsdivmat/{title}.png")
+    os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
+    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
 
 
 # def plot_individual_distributions(agents, mat):
@@ -128,34 +118,39 @@ def plot_max_action_divergence_matrix(data, title):
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
 
-    os.makedirs("storage/plots/jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/jsdivmat/{title}.png")
+    os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
+    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
 
 
 if __name__ == "__main__":
     n_agents = 11
-    nstates = 30
+    nstates = 10
     horizon = 100
     use_trajectory_starts = True
+    jsdivsampling = True
+    folder = "intervention_js_div" if jsdivsampling else "intervention_action_dists"
 
     for fam in ["a2c", "dqn", "ddqn", "c51", "rainbow"]:
         if use_trajectory_starts:
-            dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
+            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
         else:
-            dir = f"storage/results/intervention_action_dists/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
+            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
+
+        vdata = np.loadtxt(dir + "/vanilla.txt")
+        data = np.loadtxt(dir + "/88_interventions.txt")
         plot_js_divergence_matrix(
-            np.loadtxt(dir + "/88_interventions.txt"),
-            np.loadtxt(dir + "/vanilla.txt"),
-            f"Normalized JS Divergence of Actions for {fam}, {n_agents} Agents, t={horizon} horizon",
+            data,
+            vdata,
+            f"Normalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=True,
         )
         plot_js_divergence_matrix(
-            np.loadtxt(dir + "/88_interventions.txt"),
-            np.loadtxt(dir + "/vanilla.txt"),
-            f"Unnormalized JS Divergence of Actions for {fam}, {n_agents} Agents, t={horizon} horizon",
+            data,
+            vdata,
+            f"Unnormalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=False,
         )
         plot_max_action_divergence_matrix(
-            np.loadtxt(dir + "/88_interventions.txt"),
-            f"Max action divergence matrix for {fam}, {n_agents} Agents, t={horizon} horizon",
+            data,
+            f"Max action divergence matrix for {fam}, {n_agents} Agents, ({nstates} states)",
         )
