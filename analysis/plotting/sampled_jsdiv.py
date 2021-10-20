@@ -30,6 +30,8 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize, env, fname=None):
     if normalize:
         intv_mat /= van_mat.reshape(-1, 1)
         van_mat /= van_mat
+        intv_mat -= 1
+        van_mat -= 1
 
     mat = np.zeros((nstates, nintv + 1))
     mat[:, 0] = van_mat
