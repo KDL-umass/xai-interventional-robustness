@@ -1,6 +1,10 @@
 import os
 
 import matplotlib
+from analysis.plotting.tables import print_image_name_table, print_values_table
+
+from analysis.src.js_divergence import get_js_divergence_matrix
+from envs.wrappers.paths import get_num_interventions
 
 font = {"size": 14}
 
@@ -11,31 +15,9 @@ import numpy as np
 
 
 def plot_js_divergence_matrix(data, vanilla, title, normalize, env, fname=None):
-    state = data[:, 1]  # 0 indexed
-    intv = data[:, 2]  # 0 indexed
-    samples = data[:, 3]
-
-    nstates = np.max(state).astype(int) + 1
-    assert nstates == len(vanilla)
-
-    nintv = np.max(intv).astype(int) + 1
-    print(f"nstates {nstates} nintv {nintv}")
-
-    intv_mat = np.zeros((nstates, nintv))
-    for s in range(nstates):
-        for i in range(nintv):
-            intv_mat[s, i] = samples[s * nintv + i] / np.log2(10)
-
-    van_mat = vanilla[:, 3] / np.log2(10)
+    mat, nmat, van_mat, intv_mat = get_js_divergence_matrix(data, vanilla)
     if normalize:
-        intv_mat /= van_mat.reshape(-1, 1)
-        van_mat /= van_mat
-        intv_mat -= 1
-        van_mat -= 1
-
-    mat = np.zeros((nstates, nintv + 1))
-    mat[:, 0] = van_mat
-    mat[:, 1:] = intv_mat
+        mat = nmat
 
     im = plt.matshow(mat, interpolation="none")
     cbar = plt.colorbar(im)
@@ -63,55 +45,6 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize, env, fname=None):
     return van_mat.mean(), intv_mat.mean()
 
 
-def print_image_name_table(families, env):
-    print()
-    print("\\begin{tabular}{ccc}")
-    print("Family & Unnormalized & Normalized \\\\")
-    for fam in families:
-        print(
-            fam
-            + " & \\includegraphics[width=0.4\\textwidth]{plots/"
-            + env
-            + "/jsdiv_"
-            + fam
-            + ".png} & \includegraphics[width=0.4\\textwidth]{plots/"
-            + env
-            + "/jsdiv_"
-            + fam
-            + "_normalized.png}\\\\"
-        )
-    print("\\end{tabular}")
-
-
-def print_values_table(
-    env, families, checkpoints, vanilla_dict, unnormalized_dict, normalized_dict
-):
-    F = len(families)
-    C = len(checkpoints)
-    table = np.zeros((F, C, 3))
-
-    print()
-    print("\\begin{tabular}{|l|l|c|c|c|}\\hline")
-    print("Family & Checkpoint & Original & Unnormalized & Normalized \\\\\\hline")
-
-    for f, fam in enumerate(families):
-        for c, check in enumerate(checkpoints):
-            v = vanilla_dict[env][fam][check]
-            u = unnormalized_dict[env][fam][check]
-            n = normalized_dict[env][fam][check]
-            table[f, c, :] = v, u, n
-
-            if check == "":
-                check = 10000000
-
-            print(
-                f"{fam} & {'{:.0e}'.format(check)} & {round(v, 4)} & {round(u, 4)} & {round(n, 4)} \\\\\\hline"
-            )
-    print("\\end{tabular}")
-
-    return table
-
-
 if __name__ == "__main__":
     n_agents = 11
     nstates = 30
@@ -126,6 +59,7 @@ if __name__ == "__main__":
     normalized_dict = {}
 
     for env in ["SpaceInvaders"]:
+        nintv = get_num_interventions(env)
         vanilla_dict[env] = {}
         unnormalized_dict[env] = {}
         normalized_dict[env] = {}
@@ -136,9 +70,12 @@ if __name__ == "__main__":
             normalized_dict[env][fam] = {}
 
             for check in checkpoints:
-                dir = f"storage/results/{folder}/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
-                vdata = np.loadtxt(dir + f"/vanilla{check}.txt")
-                data = np.loadtxt(dir + f"/88_interventions{check}.txt")
+                if check == "":
+                    dir = f"storage/results/{folder}/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
+                else:
+                    dir = f"storage/results/{folder}/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory/check_{check}"
+                vdata = np.loadtxt(dir + f"/vanilla.txt")
+                data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
                 _, normalized_dict[env][fam][check] = plot_js_divergence_matrix(
                     data,
                     vdata,
