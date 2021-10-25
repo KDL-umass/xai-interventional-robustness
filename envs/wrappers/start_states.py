@@ -100,7 +100,9 @@ def sample_start_states(num_states, horizon, environment):
         with open(get_start_state_path(state_num, False, environment), "w") as f:
             json.dump(state, f)
 
-    print(f"Created {num_states} start states.")
+    print(
+        f"Created {num_states} start states near {get_start_state_path(state_num, False, environment)}"
+    )
 
 
 def sample_start_states_from_trajectory(agent, num_states, environment, device):
@@ -171,4 +173,6 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
     with open(get_start_state_path(0, True, environment), "w") as f:
         json.dump(state, f)
 
-    print(f"Created {num_states} start states from trajectory.")
+    print(
+        f"Created {num_states} start states from trajectory near {get_start_state_path(0, True, environment)}"
+    )

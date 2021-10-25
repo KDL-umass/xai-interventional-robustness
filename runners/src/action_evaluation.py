@@ -5,6 +5,8 @@ from analysis.src.js_divergence import js_divergence
 
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
+    customAmidarResetWrapper,
+    customBreakoutResetWrapper,
     customSpaceInvadersResetWrapper,
 )
 
@@ -79,19 +81,19 @@ def get_js_divergence(agent_family, agents, envs, env_labels):
         result_table[row, 1:3] = env_labels[e]
 
         actions = np.zeros((len(agents), envs[0].action_space.n))
+        intv_obs = env.reset()
         for a, agt in enumerate(agents):
             actions[a, :] = policy_action_distribution(
-                agent_family, agt, env, env.reset(), 1, "empirical"
+                agent_family, agt, env, intv_obs, 1, "empirical"
             )
             print(
-                f"\r\rSampling {round((e*m + a) / (n*m-1) * 100)}% complete",
+                f"\r\r\tSampling {round((e*m + a) / (n*m-1) * 100)}% complete",
                 end="",
             )
 
         result_table[row, 3] = js_divergence(actions)
 
         row += 1
-    print()
     return result_table
 
 
@@ -137,16 +139,19 @@ def evaluate_action_distributions(
     device,
     dir,
 ):
+
+    if environment == "SpaceInvaders":
+        custom_wrapper = customSpaceInvadersResetWrapper
+    elif environment == "Amidar":
+        custom_wrapper = customAmidarResetWrapper
+    elif environment == "Breakout":
+        custom_wrapper = customBreakoutResetWrapper
+
     envs = [
         ToyboxEnvironment(
             environment + "Toybox",
             device=device,
-            custom_wrapper=customSpaceInvadersResetWrapper(
-                state_num=state_num,
-                intv=intv,
-                lives=3,
-                use_trajectory_starts=use_trajectory_starts,
-            ),
+            custom_wrapper=custom_wrapper(state_num, intv, 3, use_trajectory_starts),
         )
         for state_num in range(num_states_to_intervene_on)
         for intv in interventions
@@ -175,10 +180,10 @@ def evaluate_action_distributions(
     header = get_action_distribution_header(envs, sample_js_div)
 
     if len(interventions) == 1:
-        np.savetxt(dir + f"/vanilla{checkpoint}.txt", dists, header=header)
+        np.savetxt(dir + f"/vanilla.txt", dists, header=header)
     else:
         np.savetxt(
-            dir + f"/{len(interventions)}_interventions{checkpoint}.txt",
+            dir + f"/{len(interventions)}_interventions.txt",
             dists,
             header=header,
         )
