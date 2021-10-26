@@ -252,4 +252,6 @@ if __name__ == "__main__":
 
     num_states = 2
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
-    sample_start_states_from_trajectory(agent, num_states, "SpaceInvaders")
+    sample_start_states_from_trajectory(
+        agent, num_states, "SpaceInvaders", device="cpu"
+    )

@@ -241,5 +241,5 @@ if __name__ == "__main__":
 
     num_states = 2
     agent = RandomAgent(gym.make(breakout_env_id).action_space)
-    sample_start_states_from_trajectory(agent, num_states, "Breakout")
+    sample_start_states_from_trajectory(agent, num_states, "Breakout", device="cpu")
     create_intervention_states(num_states, True)
