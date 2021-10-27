@@ -67,7 +67,7 @@ def collect_action_distributions(
                 agent_family, agt, env, env.reset(), samples, dist_type
             )
             row += 1
-            print(f"\r\rSampling {round(row / n * 100)}% complete", end="")
+            print(f"\r\r\t\tCAD: Sampling {round(row / n * 100)}% complete", end="")
     print()
     return dists
 
@@ -76,9 +76,9 @@ def get_js_divergence(agent_family, agents, envs, env_labels):
     n = len(envs)
     m = len(agents)
     result_table = np.zeros((n, 4))  # env_labels + js_divergence = 4 cols
-    row = 0
+
     for e, env in enumerate(envs):
-        result_table[row, 1:3] = env_labels[e]
+        result_table[e, 1:3] = env_labels[e]
 
         actions = np.zeros((len(agents), envs[0].action_space.n))
         intv_obs = env.reset()
@@ -87,13 +87,12 @@ def get_js_divergence(agent_family, agents, envs, env_labels):
                 agent_family, agt, env, intv_obs, 1, "empirical"
             )
             print(
-                f"\r\r\tSampling {round((e*m + a) / (n*m-1) * 100)}% complete",
+                f"\r\r\tGJD: Sampling {round((e*m + a) / (n*m-1) * 100)}% complete",
                 end="",
             )
 
-        result_table[row, 3] = js_divergence(actions)
+        result_table[e, 3] = js_divergence(actions)
 
-        row += 1
     return result_table
 
 
@@ -119,7 +118,7 @@ def average_js_divergence(agent_family, agents, envs, env_labels, num_samples):
     for i in range(num_samples):
         dist = get_js_divergence(agent_family, agents, envs, env_labels)
         dists.append(dist)
-        print(f"\r\rSampling {round(i / (num_samples-1) * 100)}% complete", end="")
+        print(f"\nAJD: Sampling {round(i / (num_samples-1) * 100)}% complete")
     print()
     dists = np.mean(dists, axis=0)  # average over trials
     return dists
@@ -205,7 +204,7 @@ def evaluate_distributions(
     device,
     dir,
 ):
-    # vanilla
+    print("vanilla")
     evaluate_action_distributions(
         agent_family,
         environment,
@@ -221,7 +220,7 @@ def evaluate_distributions(
         dir,
     )
 
-    # interventions
+    print("interventions")
     evaluate_action_distributions(
         agent_family,
         environment,
