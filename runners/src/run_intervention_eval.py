@@ -23,12 +23,21 @@ def model_root(model, env):
     return dir
 
 
-# model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
-model_names = ["a2c", "ppo"]
-# model_names = ["dqn"]
-# supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
-supported_environments = ["SpaceInvaders", "Amidar"]
+model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
+supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
+
+# supported_environments = ["SpaceInvaders"]
+# model_names = ["dqn", "vsarsa", "vqn", "rainbow"]
+
 # supported_environments = ["Amidar"]
+# model_names = ["dqn", "vsarsa", "vqn"]
+# model_names = ["ppo"]
+
+# supported_environments = ["Breakout"]
+# model_names = ["vqn", "vsarsa", "dqn"]
+# model_names = ["a2c", "ppo"]
+# model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
+# model_names = ["dqn"]
 
 model_locations = {
     fam: {
@@ -98,7 +107,7 @@ def collect_action_distributions(
                 agent_family, agt, env, env.reset(), samples, dist_type
             )
             row += 1
-            print(f"\r\rSampling {round(row / n * 100)}% complete", end="")
+            print(f"\r\rSampling: {round(row / n * 100)}% complete", end="")
     print()
     return dists
 

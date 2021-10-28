@@ -31,4 +31,4 @@ def get_num_interventions(environment):
     if environment == "Amidar":
         return 69
     if environment == "Breakout":
-        return 42
+        return 38  # 42
