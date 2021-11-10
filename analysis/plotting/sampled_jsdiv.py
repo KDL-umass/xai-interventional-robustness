@@ -1,4 +1,5 @@
 import os
+import sys
 
 import matplotlib
 from matplotlib import cm, rcParams
@@ -43,28 +44,31 @@ def plot_js_divergence_matrix(
         ax.tick_params(
             axis="x", top=False, bottom=True, labelbottom=True, labeltop=False
         )
+        plt.xlabel("Intervention Number")
+        plt.ylabel("State of Interest")
     else:
-        ax.set_xticks(list(range(0, mat.shape[1], 5)))
+        ax.set_xticks(list(range(0, mat.shape[1], 10)))
         ax.set_yticks(list(range(0, mat.shape[0], 5)))
-        ax.tick_params(
-            axis="both",
-            top=False,
-            bottom=True,
-            labelbottom=False,
-            labeltop=False,
-            left=True,
-            right=False,
-            labelleft=False,
-            labelright=False,
-            which="minor",
-            labelsize=1,
-            width=1,
-            length=1,
-            direction="out",
-        )
-        ax.set_title(f"{family} at {checkpoint} frames")
-    plt.xlabel("Intervention Number")
-    plt.ylabel("State of Interest")
+        ax.set_xticklabels(list(range(0, mat.shape[1], 10)))
+        ax.set_yticklabels(list(range(0, mat.shape[0], 5)))
+        ax.tick_params(left=False, bottom=False)
+        # ax.tick_params(
+        #     axis="both",
+        #     top=False,
+        #     bottom=False,
+        #     labelbottom=False,
+        #     labeltop=False,
+        #     left=False,
+        #     right=False,
+        #     labelleft=False,
+        #     labelright=False,
+        #     which="minor",
+        #     labelsize=0,
+        #     width=0,
+        #     length=0,
+        #     direction="out",
+        # )
+        # ax.set_title(f"{family} at {checkpoint} frames")
 
     if save_here:
         plt.title(title)
@@ -94,12 +98,20 @@ if __name__ == "__main__":
     nstates = 30
     folder = "intervention_js_div"
 
-    checkpoints = [10 ** i for i in range(2, 8)]
+    if len(sys.argv) > 1:
+        supported_env = sys.argv[1]
+        supported_environments = [supported_env]
+    else:
+        supported_environments = ["SpaceInvaders"]
+        supported_environments = ["Amidar"]
+        supported_environments = ["Breakout"]
 
-    model_names = ["vqn", "vsarsa", "ppo", "dqn", "a2c"]
-    # supported_environments = ["SpaceInvaders"]
-    # supported_environments = ["Amidar"]
-    supported_environments = ["Breakout"]
+    checkpoints = [10 ** i for i in range(2, 8)]
+    print(checkpoints)
+
+    model_names = ["vqn", "vsarsa", "ppo", "dqn", "a2c", "ddqn", "rainbow", "c51"]
+    print(model_names)
+    print(supported_environments)
 
     vanilla_dict = {}
     unnormalized_dict = {}
@@ -108,7 +120,7 @@ if __name__ == "__main__":
     megaPlot = True
 
     if megaPlot:
-        font = {"size": 2}
+        font = {"size": 3}
     else:
         font = {"size": 14}
 
@@ -117,12 +129,10 @@ if __name__ == "__main__":
     for env in supported_environments:
         if megaPlot:
             fig, axes = plt.subplots(
-                len(model_names),
-                len(checkpoints),
+                len(model_names), len(checkpoints), sharex=True, sharey=True
             )
             normfig, normaxes = plt.subplots(
-                len(model_names),
-                len(checkpoints),
+                len(model_names), len(checkpoints), sharex=True, sharey=True
             )
 
         nintv = get_num_interventions(env)
@@ -139,6 +149,22 @@ if __name__ == "__main__":
                 if megaPlot:
                     ax = axes[f, c]
                     normax = normaxes[f, c]
+                    if c == 0:
+                        ax.set_ylabel(f"{fam.upper()}\nState of Interest")
+                    if c == len(checkpoints) - 1:
+                        ax.set_ylabel(f"{fam.upper()}")
+                        # ax.tick_params(labelright=True)
+                        ax.yaxis.set_label_position("right")
+
+                    if f == 0:
+                        ax.set_xlabel(f"{check} Frames")
+                        ax.xaxis.set_label_position("top")
+
+                        # ax.tick_params(labeltop=True)
+                    if f == len(model_names) - 1:
+                        ax.tick_params(labelbottom=True)
+                        ax.set_xlabel(f"Intervention Number")
+
                 else:
                     ax = None
                     normax = None
@@ -185,7 +211,7 @@ if __name__ == "__main__":
 
             cmap = rcParams["image.cmap"]
 
-            topshift = {"Breakout": 0.93, "Amidar": 0.97, "SpaceInvaders": 0.99}[env]
+            topshift = {"Breakout": 0.93, "Amidar": 0.97, "SpaceInvaders": 0.95}[env]
             # UNNORMALIZED
             plt.figure(fig.number)
             plt.tight_layout()
@@ -234,3 +260,5 @@ if __name__ == "__main__":
             unnormalized_dict,
             normalized_dict,
         )
+
+        plt.close("all")
