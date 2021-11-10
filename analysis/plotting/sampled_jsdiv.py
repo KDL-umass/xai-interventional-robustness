@@ -44,31 +44,14 @@ def plot_js_divergence_matrix(
         ax.tick_params(
             axis="x", top=False, bottom=True, labelbottom=True, labeltop=False
         )
-        plt.xlabel("Intervention Number")
-        plt.ylabel("State of Interest")
+        plt.xlabel("Intervention")
+        plt.ylabel("State")
     else:
         ax.set_xticks(list(range(0, mat.shape[1], 10)))
-        ax.set_yticks(list(range(0, mat.shape[0], 5)))
         ax.set_xticklabels(list(range(0, mat.shape[1], 10)))
-        ax.set_yticklabels(list(range(0, mat.shape[0], 5)))
+        ax.set_yticks(list(range(0, mat.shape[0] + 1, 10)))
+        ax.set_yticklabels(list(range(0, mat.shape[0] + 1, 10)))
         ax.tick_params(left=False, bottom=False)
-        # ax.tick_params(
-        #     axis="both",
-        #     top=False,
-        #     bottom=False,
-        #     labelbottom=False,
-        #     labeltop=False,
-        #     left=False,
-        #     right=False,
-        #     labelleft=False,
-        #     labelright=False,
-        #     which="minor",
-        #     labelsize=0,
-        #     width=0,
-        #     length=0,
-        #     direction="out",
-        # )
-        # ax.set_title(f"{family} at {checkpoint} frames")
 
     if save_here:
         plt.title(title)
@@ -120,7 +103,7 @@ if __name__ == "__main__":
     megaPlot = True
 
     if megaPlot:
-        font = {"size": 3}
+        font = {"size": 4}
     else:
         font = {"size": 14}
 
@@ -150,7 +133,7 @@ if __name__ == "__main__":
                     ax = axes[f, c]
                     normax = normaxes[f, c]
                     if c == 0:
-                        ax.set_ylabel(f"{fam.upper()}\nState of Interest")
+                        ax.set_ylabel(f"{fam.upper()}\nState")
                     if c == len(checkpoints) - 1:
                         ax.set_ylabel(f"{fam.upper()}")
                         # ax.tick_params(labelright=True)
@@ -163,7 +146,7 @@ if __name__ == "__main__":
                         # ax.tick_params(labeltop=True)
                     if f == len(model_names) - 1:
                         ax.tick_params(labelbottom=True)
-                        ax.set_xlabel(f"Intervention Number")
+                        ax.set_xlabel(f"Intervention")
 
                 else:
                     ax = None
@@ -207,15 +190,24 @@ if __name__ == "__main__":
                 )
 
         if megaPlot:
-            matplotlib.rcParams["figure.figsize"] = 100, 50
+            if env == "Breakout":
+                matplotlib.rcParams["figure.figsize"] = 90, 50
+            else:
+                matplotlib.rcParams["figure.figsize"] = 100, 50
 
             cmap = rcParams["image.cmap"]
 
-            topshift = {"Breakout": 0.93, "Amidar": 0.97, "SpaceInvaders": 0.95}[env]
+            topshift = {"Breakout": 0.92, "Amidar": 0.97, "SpaceInvaders": 1.025}[env]
+            hpad = {"Breakout": 1, "Amidar": -5, "SpaceInvaders": -15}
+            wpad = {"Breakout": -20, "Amidar": 1, "SpaceInvaders": 1}
             # UNNORMALIZED
             plt.figure(fig.number)
-            plt.tight_layout()
-            fig.subplots_adjust(right=0.85, top=topshift)
+            plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
+            if env == "Breakout":
+                fig.subplots_adjust(right=0.95, top=topshift)
+            else:
+                fig.subplots_adjust(right=0.85, top=topshift)
+
             cbar_ax = fig.add_axes([0.89, 0.09, 0.025, 0.825])
             cbar_ax.set_title("JS Divergence")
             fig.colorbar(
