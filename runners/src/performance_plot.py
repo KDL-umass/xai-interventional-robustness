@@ -9,6 +9,12 @@ from runners.src.run_intervention_eval import (
 )
 
 
+prop_cycle = plt.rcParams["axes.prop_cycle"]
+colors = prop_cycle.by_key()["color"]
+colorMap = {fam: colors[i] for i, fam in enumerate(model_locations)}
+print(colorMap)
+
+
 def plot_returns_100(env, fam, timesteps=-1):
     runs_dir = model_root(fam, env)
     data = load_returns_100_data(runs_dir)
@@ -97,7 +103,7 @@ def plot_family_performance(parent_runs_dir, env):
         f.writelines([fam + "\n" for perf, fam in order])
 
     for perf, fam in order:
-        subplot_family_returns(axes, data[fam], fam)
+        subplot_family_returns(axes, data[fam], fam, fam)
     plt.xlabel("Training Frames")
     plt.ylabel("Return")
     plt.title(f"{env} performance")
@@ -130,12 +136,12 @@ def get_family_performance(runs_parent_dir, env):
     return final_data
 
 
-def subplot_family_returns(ax, data, label, timesteps=-1):
+def subplot_family_returns(ax, data, label, fam, timesteps=-1):
     t = data[:, 0]
     mean = data[:, 1]
     std = data[:, 2]
 
-    (line,) = ax.plot(t, mean, label=label)
+    (line,) = ax.plot(t, mean, label=label, color=colorMap[fam])
     ax.fill_between(t, mean + std, mean - std, alpha=0.2, color=line.get_color())
     ax.set_title(label)
     ax.set_xlabel("timesteps")
