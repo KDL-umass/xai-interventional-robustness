@@ -91,9 +91,6 @@ if __name__ == "__main__":
 
     checkpoints = [10 ** i for i in range(2, 8)]
     print(checkpoints)
-
-    model_names = ["vqn", "vsarsa", "ppo", "dqn", "a2c", "ddqn", "rainbow", "c51"]
-    print(model_names)
     print(supported_environments)
 
     vanilla_dict = {}
@@ -110,6 +107,10 @@ if __name__ == "__main__":
     matplotlib.rc("font", **font)
 
     for env in supported_environments:
+        # model_names = ["vqn", "vsarsa", "ppo", "dqn", "a2c", "ddqn", "rainbow", "c51"]
+        with open(f"storage/plots/returns/{env}/order.txt") as f:
+            model_names = [l.strip() for l in f.readlines()]
+        print(model_names)
         if megaPlot:
             fig, axes = plt.subplots(
                 len(model_names), len(checkpoints), sharex=True, sharey=True
@@ -134,19 +135,26 @@ if __name__ == "__main__":
                     normax = normaxes[f, c]
                     if c == 0:
                         ax.set_ylabel(f"{fam.upper()}\nState")
+                        normax.set_ylabel(f"{fam.upper()}\nState")
                     if c == len(checkpoints) - 1:
                         ax.set_ylabel(f"{fam.upper()}")
+                        normax.set_ylabel(f"{fam.upper()}")
                         # ax.tick_params(labelright=True)
                         ax.yaxis.set_label_position("right")
+                        normax.yaxis.set_label_position("right")
 
                     if f == 0:
                         ax.set_xlabel(f"{check} Frames")
+                        normax.set_xlabel(f"{check} Frames")
                         ax.xaxis.set_label_position("top")
+                        normax.xaxis.set_label_position("top")
 
                         # ax.tick_params(labeltop=True)
                     if f == len(model_names) - 1:
                         ax.tick_params(labelbottom=True)
+                        normax.tick_params(labelbottom=True)
                         ax.set_xlabel(f"Intervention")
+                        normax.set_xlabel(f"Intervention")
 
                 else:
                     ax = None
@@ -197,7 +205,7 @@ if __name__ == "__main__":
 
             cmap = rcParams["image.cmap"]
 
-            topshift = {"Breakout": 0.92, "Amidar": 0.97, "SpaceInvaders": 1.025}[env]
+            topshift = {"Breakout": 0.92, "Amidar": 0.96, "SpaceInvaders": 1.025}[env]
             hpad = {"Breakout": 1, "Amidar": -5, "SpaceInvaders": -15}
             wpad = {"Breakout": -20, "Amidar": 1, "SpaceInvaders": 1}
             # UNNORMALIZED
@@ -225,8 +233,11 @@ if __name__ == "__main__":
 
             # NORMALIZED
             plt.figure(normfig.number)
-            plt.tight_layout()
-            normfig.subplots_adjust(right=0.85, top=topshift)
+            plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
+            if env == "Breakout":
+                normfig.subplots_adjust(right=0.95, top=topshift)
+            else:
+                normfig.subplots_adjust(right=0.85, top=topshift)
             cbar_ax = normfig.add_axes([0.89, 0.09, 0.025, 0.825])
             cbar_ax.set_title("JS Divergence")
             normfig.colorbar(
