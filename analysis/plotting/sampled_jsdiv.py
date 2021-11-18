@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from runners.src.run_intervention_eval import supported_environments, model_names
+from runners.src.performance_plot import *
 
 
 def plot_js_divergence_matrix(
@@ -107,28 +108,46 @@ if __name__ == "__main__":
     matplotlib.rc("font", **font)
 
     for env in supported_environments:
-        # model_names = ["vqn", "vsarsa", "ppo", "dqn", "a2c", "ddqn", "rainbow", "c51"]
         with open(f"storage/plots/returns/{env}/order.txt") as f:
             model_names = [l.strip() for l in f.readlines()]
-        print(model_names)
+
         if megaPlot:
+            supfig = plt.figure()
+            subfigs = 
             fig, axes = plt.subplots(
                 len(model_names), len(checkpoints), sharex=True, sharey=True
             )
+            normsupfig = plt.figure()
             normfig, normaxes = plt.subplots(
                 len(model_names), len(checkpoints), sharex=True, sharey=True
             )
+
 
         nintv = get_num_interventions(env)
         vanilla_dict[env] = {}
         unnormalized_dict[env] = {}
         normalized_dict[env] = {}
 
+        maxYLim = 0
+
         for f, fam in enumerate(model_names):
             vanilla_dict[env][fam] = {}
             unnormalized_dict[env][fam] = {}
             normalized_dict[env][fam] = {}
 
+            # add performance at rightmost side
+            data = load_returns_100_data(f"storage/models/{env}/{fam}")[env + "Toybox"]
+            print(data.keys())
+            print(data[list(data.keys())[0]].shape)
+            subplot_returns_100(
+                axes[f, len(checkpoints)], env, data, {}, colorMapFam=fam
+            )
+            for agt in data:
+                maxPerf = np.max(data[agt][:, 1] + data[agt][:, 2])
+                if maxPerf > maxYLim:
+                    maxYLim = maxPerf
+
+            # add jsdiv plots
             for c, check in enumerate(checkpoints):
                 if megaPlot:
                     ax = axes[f, c]
@@ -139,17 +158,13 @@ if __name__ == "__main__":
                     if c == len(checkpoints) - 1:
                         ax.set_ylabel(f"{fam.upper()}")
                         normax.set_ylabel(f"{fam.upper()}")
-                        # ax.tick_params(labelright=True)
                         ax.yaxis.set_label_position("right")
                         normax.yaxis.set_label_position("right")
-
                     if f == 0:
                         ax.set_xlabel(f"{check} Frames")
                         normax.set_xlabel(f"{check} Frames")
                         ax.xaxis.set_label_position("top")
                         normax.xaxis.set_label_position("top")
-
-                        # ax.tick_params(labeltop=True)
                     if f == len(model_names) - 1:
                         ax.tick_params(labelbottom=True)
                         normax.tick_params(labelbottom=True)
@@ -208,6 +223,12 @@ if __name__ == "__main__":
             topshift = {"Breakout": 0.92, "Amidar": 0.96, "SpaceInvaders": 1.025}[env]
             hpad = {"Breakout": 1, "Amidar": -5, "SpaceInvaders": -15}
             wpad = {"Breakout": -20, "Amidar": 1, "SpaceInvaders": 1}
+
+            # performance plot
+            for f in range(len(model_names)):
+                axes[f, -1].set_xlim = (0, max(checkpoints))
+                axes[f, -1].set_ylim = (0, maxYLim)
+
             # UNNORMALIZED
             plt.figure(fig.number)
             plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
