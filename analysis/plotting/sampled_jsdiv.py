@@ -77,6 +77,11 @@ def plot_js_divergence_matrix(
     return van_mat.mean(), intv_mat.mean()
 
 
+def megaPlot():
+
+    pass
+
+
 if __name__ == "__main__":
     n_agents = 11
     nstates = 30
@@ -112,8 +117,8 @@ if __name__ == "__main__":
             model_names = [l.strip() for l in f.readlines()]
 
         if megaPlot:
-            supfig = plt.figure()
-            subfigs = 
+            # supfig = plt.figure()
+            # subfigs =
             fig, axes = plt.subplots(
                 len(model_names), len(checkpoints), sharex=True, sharey=True
             )
@@ -121,7 +126,6 @@ if __name__ == "__main__":
             normfig, normaxes = plt.subplots(
                 len(model_names), len(checkpoints), sharex=True, sharey=True
             )
-
 
         nintv = get_num_interventions(env)
         vanilla_dict[env] = {}
