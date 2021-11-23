@@ -11,24 +11,28 @@ from envs.wrappers.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 import numpy as np
+from glob import glob
 
-env_name = "Amidar"
+env_name = "Breakout"
 device = "cuda"
 frames = 1e7 + 1
 render = False
 logdir = "runs"
 writer = "tensorboard"
 toybox = True
-agent_replicate_num = 12
+agent_replicate_num = 1
 test_episodes = 100
+#loadfile="/mnt/nfs/scratch1/kavery/breakout_vqn_snapshots/vqn_1e9dc70_2021-10-18_10:40:26_088260/"
+loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
+#loadfile=""
 
 
-def main():
+def main():   
     if toybox:
         env = ToyboxEnvironment(
             env_name + "Toybox",
             device=device,
-            custom_wrapper=customAmidarResetWrapper(
+            custom_wrapper=customBreakoutResetWrapper(
                 state_num=0, intv=-1, lives=3, use_trajectory_starts=False
             ),
         )
@@ -36,37 +40,39 @@ def main():
         env = AtariEnvironment(env_name, device=device)
 
     agents = [
-        # a2c.device(device),
-        vqn.device(device),
-        # vac.device(device),
-        # vpg.device(device),
+        vsarsa.device(device),
+        # vqn.device(device),
+        # dqn.device(device),
+        # ppo.device(device),
         # vsarsa.device(device),
-        # vqn.device(device)
     ]
 
     agents = list(np.repeat(agents, agent_replicate_num))
 
-    if device == "cuda":
-        SlurmExperiment(
-            agents,
-            env,
-            frames,
-            test_episodes=test_episodes,
-            logdir=logdir,
-            write_loss=True,
-            # loadfile=""
-            sbatch_args={"partition": "1080ti-long"},
-        )
-    else:
-        run_experiment(
-            agents,
-            env,
-            frames,
-            render=render,
-            logdir=logdir,
-            writer=writer,
-            test_episodes=test_episodes,
-        )
+    loadfiles = glob(loadfile+"/*/")
+    for load in loadfiles:
+        if device == "cuda":
+            print(load + "preset10000000.pt")
+            SlurmExperiment(
+                agents,
+                env,
+                frames,
+                test_episodes=test_episodes,
+                logdir=logdir,
+                write_loss=True,
+                loadfile=load + "preset10000000.pt",
+                sbatch_args={"partition": "1080ti-long"},
+            )
+        else:
+            run_experiment(
+                agents,
+                env,
+                frames,
+                render=render,
+                logdir=logdir,
+                writer=writer,
+                test_episodes=test_episodes,
+            )
 
 
 if __name__ == "__main__":
