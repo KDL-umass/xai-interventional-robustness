@@ -22,6 +22,7 @@ writer = "tensorboard"
 toybox = True
 agent_replicate_num = 1
 test_episodes = 100
+nodelist = "node153"
 loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots/vsarsa_1e9dc70_2021-10-20_17:15:51_428966/"
 #loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
 #loadfile=""
@@ -68,7 +69,7 @@ def main():
                 write_loss=True,
                 loadfile=load + "preset10000000.pt",
                 sbatch_args={"partition": "1080ti-long"},
-                nodelist="node153",
+                nodelist=nodelist,
             )
         else:
             run_experiment(
