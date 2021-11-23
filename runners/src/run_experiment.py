@@ -22,8 +22,8 @@ writer = "tensorboard"
 toybox = True
 agent_replicate_num = 1
 test_episodes = 100
-#loadfile="/mnt/nfs/scratch1/kavery/breakout_vqn_snapshots/vqn_1e9dc70_2021-10-18_10:40:26_088260/"
-loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
+loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots/vsarsa_1e9dc70_2021-10-20_17:15:51_428966/"
+#loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
 #loadfile=""
 
 if env_name == "SpaceInvaders":
@@ -53,6 +53,9 @@ def main():
     agents = list(np.repeat(agents, agent_replicate_num))
 
     loadfiles = glob(loadfile+"/*/")
+    if len(loadfiles) == 1:
+        loadfiles = [loadfile]
+    
     for load in loadfiles:
         if device == "cuda":
             print(load + "preset10000000.pt")
@@ -65,6 +68,7 @@ def main():
                 write_loss=True,
                 loadfile=load + "preset10000000.pt",
                 sbatch_args={"partition": "1080ti-long"},
+                nodelist="node153",
             )
         else:
             run_experiment(
