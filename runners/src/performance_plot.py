@@ -9,6 +9,12 @@ from runners.src.run_intervention_eval import (
 )
 
 
+prop_cycle = plt.rcParams["axes.prop_cycle"]
+colors = prop_cycle.by_key()["color"]
+colorMap = {fam: colors[i] for i, fam in enumerate(model_locations)}
+print(colorMap)
+
+
 def plot_returns_100(env, fam, timesteps=-1):
     runs_dir = model_root(fam, env)
     data = load_returns_100_data(runs_dir)
@@ -32,6 +38,7 @@ def plot_returns_100(env, fam, timesteps=-1):
     )
     os.makedirs(f"storage/plots/returns/{env}", exist_ok=True)
     plt.savefig(f"storage/plots/returns/{env}/{fam}_returns.png", bbox_inches="tight")
+    plt.close()
 
 
 def load_returns_100_data(runs_dir):
@@ -83,23 +90,29 @@ def subplot_returns_100(ax, env, data, lines, timesteps=-1):
 
 
 def plot_family_performance(parent_runs_dir, env):
-    data = get_family_performance(parent_runs_dir + "/" + env)
-    lines = {}
+    data = get_family_performance(parent_runs_dir + "/" + env, env)
     fig, axes = plt.subplots(1, 1, figsize=(10, 5))
 
-    for i, fam in enumerate(sorted(data.keys())):
-        subplot_family_returns(axes, data[fam], fam)
+    max_performance = [
+        np.max(data[fam][np.where(data[fam][:, 0] <= 1e7), 1]) for fam in data
+    ]
+    order = list(reversed(sorted(zip(max_performance, data.keys()))))
+
+    os.makedirs(f"storage/plots/returns/{env}", exist_ok=True)
+    with open(f"storage/plots/returns/{env}/order.txt", "w") as f:
+        f.writelines([fam + "\n" for perf, fam in order])
+
+    for perf, fam in order:
+        subplot_family_returns(axes, data[fam], fam, fam)
     plt.xlabel("Training Frames")
     plt.ylabel("Return")
     plt.title(f"{env} performance")
     plt.legend(loc="upper left")
-    os.makedirs(f"storage/plots/returns/{env}", exist_ok=True)
-    plt.savefig(
-        f"storage/plots/returns/{env}/all_family_returns.png", bbox_inches="tight"
-    )
+    plt.savefig(f"storage/plots/returns/{env}_family_returns.png", bbox_inches="tight")
+    plt.close()
 
 
-def get_family_performance(runs_parent_dir):
+def get_family_performance(runs_parent_dir, env):
     final_data = {}
     for fam in model_locations:
         data = load_returns_100_data(runs_parent_dir + f"/{fam}")
@@ -108,8 +121,8 @@ def get_family_performance(runs_parent_dir):
         if len(data.keys()) == 0:
             continue
 
-        for key in data["SpaceInvadersToybox"]:
-            plist.append(data["SpaceInvadersToybox"][key])
+        for key in data[env + "Toybox"]:
+            plist.append(data[env + "Toybox"][key])
 
         shapes = map(lambda x: np.shape(x), plist)
         m = max(shapes)
@@ -123,12 +136,12 @@ def get_family_performance(runs_parent_dir):
     return final_data
 
 
-def subplot_family_returns(ax, data, label, timesteps=-1):
+def subplot_family_returns(ax, data, label, fam, timesteps=-1):
     t = data[:, 0]
     mean = data[:, 1]
     std = data[:, 2]
 
-    (line,) = ax.plot(t, mean, label=label)
+    (line,) = ax.plot(t, mean, label=label, color=colorMap[fam])
     ax.fill_between(t, mean + std, mean - std, alpha=0.2, color=line.get_color())
     ax.set_title(label)
     ax.set_xlabel("timesteps")

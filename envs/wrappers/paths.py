@@ -23,3 +23,12 @@ def get_start_state_path(state_num, use_trajectory_starts, environment):
     prefix = "trajectory_" if use_trajectory_starts else ""
     os.makedirs(f"storage/states/{prefix}starts/{environment}", exist_ok=True)
     return f"storage/states/{prefix}starts/{environment}/{state_num}.json"
+
+
+def get_num_interventions(environment):
+    if environment == "SpaceInvaders":
+        return 88
+    if environment == "Amidar":
+        return 69
+    if environment == "Breakout":
+        return 38  # 42

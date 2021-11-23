@@ -26,3 +26,20 @@ Typically results will be found in `storage/results`.
 ## Formatting
 
 Please use the `black` formatting so we don't have big diffs due to people using different autoformatters.
+
+## Gypsum
+
+Running jobs GPU compatible _interactive_ nodes, use
+```bash
+srun --pty --gres=gpu:1 bash
+```
+and execute whatever code you want to.
+
+Running batch jobs, use
+```
+sbatch runners/scripts/intervention_experiment.sh
+```
+or for training, run
+```
+python -m runners.src.run_experiment
+```

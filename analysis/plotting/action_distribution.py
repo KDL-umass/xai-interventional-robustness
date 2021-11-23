@@ -2,6 +2,8 @@ import os
 
 import matplotlib
 
+from envs.wrappers.paths import get_num_interventions
+
 font = {"size": 15}
 
 matplotlib.rc("font", **font)
@@ -130,6 +132,9 @@ if __name__ == "__main__":
     jsdivsampling = True
     folder = "intervention_js_div" if jsdivsampling else "intervention_action_dists"
 
+    environment = "SpaceInvaders"
+    nintv = get_num_interventions(environment)
+
     for fam in ["a2c", "dqn", "ddqn", "c51", "rainbow"]:
         if use_trajectory_starts:
             dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
@@ -137,7 +142,7 @@ if __name__ == "__main__":
             dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
 
         vdata = np.loadtxt(dir + "/vanilla.txt")
-        data = np.loadtxt(dir + "/88_interventions.txt")
+        data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
         plot_js_divergence_matrix(
             data,
             vdata,

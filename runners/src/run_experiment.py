@@ -26,15 +26,18 @@ test_episodes = 100
 loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
 #loadfile=""
 
+if env_name == "SpaceInvaders":
+    custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
+elif env_name == "Amidar":
+    custom_wrapper = customAmidarResetWrapper(0, -1, 3, False)
+elif env_name == "Breakout":
+    custom_wrapper = customBreakoutResetWrapper(0, -1, 3, False)
 
-def main():   
+
+def main():
     if toybox:
         env = ToyboxEnvironment(
-            env_name + "Toybox",
-            device=device,
-            custom_wrapper=customBreakoutResetWrapper(
-                state_num=0, intv=-1, lives=3, use_trajectory_starts=False
-            ),
+            env_name + "Toybox", device=device, custom_wrapper=custom_wrapper
         )
     else:
         env = AtariEnvironment(env_name, device=device)

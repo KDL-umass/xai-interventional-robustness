@@ -205,7 +205,7 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         prev = count
         count = get_flip_shield_icons(env, state_num, count, use_trajectory_starts)
         print(f"Interventions {prev}-{count-1} flip shield icons vertically.")
-        print(f"Created {count} intervention states for state {state_num} in `{path}`.")
+        print(f"Created {count} intervention states for state {state_num} in `{dir}`.")
     return count
 
 
@@ -252,4 +252,6 @@ if __name__ == "__main__":
 
     num_states = 2
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
-    sample_start_states_from_trajectory(agent, num_states, "SpaceInvaders")
+    sample_start_states_from_trajectory(
+        agent, num_states, "SpaceInvaders", device="cpu"
+    )

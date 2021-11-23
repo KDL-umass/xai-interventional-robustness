@@ -100,10 +100,12 @@ def sample_start_states(num_states, horizon, environment):
         with open(get_start_state_path(state_num, False, environment), "w") as f:
             json.dump(state, f)
 
-    print(f"Created {num_states} start states.")
+    print(
+        f"Created {num_states} start states near {get_start_state_path(state_num, False, environment)}"
+    )
 
 
-def sample_start_states_from_trajectory(agent, num_states, environment):
+def sample_start_states_from_trajectory(agent, num_states, environment, device):
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     elif environment == "Amidar":
@@ -114,7 +116,7 @@ def sample_start_states_from_trajectory(agent, num_states, environment):
         raise ValueError("Unknown environment specified.")
 
     print(environment)
-    env = ToyboxEnvironment(environment + "Toybox", passThroughWrapper)
+    env = ToyboxEnvironment(environment + "Toybox", passThroughWrapper, device=device)
 
     obs = env.reset()
     action, _ = agent.act(obs)
@@ -171,4 +173,6 @@ def sample_start_states_from_trajectory(agent, num_states, environment):
     with open(get_start_state_path(0, True, environment), "w") as f:
         json.dump(state, f)
 
-    print(f"Created {num_states} start states from trajectory.")
+    print(
+        f"Created {num_states} start states from trajectory near {get_start_state_path(0, True, environment)}"
+    )
