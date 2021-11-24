@@ -41,13 +41,16 @@ def main():
 
     agents = [
         # a2c.device(device),
-        dqn.device(device),
+        # dqn.device(device),
         # vqn.device(device),
         # vac.device(device),
         # vpg.device(device),
         # vsarsa.device(device),
         # vqn.device(device)
         # ppo.device(device)
+        # rainbow.device(device)
+        # c51.device(device)
+        ddqn.device(device)
     ]
 
     agents = list(np.repeat(agents, agent_replicate_num))
@@ -60,7 +63,7 @@ def main():
             test_episodes=test_episodes,
             logdir=logdir,
             write_loss=True,
-            # loadfile="",
+            loadfile="",
             sbatch_args={"partition": "1080ti-long"},
         )
     else:
