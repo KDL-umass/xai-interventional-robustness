@@ -11,17 +11,21 @@ from envs.wrappers.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 import numpy as np
+from glob import glob
 
-env_name = "Breakout"
+env_name = "SpaceInvaders"
 device = "cuda"
 frames = 1e7 + 1
 render = False
 logdir = "runs"
 writer = "tensorboard"
 toybox = True
-agent_replicate_num = 14
+agent_replicate_num = 1
 test_episodes = 100
-
+nodelist = "node153"
+# loadfile = "/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots/vsarsa_1e9dc70_2021-10-20_17:15:51_428966/"
+# loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
+loadfile = "/mnt/nfs/scratch1/kavery/si_ppo_snapshots"
 
 if env_name == "SpaceInvaders":
     custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
@@ -42,40 +46,48 @@ def main():
     agents = [
         # a2c.device(device),
         # dqn.device(device),
-        # vqn.device(device),
-        # vac.device(device),
-        # vpg.device(device),
         # vsarsa.device(device),
-        # vqn.device(device)
-        # ppo.device(device)
-        # rainbow.device(device)
-        # c51.device(device)
-        ddqn.device(device)
+        # vqn.device(device),
+        # dqn.device(device),
+        # ppo.device(device),
+        # vsarsa.device(device),
+        # vqn.device(device),
+        ppo.device(device),
+        # rainbow.device(device),
+        # c51.device(device),
+        # ddqn.device(device),
     ]
 
     agents = list(np.repeat(agents, agent_replicate_num))
 
-    if device == "cuda":
-        SlurmExperiment(
-            agents,
-            env,
-            frames,
-            test_episodes=test_episodes,
-            logdir=logdir,
-            write_loss=True,
-            loadfile="",
-            sbatch_args={"partition": "1080ti-long"},
-        )
-    else:
-        run_experiment(
-            agents,
-            env,
-            frames,
-            render=render,
-            logdir=logdir,
-            writer=writer,
-            test_episodes=test_episodes,
-        )
+    loadfiles = glob(loadfile + "/*/")
+    if len(loadfiles) == 1:
+        loadfiles = [loadfile]
+
+    for load in loadfiles:
+        if device == "cuda":
+            print(load + "preset10000000.pt")
+            SlurmExperiment(
+                agents,
+                env,
+                frames,
+                test_episodes=test_episodes,
+                logdir=logdir,
+                write_loss=True,
+                loadfile=load + "preset10000000.pt",
+                sbatch_args={"partition": "1080ti-long"},
+                nodelist=nodelist,
+            )
+        else:
+            run_experiment(
+                agents,
+                env,
+                frames,
+                render=render,
+                logdir=logdir,
+                writer=writer,
+                test_episodes=test_episodes,
+            )
 
 
 if __name__ == "__main__":
