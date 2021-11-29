@@ -46,4 +46,4 @@ def get_js_divergence_matrix(data, vanilla):
     nmat[:, 0] = n_van_mat
     nmat[:, 1:] = n_intv_mat
 
-    return mat, nmat, van_mat, intv_mat
+    return mat, nmat, van_mat, intv_mat, n_intv_mat

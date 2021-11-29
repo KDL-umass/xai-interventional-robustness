@@ -81,6 +81,8 @@ def subplot_returns_100(ax, env, data, lines, timesteps=-1, colorMapFam=None):
         else:
             if colorMapFam is not None:
                 color = colorMap[colorMapFam]
+            else:
+                color = None
             (line,) = ax.plot(x, mean, label=agent, color=color)
             lines[agent] = line
         ax.fill_between(
@@ -127,22 +129,27 @@ def get_family_performance(runs_parent_dir, env):
         for key in data[env + "Toybox"]:
             plist.append(data[env + "Toybox"][key])
 
+        print(env, fam)
         shapes = map(lambda x: np.shape(x), plist)
-        m = max(shapes)
-        avg = np.zeros(m)
-
+        print("shapes", list(shapes))
         avg = np.concatenate(plist)
-        avg = np.sort(avg, axis=0)
-        avg = np.sort(avg, axis=0)
+        order = np.argsort(avg[:, 0])
+        avg = avg[order, :]
+        print(avg.shape)
+
+        # try to do window averaging ???
+        # avg = np.array(list(map(np.hsplit(avg, 5), lambda x: np.mean(x, axis=0))))
 
         final_data[fam] = avg
     return final_data
 
 
 def subplot_family_returns(ax, data, label, fam, timesteps=-1):
-    t = data[:, 0]
-    mean = data[:, 1]
-    std = data[:, 2]
+    mask = data[:, 0] <= 1e7
+    t = data[mask, 0]
+    mean = data[mask, 1]
+    std = data[mask, 2]
+    print(min(t), max(t))
 
     (line,) = ax.plot(t, mean, label=label, color=colorMap[fam])
     ax.fill_between(t, mean + std, mean - std, alpha=0.2, color=line.get_color())
@@ -175,3 +182,5 @@ if __name__ == "__main__":
 
     for env in supported_environments:
         plot_family_performance("storage/models/", env)
+
+    # get_family_performance("storage/models/Amidar", "Amidar")
