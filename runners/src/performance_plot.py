@@ -1,4 +1,5 @@
 import os
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -66,7 +67,7 @@ def load_returns_100_data(runs_dir):
     return data
 
 
-def subplot_returns_100(ax, env, data, lines, timesteps=-1):
+def subplot_returns_100(ax, env, data, lines, timesteps=-1, colorMapFam=None):
     for agent in data:
         agent_data = data[agent]
         x = agent_data[:, 0]
@@ -79,19 +80,26 @@ def subplot_returns_100(ax, env, data, lines, timesteps=-1):
         if agent in lines:
             ax.plot(x, mean, label=agent, color=lines[agent].get_color())
         else:
-            (line,) = ax.plot(x, mean, label=agent)
+            if colorMapFam is not None:
+                color = colorMap[colorMapFam]
+            else:
+                color = None
+            (line,) = ax.plot(x, mean, label=agent, color=color)
             lines[agent] = line
         ax.fill_between(
             x, mean + std, mean - std, alpha=0.2, color=lines[agent].get_color()
         )
         ax.set_title(env)
         ax.set_xlabel("timesteps")
-        ax.ticklabel_format(style="sci", axis="x", scilimits=(0, 5))
+        if colorMapFam is None:
+            ax.ticklabel_format(style="sci", axis="x", scilimits=(0, 5))
 
 
 def plot_family_performance(parent_runs_dir, env):
+    font = {"size": 14}
+    matplotlib.rc("font", **font)
     data = get_family_performance(parent_runs_dir + "/" + env, env)
-    fig, axes = plt.subplots(1, 1, figsize=(10, 5))
+    fig, axes = plt.subplots(1, 1, figsize=(20, 10))
 
     max_performance = [
         np.max(data[fam][np.where(data[fam][:, 0] <= 1e7), 1]) for fam in data
@@ -124,22 +132,47 @@ def get_family_performance(runs_parent_dir, env):
         for key in data[env + "Toybox"]:
             plist.append(data[env + "Toybox"][key])
 
+        print(env, fam)
         shapes = map(lambda x: np.shape(x), plist)
-        m = max(shapes)
-        avg = np.zeros(m)
-
+        print("shapes", list(shapes))
         avg = np.concatenate(plist)
-        avg = np.sort(avg, axis=0)
-        avg = np.sort(avg, axis=0)
+        order = np.argsort(avg[:, 0])
+        avg = avg[order, :]
+        print(avg.shape)
+
+        # try to do window averaging ???
+        # avg = np.array(list(map(np.hsplit(avg, 5), lambda x: np.mean(x, axis=0))))
 
         final_data[fam] = avg
     return final_data
 
 
+def get_checkpoint_performances(runs_dir, env, fam, checkpoints):
+    data = load_returns_100_data(runs_dir + f"/{fam}")
+    data = data[env + "Toybox"]
+    plist = np.zeros((len(data.keys()), len(checkpoints)))  # models x checkpoints
+
+    for m, key in enumerate(data):  # for each model
+        for c, check in enumerate(checkpoints):
+            d = data[key]
+            idx = d[:, 0] >= check
+            if len(d[idx, 1]) == 0:
+                plist[m, c] = max(d[:, 1])
+            else:
+                plist[m, c] = d[idx, 1][0]  # just get first score after checkpoint
+
+    # collapse (column-wise) to just checkpoints
+    plist = np.mean(plist, axis=0)
+
+    return plist
+
+
 def subplot_family_returns(ax, data, label, fam, timesteps=-1):
-    t = data[:, 0]
-    mean = data[:, 1]
-    std = data[:, 2]
+    mask = data[:, 0] <= 1e7
+    t = data[mask, 0]
+    mean = data[mask, 1]
+    std = data[mask, 2]
+    print(min(t), max(t))
 
     (line,) = ax.plot(t, mean, label=label, color=colorMap[fam])
     ax.fill_between(t, mean + std, mean - std, alpha=0.2, color=line.get_color())
@@ -172,3 +205,5 @@ if __name__ == "__main__":
 
     for env in supported_environments:
         plot_family_performance("storage/models/", env)
+
+    # get_family_performance("storage/models/Amidar", "Amidar")

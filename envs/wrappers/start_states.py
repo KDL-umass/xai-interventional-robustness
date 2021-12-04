@@ -150,7 +150,9 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
 
         obs = env.reset()
         env.toybox.write_state_json(state)
-        for _ in range(5):
+
+        randomWalkLength = 0  # 5
+        for _ in range(randomWalkLength):
             obs, _, done, _ = env.step(random_agent.get_action(obs))
 
             if (

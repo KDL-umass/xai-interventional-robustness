@@ -1,4 +1,13 @@
 import numpy as np
+from analysis.src.js_divergence import get_js_divergence_matrix
+from envs.wrappers.paths import get_num_interventions
+
+
+from runners.src.run_intervention_eval import (
+    supported_environments,
+    model_names,
+    checkpoints,
+)
 
 
 def print_image_name_table(families, env):
@@ -48,3 +57,49 @@ def print_values_table(
     print("\\end{tabular}")
 
     return table
+
+
+def makeTables(nAgents=11, nStates=30):
+    vanilla_dict = {}
+    unnormalized_dict = {}
+    normalized_dict = {}
+
+    for env in supported_environments:
+        nintv = get_num_interventions(env)
+
+        vanilla_dict[env] = {}
+        unnormalized_dict[env] = {}
+        normalized_dict[env] = {}
+
+        for fam in model_names:
+            vanilla_dict[env][fam] = {}
+            unnormalized_dict[env][fam] = {}
+            normalized_dict[env][fam] = {}
+
+            for check in checkpoints:
+                dir = f"storage/results/intervention_js_div/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
+
+                vdata = np.loadtxt(dir + f"/vanilla.txt")
+                data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
+
+                mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(
+                    data, vdata
+                )
+
+                vanilla_dict[env][fam][check] = van_mat.mean()
+                normalized_dict[env][fam][check] = n_intv_mat.mean()
+                unnormalized_dict[env][fam][check] = intv_mat.mean()
+
+        print_image_name_table(model_names, env)
+        print_values_table(
+            env,
+            model_names,
+            checkpoints,
+            vanilla_dict,
+            unnormalized_dict,
+            normalized_dict,
+        )
+
+
+if __name__ == "__main__":
+    makeTables()

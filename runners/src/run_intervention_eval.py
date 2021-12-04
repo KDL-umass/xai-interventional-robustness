@@ -25,6 +25,7 @@ def model_root(model, env):
 
 model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
 supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
+checkpoints = [10 ** i for i in range(2, 8)]
 
 # supported_environments = ["SpaceInvaders"]
 # model_names = ["dqn", "vsarsa", "vqn", "rainbow"]
@@ -52,7 +53,6 @@ model_locations = {
 
 # pprint(model_locations)
 
-checkpoints = [100 * 10 ** i for i in range(6)]
 print(checkpoints)
 
 
