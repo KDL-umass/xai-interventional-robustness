@@ -1,4 +1,5 @@
 import os
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -95,8 +96,10 @@ def subplot_returns_100(ax, env, data, lines, timesteps=-1, colorMapFam=None):
 
 
 def plot_family_performance(parent_runs_dir, env):
+    font = {"size": 14}
+    matplotlib.rc("font", **font)
     data = get_family_performance(parent_runs_dir + "/" + env, env)
-    fig, axes = plt.subplots(1, 1, figsize=(10, 5))
+    fig, axes = plt.subplots(1, 1, figsize=(20, 10))
 
     max_performance = [
         np.max(data[fam][np.where(data[fam][:, 0] <= 1e7), 1]) for fam in data
@@ -142,6 +145,26 @@ def get_family_performance(runs_parent_dir, env):
 
         final_data[fam] = avg
     return final_data
+
+
+def get_checkpoint_performances(runs_dir, env, fam, checkpoints):
+    data = load_returns_100_data(runs_dir + f"/{fam}")
+    data = data[env + "Toybox"]
+    plist = np.zeros((len(data.keys()), len(checkpoints)))  # models x checkpoints
+
+    for m, key in enumerate(data):  # for each model
+        for c, check in enumerate(checkpoints):
+            d = data[key]
+            idx = d[:, 0] >= check
+            if len(d[idx, 1]) == 0:
+                plist[m, c] = max(d[:, 1])
+            else:
+                plist[m, c] = d[idx, 1][0]  # just get first score after checkpoint
+
+    # collapse (column-wise) to just checkpoints
+    plist = np.mean(plist, axis=0)
+
+    return plist
 
 
 def subplot_family_returns(ax, data, label, fam, timesteps=-1):

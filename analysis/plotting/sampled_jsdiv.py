@@ -22,8 +22,12 @@ from runners.src.run_intervention_eval import (
 from runners.src.performance_plot import *
 
 
-def subplot_js_divergence_matrix(ax, data, vanilla, normalize):
+def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
+    font = {"size": 4}
+    matplotlib.rc("font", **font)
+
     mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(data, vanilla)
+
     if normalize:
         mat = nmat
 
@@ -35,11 +39,17 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize):
     else:
         im.set_clim(0, 1.0)
 
-    ax.set_xticks(list(range(0, mat.shape[1], 10)))
-    ax.set_xticklabels(list(range(0, mat.shape[1], 10)))
+    ax.set_xticks(list(range(0, mat.shape[1], 20)))
+    ax.set_xticklabels(list(range(0, mat.shape[1], 20)))
+
     ax.set_yticks(list(range(0, mat.shape[0] + 1, 10)))
     ax.set_yticklabels(list(range(0, mat.shape[0] + 1, 10)))
+
     ax.tick_params(left=False, bottom=False)
+
+    if title != "":
+        ax.set_xlabel(title)
+        ax.xaxis.set_label_position("top")
 
 
 def plot_js_divergence_matrix(
@@ -51,7 +61,7 @@ def plot_js_divergence_matrix(
 
     ax = plt.gca()
 
-    im = plt.matshow(mat, interpolation="none")
+    im = plt.matshow(mat, interpolation="none", aspect="auto")
 
     if normalize:
         im.set_clim(-1.0, 1.0)
@@ -144,6 +154,9 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
     for f, fam in enumerate(model_names):
         # add performance at rightmost side
         data = load_returns_100_data(f"storage/models/{env}/{fam}")[env + "Toybox"]
+        performance = get_checkpoint_performances(
+            f"storage/models/{env}", env, fam, checkpoints
+        )
 
         # add jsdiv plots
         for c, check in enumerate(checkpoints):
@@ -154,8 +167,9 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
                 ax.set_ylabel(f"{fam.upper()}")
                 ax.yaxis.set_label_position("right")
             if f == 0:
-                ax.set_xlabel(f"{check} Frames")
-                ax.xaxis.set_label_position("top")
+                ax.set_title(f"{check} Frames")
+                # ax.set_xlabel(f"{check} Frames")
+                # ax.xaxis.set_label_position("top")
             if f == len(model_names) - 1:
                 ax.tick_params(labelbottom=True)
                 ax.set_xlabel(f"Intervention")
@@ -167,25 +181,30 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
             vdata = np.loadtxt(dir + f"/vanilla.txt")
             data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
 
-            subplot_js_divergence_matrix(ax, data, vdata, normalized)
+            subplot_js_divergence_matrix(
+                ax, data, vdata, normalized, title=format(performance[c], ".3E")
+            )
 
             if env == "Breakout":
-                matplotlib.rcParams["figure.figsize"] = 90, 50
+                matplotlib.rcParams["figure.figsize"] = 100, 100
             else:
                 matplotlib.rcParams["figure.figsize"] = 100, 50
 
             cmap = rcParams["image.cmap"]
 
-            topshift = {"Breakout": 0.92, "Amidar": 0.96, "SpaceInvaders": 1.025}[env]
-            hpad = {"Breakout": 1, "Amidar": -5, "SpaceInvaders": -15}
-            wpad = {"Breakout": -20, "Amidar": 1, "SpaceInvaders": 1}
+            topshift = {"Breakout": 0.89, "Amidar": 0.90, "SpaceInvaders": 0.91}[env]
 
             plt.figure(fig.number)
-            plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
             if env == "Breakout":
-                fig.subplots_adjust(right=0.95, top=topshift)
+                fig.subplots_adjust(right=0.85, top=topshift)
             else:
                 fig.subplots_adjust(right=0.85, top=topshift)
+
+            # hpad = {"Breakout": 1, "Amidar": -5, "SpaceInvaders": -15}
+            # wpad = {"Breakout": -20, "Amidar": 1, "SpaceInvaders": 1}
+            # plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
+            # plt.tight_layout()
+            # plt.constrained_layout()
 
             cbar_ax = fig.add_axes([0.89, 0.09, 0.025, 0.825])
             cbar_ax.set_title("JS Divergence")
@@ -203,14 +222,17 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
                 bbox_inches="tight",
                 dpi=600,
             )
+            plt.subplot_tool(targetfig=fig)
             plt.close(fig)
 
 
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
+        print(f"Making megaplot for {sys.argv[1]}")
         # megaPlot(True)
         megaPlot(False)
     else:
+        print("Plotting individual plots")
         individualPlots(False)
         individualPlots(True)
