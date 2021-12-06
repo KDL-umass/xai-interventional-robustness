@@ -13,19 +13,19 @@ from envs.wrappers.all_toybox_wrapper import (
 import numpy as np
 from glob import glob
 
-env_name = "SpaceInvaders"
+env_name = "Breakout"
 device = "cuda"
-frames = 1e7 + 1
+frames = 12e6 + 1
 render = False
 logdir = "runs"
 writer = "tensorboard"
 toybox = True
-agent_replicate_num = 1
-test_episodes = 100
-nodelist = "node153"
-# loadfile = "/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots/vsarsa_1e9dc70_2021-10-20_17:15:51_428966/"
-# loadfile="/mnt/nfs/scratch1/kavery/breakout_vsarsa_snapshots"
-loadfile = "/mnt/nfs/scratch1/kavery/si_ppo_snapshots"
+agent_replicate_num = 12
+test_episodes = 150
+nodelist = ""
+loadfile = False  # replace with specific path if continuing from checkpoint
+# e.g. loadfile = "/mnt/nfs/scratch1/kavery/si_ppo_snapshots"
+
 
 if env_name == "SpaceInvaders":
     custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
@@ -52,7 +52,7 @@ def main():
         # ppo.device(device),
         # vsarsa.device(device),
         # vqn.device(device),
-        ppo.device(device),
+        # ppo.device(device),
         # rainbow.device(device),
         # c51.device(device),
         # ddqn.device(device),
@@ -60,9 +60,12 @@ def main():
 
     agents = list(np.repeat(agents, agent_replicate_num))
 
-    loadfiles = glob(loadfile + "/*/")
-    if len(loadfiles) == 1:
-        loadfiles = [loadfile]
+    if loadfile:
+        loadfiles = glob(loadfile + "/*/")
+        if len(loadfiles) == 1:
+            loadfiles = [loadfile]
+    else:
+        loadfiles = [""]
 
     for load in loadfiles:
         if device == "cuda":
@@ -74,7 +77,7 @@ def main():
                 test_episodes=test_episodes,
                 logdir=logdir,
                 write_loss=True,
-                loadfile=load + "preset10000000.pt",
+                loadfile="" if load == "" else load + "preset10000000.pt",
                 sbatch_args={"partition": "1080ti-long"},
                 nodelist=nodelist,
             )
