@@ -13,7 +13,7 @@ from envs.wrappers.all_toybox_wrapper import (
 import numpy as np
 from glob import glob
 
-env_name = "Breakout"
+env_name = "SpaceInvaders"
 device = "cuda"
 frames = 12e6 + 1
 render = False
@@ -46,7 +46,7 @@ def main():
     agents = [
         # a2c.device(device),
         # dqn.device(device),
-        # vsarsa.device(device),
+        vsarsa.device(device),
         # vqn.device(device),
         # dqn.device(device),
         # ppo.device(device),
@@ -69,7 +69,8 @@ def main():
 
     for load in loadfiles:
         if device == "cuda":
-            print(load + "preset10000000.pt")
+            if load != "":
+                print(load + "preset10000000.pt")
             SlurmExperiment(
                 agents,
                 env,
