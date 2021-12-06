@@ -36,10 +36,16 @@ srun --pty --gres=gpu:1 bash
 and execute whatever code you want to.
 
 Running batch jobs, use
-```
+```bash
 sbatch runners/scripts/intervention_experiment.sh
 ```
 or for training, run
-```
+```bash
 python -m runners.src.run_experiment
+```
+
+Removing `events*` files that take up a lot of storage.
+
+```bash
+rm $(find -name events*)
 ```
