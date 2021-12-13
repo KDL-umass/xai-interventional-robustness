@@ -13,29 +13,27 @@ from envs.wrappers.all_toybox_wrapper import (
 import numpy as np
 from glob import glob
 
-env_name = "SpaceInvaders"
 device = "cuda"
-frames = 12e6 + 1
+frames = 1e7 + 1
 render = False
 logdir = "runs"
 writer = "tensorboard"
 toybox = True
-agent_replicate_num = 12
-test_episodes = 150
+agent_replicate_num = 1
+test_episodes = 100
 nodelist = ""
 loadfile = False  # replace with specific path if continuing from checkpoint
 # e.g. loadfile = "/mnt/nfs/scratch1/kavery/si_ppo_snapshots"
 
 
-if env_name == "SpaceInvaders":
-    custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
-elif env_name == "Amidar":
-    custom_wrapper = customAmidarResetWrapper(0, -1, 3, False)
-elif env_name == "Breakout":
-    custom_wrapper = customBreakoutResetWrapper(0, -1, 3, False)
+def main(env_name, fam):
+    if env_name == "SpaceInvaders":
+        custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
+    elif env_name == "Amidar":
+        custom_wrapper = customAmidarResetWrapper(0, -1, 3, False)
+    elif env_name == "Breakout":
+        custom_wrapper = customBreakoutResetWrapper(0, -1, 3, False)
 
-
-def main():
     if toybox:
         env = ToyboxEnvironment(
             env_name + "Toybox", device=device, custom_wrapper=custom_wrapper
@@ -43,21 +41,18 @@ def main():
     else:
         env = AtariEnvironment(env_name, device=device)
 
-    agents = [
-        # a2c.device(device),
-        # dqn.device(device),
-        vsarsa.device(device),
-        # vqn.device(device),
-        # dqn.device(device),
-        # ppo.device(device),
-        # vsarsa.device(device),
-        # vqn.device(device),
-        # ppo.device(device),
-        # rainbow.device(device),
-        # c51.device(device),
-        # ddqn.device(device),
-    ]
-
+    agent = {
+        "a2c": a2c,
+        "c51": c51,
+        "dqn": dqn,
+        "ddqn": ddqn,
+        "ppo": ppo,
+        "vsarsa": vsarsa,
+        "vqn": vqn,
+        "vqn": vqn,
+        "rainbow": rainbow,
+    }[fam]
+    agents = [agent.device(device)]
     agents = list(np.repeat(agents, agent_replicate_num))
 
     if loadfile:
@@ -79,7 +74,7 @@ def main():
                 logdir=logdir,
                 write_loss=True,
                 loadfile="" if load == "" else load + "preset10000000.pt",
-                sbatch_args={"partition": "1080ti-long"},
+                sbatch_args={"partition": "titanx-long"},
                 nodelist=nodelist,
             )
         else:
@@ -95,4 +90,25 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Train agent of specified type on environment."
+    )
+    parser.add_argument(
+        "--env",
+        nargs=1,
+        type=str,
+        help="Environment name: SpaceInvaders, Amidar, or Breakout",
+    )
+    parser.add_argument(
+        "--family",
+        nargs=1,
+        type=str,
+        help="Agent family:  a2c,c51, dqn, ddqn, ppo, rainbow, vsarsa, vqn",
+    )
+    args = parser.parse_args()
+
+    assert args.env is not None, "ENV must be specified"
+    assert args.family is not None, "FAMILY must be specified"
+
+    print(f"Training {args.family[0]} on {args.env[0]}")
+    main(args.env[0], args.family[0])
