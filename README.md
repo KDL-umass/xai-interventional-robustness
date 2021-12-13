@@ -37,6 +37,9 @@ Typically results will be found in `storage/results`.
 
 ## Training Agents
 
+Mark the cell you decide to take on in this spreadsheet as "<YourName> - in progress":
+[https://docs.google.com/spreadsheets/d/1XGPn3OLnPyjsCNA4JIzWuXQhh1-EeAExlZJE0XR1Lgo/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1XGPn3OLnPyjsCNA4JIzWuXQhh1-EeAExlZJE0XR1Lgo/edit?usp=sharing)
+
 To see available commands, run
 ```bash
 python -m runners.src.run_experiment --help
@@ -52,7 +55,7 @@ When this is done, make sure that the `out/*.err` file created for that Slurm jo
 Error: `RuntimeError: CUDA driver initialization failed, you might not have a CUDA gpu.`
 Repeat as necessary until 11 agents are successfuly training. 
 
-Don't worry if there are `rm: missing operand. Try 'rm --help' for more information.` errors in the `*.err` files, this is expected and not a problem.
+Don't worry if there are `rm: missing operand. Try 'rm --help' for more information.` errors in the `*.err` files, this is expected and not a problem. It's clearing out unused data so we don't run out of storage.
 
 Sometimes there are CUDA errors unless you run this command from an interactive node:
 ```bash
