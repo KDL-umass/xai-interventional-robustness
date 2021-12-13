@@ -33,6 +33,8 @@ def main(env_name, fam):
         custom_wrapper = customAmidarResetWrapper(0, -1, 3, False)
     elif env_name == "Breakout":
         custom_wrapper = customBreakoutResetWrapper(0, -1, 3, False)
+    else:
+        raise ValueError(f"Unrecognized env_name: {env_name}")
 
     if toybox:
         env = ToyboxEnvironment(
@@ -74,7 +76,7 @@ def main(env_name, fam):
                 logdir=logdir,
                 write_loss=True,
                 loadfile="" if load == "" else load + "preset10000000.pt",
-                sbatch_args={"partition": "titanx-long"},
+                sbatch_args={"partition": "1080ti-long"},
                 nodelist=nodelist,
             )
         else:
@@ -105,6 +107,8 @@ if __name__ == "__main__":
         type=str,
         help="Agent family:  a2c,c51, dqn, ddqn, ppo, rainbow, vsarsa, vqn",
     )
+    parser.add_argument("--experiment_id", type=int)
+
     args = parser.parse_args()
 
     assert args.env is not None, "ENV must be specified"

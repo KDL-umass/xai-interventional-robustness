@@ -48,7 +48,10 @@ Example: To train a single a2c agent on SpaceInvaders, run the following command
 python -m runners.src.run_experiment --env SpaceInvaders --family a2c
 ```
 
-When this is done, make sure that the `out/*.err` file created for that Slurm job did not error with CUDA error.
+When this is done, make sure that the `out/*.err` file created for that Slurm job did not error with CUDA error.\
+
+Error: `RuntimeError: CUDA driver initialization failed, you might not have a CUDA gpu.`
+
 Repeat as necessary until 11 agents are successfuly training.
 
 Sometimes there are CUDA errors unless you run this command from an interactive node:
