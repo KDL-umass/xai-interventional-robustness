@@ -40,6 +40,20 @@ Typically results will be found in `storage/results`.
 Mark the cell you decide to take on in this spreadsheet as "<YourName> - in progress":
 [https://docs.google.com/spreadsheets/d/1XGPn3OLnPyjsCNA4JIzWuXQhh1-EeAExlZJE0XR1Lgo/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1XGPn3OLnPyjsCNA4JIzWuXQhh1-EeAExlZJE0XR1Lgo/edit?usp=sharing)
 
+### Env Setup
+
+To set up the environment, we have to initialize the start states as follows:
+
+```bash
+python -m envs.wrappers.space_invaders.interventions.interventions
+python -m envs.wrappers.amidar.interventions.interventions
+python -m envs.wrappers.breakout.interventions.interventions
+```
+
+Now we can begin training.
+
+### Training
+
 To see available commands, run
 ```bash
 python -m runners.src.run_experiment --help
