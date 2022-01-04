@@ -1,7 +1,9 @@
 import numpy as np
 import torch
+import os
 
 from analysis.src.js_divergence import js_divergence
+import matplotlib.pyplot as plt
 
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
@@ -72,7 +74,7 @@ def collect_action_distributions(
     return dists
 
 
-def get_js_divergence(agent_family, agents, envs, env_labels):
+def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms=False):
     n = len(envs)
     m = len(agents)
     result_table = np.zeros((n, 4))  # env_labels + js_divergence = 4 cols
@@ -91,9 +93,38 @@ def get_js_divergence(agent_family, agents, envs, env_labels):
                 end="",
             )
 
+        if histograms: 
+            label_actions = np.argmax(actions, axis=1)
+            # print(label_actions)
+            str_label_actions = [str(i) for i in label_actions]
+            # print(env_labels[e])
+            with open(dir + f"/actions.csv", "a+") as file: 
+                file.write(str(env_labels[e][0]) + ", " + str(env_labels[e][1]) + ", " + ",".join(str_label_actions) + "\n")
+                # print(str(env_labels[e][0]) + ", " + str(env_labels[e][1]) + ", " + ",".join(str_label_actions) + "\n")
+
+            # create_histograms(dir)
+
         result_table[e, 3] = js_divergence(actions)
 
     return result_table
+
+def create_histograms(dir):
+    lines = np.genfromtxt(dir + f"/actions.csv", delimiter=',')
+
+    for line in lines:
+        state = line[0]
+        intervention = line[1]
+        actions = np.array(line[2:])
+
+        my_bins = [0,1,2,3,4,5,6]
+        h, _ = np.histogram(actions, bins=my_bins)
+        plt.bar(range(len(my_bins)-1),h, width=1, edgecolor='k')
+        plt.axis([-0.5, 5.5, 0, 10]) 
+
+        if not os.path.exists(os.getcwd() + "/" + dir + "/histograms"):
+            os.makedirs(os.getcwd() + "/" + dir + "/histograms")
+        plt.savefig(os.getcwd() + "/" + dir + "/histograms/" + str(state) + "_" + str(intervention) + ".png" )
+        plt.close()
 
 
 def get_action_distribution_header(envs, sample_jsdiv):
@@ -109,14 +140,14 @@ def get_action_distribution_header(envs, sample_jsdiv):
         return header
 
 
-def average_js_divergence(agent_family, agents, envs, env_labels, num_samples):
+def average_js_divergence(agent_family, agents, envs, env_labels, num_samples, dir, histograms):
     if agent_family in agent_family_that_selects_max_action:
         # only need to run one iteration
-        return get_js_divergence(agent_family, agents, envs, env_labels)
+        return get_js_divergence(agent_family, agents, envs, env_labels, dir, histograms)
 
     dists = []
     for i in range(num_samples):
-        dist = get_js_divergence(agent_family, agents, envs, env_labels)
+        dist = get_js_divergence(agent_family, agents, envs, env_labels, dir, histograms)
         dists.append(dist)
         print(f"\nAJD: Sampling {round(i / (num_samples-1) * 100)}% complete")
     print()
@@ -137,6 +168,7 @@ def evaluate_action_distributions(
     dist_type,
     device,
     dir,
+    histograms,
 ):
 
     if environment == "SpaceInvaders":
@@ -164,7 +196,7 @@ def evaluate_action_distributions(
 
     if sample_js_div:
         dists = average_js_divergence(
-            agent_family, agents, envs, env_labels, num_samples
+            agent_family, agents, envs, env_labels, num_samples, dir, histograms
         )
     else:
         dists = collect_action_distributions(
@@ -218,6 +250,7 @@ def evaluate_distributions(
         dist_type,
         device,
         dir,
+        histograms=True,
     )
 
     print("interventions")
@@ -234,6 +267,7 @@ def evaluate_distributions(
         dist_type,
         device,
         dir,
+        histograms=True,
     )
 
     pass
