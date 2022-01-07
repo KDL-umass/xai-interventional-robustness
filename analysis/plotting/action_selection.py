@@ -14,11 +14,21 @@ def create_histograms(env, fam, check, state, intv):
     srows = (data[:, 0] == state).astype(bool)
     irows = (data[:, 1] == intv).astype(bool)
     rows = srows * irows
-    d = data[rows]
-    actions = np.mean(d, axis=0)
 
-    my_bins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    d = data[rows, 2:]
+    print(d)
+    actions = np.mean(d, axis=0)
+    print(actions)
+
+    if env == "Amidar":
+        my_bins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    elif env == "Breakout":
+        my_bins = [0, 1, 2, 3]
+    elif env == "SpaceInvaders":
+        my_bins = [0, 1, 2, 3, 4, 5]
+
     h, _ = np.histogram(actions, bins=my_bins)
+    print(h)
     plt.bar(range(len(my_bins) - 1), h, width=1, edgecolor="k")
     plt.xlabel("Action")
     plt.ylabel("Frequency of Selection Among Trained Agents")
