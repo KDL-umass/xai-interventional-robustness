@@ -22,13 +22,6 @@ agent_family_that_selects_max_action = [
 ]
 
 
-def load_agent(dir, device):
-    path = dir + "/preset.pt"
-    agt = torch.load(path, map_location=torch.device(device))
-    agt = agt.test_agent()
-    return agt
-
-
 def policy_action_distribution(
     agent_family, agt, env, obs, samples, dist_type="analytic"
 ):
@@ -49,7 +42,7 @@ def policy_action_distribution(
                 actions[i] = act
             else:
                 actions[i] = act.detach().cpu().numpy()
-        dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
+        dist = [np.count_nonzero(actions == a) / samples for a in range(n)]
     else:
         raise ValueError("Dist unknown")
     return dist
@@ -93,13 +86,20 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
                 end="",
             )
 
-        if histograms: 
+        if histograms:
             label_actions = np.argmax(actions, axis=1)
             # print(label_actions)
             str_label_actions = [str(i) for i in label_actions]
             # print(env_labels[e])
-            with open(dir + f"/actions.csv", "a+") as file: 
-                file.write(str(env_labels[e][0]) + ", " + str(env_labels[e][1]) + ", " + ",".join(str_label_actions) + "\n")
+            with open(dir + f"/actions.csv", "a+") as file:
+                file.write(
+                    str(env_labels[e][0])
+                    + ", "
+                    + str(env_labels[e][1])
+                    + ", "
+                    + ",".join(str_label_actions)
+                    + "\n"
+                )
                 # print(str(env_labels[e][0]) + ", " + str(env_labels[e][1]) + ", " + ",".join(str_label_actions) + "\n")
 
             # create_histograms(dir)
@@ -108,22 +108,32 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
 
     return result_table
 
+
 def create_histograms(dir):
-    lines = np.genfromtxt(dir + f"/actions.csv", delimiter=',')
+    lines = np.genfromtxt(dir + f"/actions.csv", delimiter=",")
 
     for line in lines:
         state = line[0]
         intervention = line[1]
         actions = np.array(line[2:])
 
-        my_bins = [0,1,2,3,4,5,6]
+        my_bins = [0, 1, 2, 3, 4, 5, 6]
         h, _ = np.histogram(actions, bins=my_bins)
-        plt.bar(range(len(my_bins)-1),h, width=1, edgecolor='k')
-        plt.axis([-0.5, 5.5, 0, 10]) 
+        plt.bar(range(len(my_bins) - 1), h, width=1, edgecolor="k")
+        plt.axis([-0.5, 5.5, 0, 10])
 
         if not os.path.exists(os.getcwd() + "/" + dir + "/histograms"):
             os.makedirs(os.getcwd() + "/" + dir + "/histograms")
-        plt.savefig(os.getcwd() + "/" + dir + "/histograms/" + str(state) + "_" + str(intervention) + ".png" )
+        plt.savefig(
+            os.getcwd()
+            + "/"
+            + dir
+            + "/histograms/"
+            + str(state)
+            + "_"
+            + str(intervention)
+            + ".png"
+        )
         plt.close()
 
 
@@ -140,14 +150,20 @@ def get_action_distribution_header(envs, sample_jsdiv):
         return header
 
 
-def average_js_divergence(agent_family, agents, envs, env_labels, num_samples, dir, histograms):
+def average_js_divergence(
+    agent_family, agents, envs, env_labels, num_samples, dir, histograms
+):
     if agent_family in agent_family_that_selects_max_action:
         # only need to run one iteration
-        return get_js_divergence(agent_family, agents, envs, env_labels, dir, histograms)
+        return get_js_divergence(
+            agent_family, agents, envs, env_labels, dir, histograms
+        )
 
     dists = []
     for i in range(num_samples):
-        dist = get_js_divergence(agent_family, agents, envs, env_labels, dir, histograms)
+        dist = get_js_divergence(
+            agent_family, agents, envs, env_labels, dir, histograms
+        )
         dists.append(dist)
         print(f"\nAJD: Sampling {round(i / (num_samples-1) * 100)}% complete")
     print()

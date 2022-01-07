@@ -63,7 +63,6 @@ def load_returns_100_data(runs_dir):
                     returns100path = os.path.join(env_path, "returns100.csv")
                     if os.path.exists(returns100path):
                         add_data(agent, env, returns100path)
-
     return data
 
 

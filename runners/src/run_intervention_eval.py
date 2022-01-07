@@ -1,6 +1,7 @@
 import os
 import argparse
 import torch
+from pprint import pprint
 
 from runners.src.action_evaluation import *
 
@@ -24,8 +25,15 @@ def model_root(model, env):
 
 
 model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
+# model_names = ["vqn", "ppo"]
 supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
-checkpoints = [10 ** i for i in range(2, 8)]
+# supported_environments = ["SpaceInvaders"]
+# supported_environments = ["Amidar"]
+# supported_environments = ["Breakout"]
+# checkpoints = list(range(0, 100000, 10000))
+# checkpoints.extend(list(range(100000, 1000000, 100000)))
+# checkpoints.extend(list(range(1000000, 11000000, 1000000)))
+checkpoints = [50000, 100000, 500000, 1000000, 5000000, 10000000]
 
 # supported_environments = ["SpaceInvaders"]
 # model_names = ["dqn", "vsarsa", "vqn", "rainbow"]
@@ -53,7 +61,7 @@ model_locations = {
 
 # pprint(model_locations)
 
-print(checkpoints)
+# print(checkpoints)
 
 
 def load_agent(dir, device, checkpoint=None):
@@ -69,49 +77,6 @@ def load_agent(dir, device, checkpoint=None):
     return agt
 
 
-def policy_action_distribution(
-    agent_family, agt, env, obs, samples, dist_type="analytic"
-):
-    if dist_type == "analytic":
-        act, p_dist = agt.act(obs)
-        dist = p_dist.detach().cpu().numpy()
-
-        if agent_family in agent_family_that_selects_max_action:
-            idx = np.argmax(dist)
-            dist = np.zeros(dist.shape)
-            dist[idx] = 1.0
-    else:
-        n = env.action_space.n
-        actions = np.zeros((samples,))
-        for i in range(samples):
-            act, p_dist = agt.act(obs)
-            if type(act) == int:
-                actions[i] = act
-            else:
-                actions[i] = act.detach().cpu().numpy()
-        dist = [np.count_nonzero(actions == act) / samples for act in range(n)]
-    return dist
-
-
-def collect_action_distributions(
-    agent_family, agents, envs, env_labels, samples, dist_type
-):
-    n = len(envs) * len(agents)
-    dists = np.zeros((n, envs[0].action_space.n + 3))
-    row = 0
-    for a, agt in enumerate(agents):
-        for e, env in enumerate(envs):
-            dists[row, 0] = a
-            dists[row, 1:3] = env_labels[e]
-            dists[row, 3:] = policy_action_distribution(
-                agent_family, agt, env, env.reset(), samples, dist_type
-            )
-            row += 1
-            print(f"\r\rSampling: {round(row / n * 100)}% complete", end="")
-    print()
-    return dists
-
-
 def agent_setup(
     agent_family,
     environment,
@@ -122,6 +87,7 @@ def agent_setup(
     sample_js_div,
     device,
 ):
+    print(model_locations[agent_family][environment])
     agents = [
         load_agent(dir, device, checkpoint)
         for dir in model_locations[agent_family][environment]
@@ -203,6 +169,7 @@ def evaluate_interventions(agent_family, environment, device):
     js_div_samples = 30
 
     for checkpoint in checkpoints:
+        print("Checkpoint", checkpoint)
 
         agents, dir = agent_setup(
             agent_family,
