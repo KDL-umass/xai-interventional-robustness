@@ -87,12 +87,15 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
             )
 
         if histograms:
+            # print("n", envs[0].action_space.n)
+            # print("actions", actions)
             label_actions = np.argmax(actions, axis=1)
-            # print(label_actions)
+            # print("label_actions", label_actions)
             str_label_actions = [str(i) for i in label_actions]
-            # print(env_labels[e])
+            # print("str_label_actions", str_label_actions)
+            # print("env_labels[e]", env_labels[e])
             with open(dir + f"/actions.csv", "a+") as file:
-                file.write(
+                output = (
                     str(env_labels[e][0])
                     + ", "
                     + str(env_labels[e][1])
@@ -100,6 +103,8 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
                     + ",".join(str_label_actions)
                     + "\n"
                 )
+                # print("out", output)
+                file.write(output)
                 # print(str(env_labels[e][0]) + ", " + str(env_labels[e][1]) + ", " + ",".join(str_label_actions) + "\n")
 
             # create_histograms(dir)
