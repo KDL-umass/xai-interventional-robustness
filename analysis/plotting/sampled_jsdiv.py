@@ -39,6 +39,11 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
     ax.spines["right"].set_color("white")
     ax.spines["left"].set_color("white")
 
+    ax.spines["bottom"].set_linewidth(0)
+    ax.spines["top"].set_linewidth(0)
+    ax.spines["right"].set_linewidth(0)
+    ax.spines["left"].set_linewidth(0)
+
     if normalize:
         im.set_clim(-1.0, 1.0)
     else:
