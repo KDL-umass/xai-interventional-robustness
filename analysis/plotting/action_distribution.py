@@ -146,13 +146,13 @@ if __name__ == "__main__":
         plot_js_divergence_matrix(
             data,
             vdata,
-            f"Normalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
+            f"Normalized JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=True,
         )
         plot_js_divergence_matrix(
             data,
             vdata,
-            f"Unnormalized Sampled JS Divergence over Actions for {fam}, {n_agents} Agents",
+            f"JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=False,
         )
         plot_max_action_divergence_matrix(

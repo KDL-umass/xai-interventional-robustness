@@ -127,8 +127,9 @@ def individualPlots(normalized):
                 vdata = np.loadtxt(dir + f"/vanilla.txt")
                 data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
 
-                type = "Normalized" if normalized else "Unnormalized"
-                name = f"{type} JS Divergence over Actions\nfor {fam} at {check} frames, {env}"
+                title_type = "Normalized " if normalized else ""
+                file_type = "normalized" if normalized else "unnormalized"
+                name = f"{title_type}JS Divergence over Actions\nfor {fam} at {check} frames, {env}"
                 plot_js_divergence_matrix(
                     data,
                     vdata,
@@ -137,7 +138,7 @@ def individualPlots(normalized):
                     env,
                     family=fam,
                     checkpoint=check,
-                    fname=f"jsdiv_{fam}{check}_{type.lower()}",
+                    fname=f"jsdiv_{fam}{check}_{file_type}",
                 )
 
 
@@ -243,15 +244,16 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
             cbar_ax.tick_params(labelsize=8)
             print(f"plot, {f},{c}")
 
-    type = "Normalized" if normalized else "Unnormalized"
+    title_type = "Normalized " if normalized else ""
+    file_type = "normalized" if normalized else "unnormalized"
 
-    fig.suptitle(f"{type} JS Divergence over Actions: {env}", fontsize=11)
+    fig.suptitle(f"{title_type}JS Divergence over Actions: {env}", fontsize=11)
 
     plt.margins(0)
     framesXY = (0.025, 0.872)
     plt.annotate("Frames:", xy=framesXY, xytext=framesXY, textcoords="figure fraction")
     plt.savefig(
-        f"storage/plots/sampled_jsdivmat/{env}_{type.lower()}.png",
+        f"storage/plots/sampled_jsdivmat/{env}_{file_type}.png",
         bbox_inches="tight",
         dpi=600,
     )
