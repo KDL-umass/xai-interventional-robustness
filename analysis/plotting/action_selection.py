@@ -27,15 +27,30 @@ def create_histograms(env, fam, check, state, intv):
     elif env == "SpaceInvaders":
         my_bins = [0, 1, 2, 3, 4, 5]
 
+    # state, intv specific
+    plt.subplot(2, 1, 1)
     h, _ = np.histogram(actions, bins=my_bins)
     print(h)
     plt.bar(range(len(my_bins) - 1), h, width=1, edgecolor="k")
     plt.xlabel("Action")
-    plt.ylabel("Frequency of Selection Among Trained Agents")
-    # plt.axis([-0.5, 5.5, 0, 10])
+    plt.ylabel("Frequency of Selection\nAmong Trained Agents")
     plt.title(
         f"Actions selected by {fam} for {env}\nin state {state} under intv {intv}"
     )
+
+    # global total
+    plt.subplot(2, 1, 2)
+    h, _ = np.histogram(data[:, 2:], bins=my_bins)
+    h = np.log10(h)
+    h[h < 0] = 0
+    print(h)
+    plt.bar(range(len(my_bins) - 1), h, width=1, edgecolor="k")
+    plt.xlabel("Action")
+    plt.ylabel("Frequency of Selection\n(log10 scale)")
+    plt.xticks()
+    plt.title(f"Actions selected by {fam} for {env}")
+
+    plt.tight_layout()
     plt.show()
 
 
