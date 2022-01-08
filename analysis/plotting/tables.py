@@ -13,7 +13,7 @@ from runners.src.run_intervention_eval import (
 def print_image_name_table(families, env):
     print()
     print("\\begin{tabular}{ccc}")
-    print("Family & Unnormalized & Normalized \\\\")
+    print("Family & Intervened & Normalized \\\\")
     for fam in families:
         print(
             fam
@@ -39,7 +39,7 @@ def print_values_table(
 
     print()
     print("\\begin{tabular}{|l|l|c|c|c|}\\hline")
-    print("Family & Checkpoint & Original & Unnormalized & Normalized \\\\\\hline")
+    print("Family & Checkpoint & Original & Intervened & Normalized \\\\\\hline")
 
     for f, fam in enumerate(families):
         for c, check in enumerate(checkpoints):
