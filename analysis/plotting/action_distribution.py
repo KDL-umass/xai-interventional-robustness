@@ -1,14 +1,18 @@
 import os
 
-import matplotlib
 
 from envs.wrappers.paths import get_num_interventions
 
 font = {"size": 15}
 
+import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import rcParams
+
+cmap = rcParams["image.cmap"]
+cmap = plt.get_cmap(cmap).reversed()
 matplotlib.rc("font", **font)
 
-import matplotlib.pyplot as plt
 import numpy as np
 from analysis.src.js_divergence import js_divergence
 
