@@ -21,6 +21,11 @@ from runners.src.run_intervention_eval import (
 )
 from runners.src.performance_plot import *
 
+# cmap = plt.get_cmap("magma").reversed()
+cmap = rcParams["image.cmap"]
+cmap = plt.get_cmap(cmap).reversed()
+showPoints = True
+
 
 def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
     font = {"size": 10}
@@ -28,11 +33,15 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
 
     mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(data, vanilla)
 
+    # invert!
+    mat = 1 - mat
+
     if normalize:
         mat = nmat
+        mat = (2 - (mat + 1)) - 1
 
     plt.sca(ax)
-    im = ax.imshow(mat.T, interpolation="none")
+    im = ax.imshow(mat.T, interpolation="none", cmap=cmap)
 
     ax.spines["bottom"].set_color("white")
     ax.spines["top"].set_color("white")
@@ -57,9 +66,10 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
 
     ax.tick_params(left=False, bottom=False)
 
-    if title != "":
-        ax.set_xlabel(title, {"fontsize": 8})
-        ax.xaxis.set_label_position("top")
+    if showPoints:
+        if title != "":
+            ax.set_xlabel(title, {"fontsize": 8})
+            ax.xaxis.set_label_position("top")
 
 
 def plot_js_divergence_matrix(
@@ -69,7 +79,10 @@ def plot_js_divergence_matrix(
     if normalize:
         mat = nmat
 
-    im = plt.matshow(mat.T, interpolation="none", aspect="auto")
+    # invert!
+    mat = 1 - mat
+
+    im = plt.matshow(mat.T, interpolation="none", aspect="auto", cmap=cmap)
 
     if normalize:
         im.set_clim(-1.0, 1.0)
@@ -83,7 +96,7 @@ def plot_js_divergence_matrix(
 
     plt.title(title)
     cbar = plt.colorbar(im)
-    cbar.set_label("JS Divergence of Action Distributions")
+    cbar.set_label(r"Interventional Robustness ($\mathcal{R}$)")
     if normalize:
         plt.clim(-1.0, 1.0)
     else:
@@ -129,7 +142,7 @@ def individualPlots(normalized):
 
                 title_type = "Normalized " if normalized else ""
                 file_type = "normalized" if normalized else "unnormalized"
-                name = f"{title_type}JS Divergence over Actions\nfor {fam} at {check} frames, {env}"
+                name = f"{title_type}Interventional Robustness\nfor {fam} at {check} frames, {env}"
                 plot_js_divergence_matrix(
                     data,
                     vdata,
@@ -155,7 +168,10 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
     with open(f"storage/plots/returns/{env}/order.txt") as f:
         model_names = [l.strip() for l in f.readlines()]
 
-    figsize = (3.5, 9) if env == "Breakout" else (3.5, 10)
+    if showPoints:
+        figsize = (3.5, 9) if env == "Breakout" else (3.5, 10)
+    else:
+        figsize = (3.5, 6) if env == "Breakout" else (3.5, 10)
 
     fig, axes = plt.subplots(
         len(model_names),
@@ -175,15 +191,16 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
             f"storage/models/{env}", env, fam, checkpoints
         )
 
-        performanceOrder = int(np.floor(np.max(np.log10(performance))))
+        # performanceOrder = int(np.floor(np.max(np.log10(performance))))
+        performanceOrder = 1000
 
         # add jsdiv plots
         for c, check in enumerate(checkpoints):
             ax = axes[f, c]
             if c == 0:
-                ax.set_ylabel(f"{fam.upper()}\nIntervention")
+                ax.set_ylabel(f"{fam.upper()}", {"fontsize": 8})
             if c == len(checkpoints) - 1:
-                ax.set_ylabel(f"{fam.upper()}")
+                ax.set_ylabel(f"{fam.upper()}", {"fontsize": 8})
                 ax.yaxis.set_label_position("right")
             if f == 0:
                 order = int(np.floor(np.log10(check)))
@@ -192,7 +209,7 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
                 # ax.xaxis.set_label_position("top")
             if f == len(model_names) - 1:
                 ax.tick_params(labelbottom=True)
-                ax.set_xlabel(f"State")
+                # ax.set_xlabel(f"State")
             # else:
             #     ax = None
 
@@ -206,18 +223,42 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
                 data,
                 vdata,
                 normalized,
-                title=format(performance[c] / 10 ** performanceOrder, ".2f")
-                + f"e{performanceOrder}",
+                title=format(performance[c] / performanceOrder, ".2f")
+                # + f"e{performanceOrder}",
             )
 
-            cmap = rcParams["image.cmap"]
-
-            topshift = {"Breakout": 0.945, "Amidar": 0.92, "SpaceInvaders": 0.92}[env]
-            bottomshift = {"Breakout": 0.1, "Amidar": 0.1, "SpaceInvaders": 0.1}[env]
-            rightshift = {"Breakout": 0.85, "Amidar": 0.85, "SpaceInvaders": 0.85}[env]
-            leftshift = {"Breakout": 0.05, "Amidar": 0.05, "SpaceInvaders": 0.05}[env]
-            hspace = {"Breakout": 0, "Amidar": 0.5, "SpaceInvaders": 0.3}[env]
-            wspace = {"Breakout": 0.3, "Amidar": 0.15, "SpaceInvaders": 0.2}[env]
+            # with showPoints
+            if showPoints:
+                topshift = {"Breakout": 0.945, "Amidar": 0.92, "SpaceInvaders": 0.92}[
+                    env
+                ]
+                bottomshift = {"Breakout": 0.05, "Amidar": 0.07, "SpaceInvaders": 0.07}[
+                    env
+                ]
+                rightshift = {"Breakout": 1, "Amidar": 1, "SpaceInvaders": 1}[env]
+                leftshift = {
+                    "Breakout": 0.125,
+                    "Amidar": 0.125,
+                    "SpaceInvaders": 0.125,
+                }[env]
+                hspace = {"Breakout": 0, "Amidar": 0.5, "SpaceInvaders": 0.3}[env]
+                wspace = {"Breakout": 0.3, "Amidar": 0.15, "SpaceInvaders": 0.2}[env]
+            else:
+                # without showPoints
+                topshift = {"Breakout": 0.945, "Amidar": 0.92, "SpaceInvaders": 0.935}[
+                    env
+                ]
+                bottomshift = {"Breakout": 0.05, "Amidar": 0.07, "SpaceInvaders": 0.07}[
+                    env
+                ]
+                rightshift = {"Breakout": 1, "Amidar": 1, "SpaceInvaders": 1}[env]
+                leftshift = {
+                    "Breakout": 0.15,
+                    "Amidar": 0.13,
+                    "SpaceInvaders": 0.13,
+                }[env]
+                hspace = {"Breakout": -0.7, "Amidar": 0.5, "SpaceInvaders": 0.1}[env]
+                wspace = {"Breakout": 0.3, "Amidar": 0.15, "SpaceInvaders": 0.2}[env]
 
             plt.subplots_adjust(
                 top=topshift,
@@ -234,24 +275,66 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
             # plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
             # plt.tight_layout()
             # plt.constrained_layout()
-            cbar_ax = fig.add_axes([0.95, 0.09, 0.03, 0.83])
-            cbar_ax.set_title("JS Div", {"fontsize": 8})
+            cbar_ax = fig.add_axes([0.15, 0.0, 0.85, 0.02])
+            cbar_ax.set_title(
+                r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-1.8
+            )
             vmin = -1 if normalized else 0
-            fig.colorbar(
+            plt.colorbar(
                 cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=1), cmap=cmap),
                 cax=cbar_ax,
+                orientation="horizontal",
             )
-            cbar_ax.tick_params(labelsize=8)
+            cbar_ax.tick_params(labelsize=6)
             print(f"plot, {f},{c}")
 
     title_type = "Normalized " if normalized else ""
     file_type = "normalized" if normalized else "unnormalized"
 
-    fig.suptitle(f"{title_type}JS Divergence over Actions: {env}", fontsize=11)
+    fig.suptitle(f"{title_type}Interventional Robustness: {env}", fontsize=11)
 
     plt.margins(0)
-    framesXY = (0.025, 0.872)
-    plt.annotate("Frames:", xy=framesXY, xytext=framesXY, textcoords="figure fraction")
+    # annotations
+    if showPoints:
+        framesXY = (0.02, 0.9675)
+        plt.annotate(
+            "Frames:\nPoints:",
+            xy=framesXY,
+            xytext=framesXY,
+            textcoords="figure fraction",
+            fontsize=8,
+        )
+    else:
+        framesXY = (0.025, 0.985)
+        plt.annotate(
+            "Frames:",
+            xy=framesXY,
+            xytext=framesXY,
+            textcoords="figure fraction",
+            fontsize=8,
+        )
+
+    framesXY = (0.01, 0.5)
+    plt.annotate(
+        "Intervention",
+        xy=framesXY,
+        xytext=framesXY,
+        textcoords="figure fraction",
+        rotation=90,
+        size=10,
+    )
+
+    if showPoints:
+        framesXY = (0.54, 0.07)
+        plt.annotate(
+            "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
+        )
+    else:
+        framesXY = (0.53, 0.0725)
+        plt.annotate(
+            "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
+        )
+
     plt.savefig(
         f"storage/plots/sampled_jsdivmat/{env}_{file_type}.png",
         bbox_inches="tight",
