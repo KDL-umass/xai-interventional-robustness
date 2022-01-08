@@ -10,6 +10,11 @@ from runners.src.result_paths import (
 from analysis.src.js_divergence import get_js_divergence_matrix
 from runners.src.run_intervention_eval import checkpoints
 
+from matplotlib import rcParams
+
+cmap = rcParams["image.cmap"]
+cmap = plt.get_cmap(cmap).reversed()
+
 
 def get_family_jsdiv(
     family,
