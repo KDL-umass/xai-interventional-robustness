@@ -1,10 +1,13 @@
 from glob import glob
 import argparse
 import os
+from subprocess import call
 
 # from all.experiments import SlurmExperiment
 from all.experiments.run_experiment import get_experiment_type
 import numpy as np
+
+from runners.src.run_intervention_eval import model_names
 
 # from all.environments import AtariEnvironment
 # from all.presets import atari
@@ -22,15 +25,13 @@ device = "cuda"
 print("CUDA:", torch.cuda.is_available())
 
 
-# checkpoints = list(range(0, 100000, 10000))
-# checkpoints.extend(list(range(100000, 1000000, 100000)))
-# checkpoints.extend(list(range(1000000, 11000000, 1000000)))
-checkpoints = [10000000]
-num_episodes = 1
+checkpoints = list(range(0, 100000, 10000))
+checkpoints.extend(list(range(100000, 1000000, 100000)))
+checkpoints.extend(list(range(1000000, 11000000, 1000000)))
+num_episodes = 3
 
 
-def main(env_name, fam):
-
+def main(env_name, fam=None):
     if env_name == "SpaceInvaders":
         custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
     elif env_name == "Amidar":
@@ -44,51 +45,58 @@ def main(env_name, fam):
         env_name + "Toybox", device=device, custom_wrapper=custom_wrapper
     )
 
-    modelPath = f"storage/models/{env_name}/{fam}"
+    if fam is None:
+        families = model_names
+    else:
+        families = [fam]
 
-    performance = []
-    for check in checkpoints:
-        loadfiles = glob(modelPath + f"/*/preset{check}.pt")
-        print(check, loadfiles)
+    for fam in families:
+        dir = f"storage/results/performance/{env_name}/{fam}"
+        os.makedirs(dir, exist_ok=True)
 
-        agents = [torch.load(loadfile) for loadfile in loadfiles]
+        f = open(dir + "/returns.txt", "w")
+        f.write("frame,mean,std\n")
 
-        results = np.zeros((len(agents), num_episodes))
-        for p, preset in enumerate(agents):
-            make_experiment = get_experiment_type(preset)
-            experiment = make_experiment(
-                preset,
-                env,
-                train_steps=0,
-                logdir="runs",
-                quiet=True,
-                write_loss=False,
-            )
+        modelPath = f"storage/models/{env_name}/{fam}"
+        for check in checkpoints:
+            loadfiles = glob(modelPath + f"/*/preset{check}.pt")
+            print(check, loadfiles)
 
-            test_returns = experiment.test(episodes=num_episodes, log=False)
-            results[p, :] = test_returns
+            agents = [torch.load(loadfile) for loadfile in loadfiles]
 
-        mean = np.mean(results)
-        std = np.std(results)
-        performance.append([check, mean, std])
+            results = np.zeros((len(agents), num_episodes))
+            for p, preset in enumerate(agents):
+                make_experiment = get_experiment_type(preset)
+                experiment = make_experiment(
+                    preset,
+                    env,
+                    train_steps=0,
+                    logdir="runs",
+                    quiet=True,
+                    write_loss=False,
+                )
 
-    os.makedirs(f"storage/results/performance/{env_name}", exist_ok=True)
-    np.savetxt(
-        f"storage/results/performance/{env_name}/returns100.txt",
-        performance,
-        header="frame,mean,std",
-    )
+                test_returns = experiment.test(episodes=num_episodes, log=False)
+                results[p, :] = test_returns
+
+            mean = np.mean(results)
+            std = np.std(results)
+
+            f.write(f"{check},{mean},{std}\n")
+
+        f.close()
+        call(["rm", "-rf", "runs/*"])
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Train agent of specified type on env_nameironment."
+        description="Train agent of specified type on environment."
     )
     parser.add_argument(
         "--env",
         nargs=1,
         type=str,
-        help="env_nameironment name: SpaceInvaders, Amidar, or Breakout",
+        help="environment name: SpaceInvaders, Amidar, or Breakout",
     )
     parser.add_argument(
         "--family",
@@ -100,4 +108,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.env[0], args.family[0])
+    if args.family:
+        main(args.env[0], args.family[0])
+    else:
+        main(args.env[0])
+
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
