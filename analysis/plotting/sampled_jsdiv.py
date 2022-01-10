@@ -5,6 +5,7 @@ import matplotlib
 from matplotlib import cm, rcParams
 from matplotlib.colors import Normalize
 from numpy.lib.npyio import save
+from analysis.plotting.performance import plotAllFamilies
 from analysis.plotting.tables import print_image_name_table, print_values_table
 
 from analysis.src.js_divergence import get_js_divergence_matrix
@@ -24,7 +25,6 @@ from runners.src.performance_plot import *
 # cmap = plt.get_cmap("magma").reversed()
 cmap = rcParams["image.cmap"]
 cmap = plt.get_cmap(cmap).reversed()
-showPoints = True
 
 
 def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
@@ -66,10 +66,10 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
 
     ax.tick_params(left=False, bottom=False)
 
-    if showPoints:
-        if title != "":
-            ax.set_xlabel(title, {"fontsize": 8})
-            ax.xaxis.set_label_position("top")
+    # showPoints
+    # if title != "":
+    #     ax.set_xlabel(title, {"fontsize": 8})
+    #     ax.xaxis.set_label_position("top")
 
 
 def plot_js_divergence_matrix(
@@ -155,6 +155,55 @@ def individualPlots(normalized):
                 )
 
 
+def colorBar(fig, normalized, env):
+    cbar_ax = fig.add_axes([0.15, 0.0, 0.85, 0.02])
+    if env == "Breakout":
+        cbar_ax.set_title(
+            r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-2.2
+        )
+    else:
+        cbar_ax.set_title(
+            r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-1.8
+        )
+    vmin = -1 if normalized else 0
+    plt.colorbar(
+        cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=1), cmap=cmap),
+        cax=cbar_ax,
+        orientation="horizontal",
+    )
+    cbar_ax.tick_params(labelsize=6)
+
+
+def plotPerformance(fig, env):
+    gs = fig.add_gridspec(
+        len(model_names), 1, left=0.95, right=1.1, top=0.93, bottom=0.07
+    )
+    plotAllFamilies(env, gs)
+
+
+def resizeMegaplot(env, normalized):
+    # without showPoints
+    topshift = {"Breakout": 0.945, "Amidar": 0.935, "SpaceInvaders": 0.935}[env]
+    bottomshift = {"Breakout": 0.07, "Amidar": 0.07, "SpaceInvaders": 0.07}[env]
+    rightshift = {"Breakout": 0.9, "Amidar": 0.9, "SpaceInvaders": 0.9}[env]
+    leftshift = {
+        "Breakout": 0.15,
+        "Amidar": 0.13,
+        "SpaceInvaders": 0.05 if normalized else 0.15,
+    }[env]
+    hspace = {"Breakout": 0.2, "Amidar": 0.1, "SpaceInvaders": 0.1}[env]
+    wspace = {"Breakout": 0.2, "Amidar": 0.1, "SpaceInvaders": 0.2}[env]
+
+    plt.subplots_adjust(
+        top=topshift,
+        bottom=bottomshift,
+        left=leftshift,
+        right=rightshift,
+        hspace=hspace,
+        wspace=wspace,
+    )
+
+
 def megaPlot(normalized, nAgents=11, nStates=30, env=None):
     """
     https://matplotlib.org/stable/gallery/subplots_axes_and_figures/subfigures.html#sphx-glr-gallery-subplots-axes-and-figures-subfigures-py
@@ -168,10 +217,7 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
     with open(f"storage/plots/returns/{env}/order.txt") as f:
         model_names = [l.strip() for l in f.readlines()]
 
-    if showPoints:
-        figsize = (3.5, 9) if env == "Breakout" else (3.5, 10)
-    else:
-        figsize = (3.5, 6) if env == "Breakout" else (3.5, 10)
+    figsize = (3.5, 8) if env == "Breakout" else (3.5, 10)
 
     fig, axes = plt.subplots(
         len(model_names),
@@ -226,67 +272,12 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
                 title=format(performance[c] / performanceOrder, ".2f")
                 # + f"e{performanceOrder}",
             )
-
-            # with showPoints
-            if showPoints:
-                topshift = {"Breakout": 0.945, "Amidar": 0.92, "SpaceInvaders": 0.92}[
-                    env
-                ]
-                bottomshift = {"Breakout": 0.05, "Amidar": 0.07, "SpaceInvaders": 0.07}[
-                    env
-                ]
-                rightshift = {"Breakout": 1, "Amidar": 1, "SpaceInvaders": 1}[env]
-                leftshift = {
-                    "Breakout": 0.125,
-                    "Amidar": 0.125,
-                    "SpaceInvaders": 0.125,
-                }[env]
-                hspace = {"Breakout": 0, "Amidar": 0.5, "SpaceInvaders": 0.3}[env]
-                wspace = {"Breakout": 0.3, "Amidar": 0.15, "SpaceInvaders": 0.2}[env]
-            else:
-                # without showPoints
-                topshift = {"Breakout": 0.945, "Amidar": 0.92, "SpaceInvaders": 0.935}[
-                    env
-                ]
-                bottomshift = {"Breakout": 0.05, "Amidar": 0.07, "SpaceInvaders": 0.07}[
-                    env
-                ]
-                rightshift = {"Breakout": 1, "Amidar": 1, "SpaceInvaders": 1}[env]
-                leftshift = {
-                    "Breakout": 0.15,
-                    "Amidar": 0.13,
-                    "SpaceInvaders": 0.13,
-                }[env]
-                hspace = {"Breakout": -0.7, "Amidar": 0.5, "SpaceInvaders": 0.1}[env]
-                wspace = {"Breakout": 0.3, "Amidar": 0.15, "SpaceInvaders": 0.2}[env]
-
-            plt.subplots_adjust(
-                top=topshift,
-                bottom=bottomshift,
-                left=leftshift,
-                right=rightshift,
-                hspace=hspace,
-                wspace=wspace,
-            )
-            plt.figure(fig.number)
-
-            # hpad = {"Breakout": 1, "Amidar": -5, "SpaceInvaders": -15}
-            # wpad = {"Breakout": -20, "Amidar": 1, "SpaceInvaders": 1}
-            # plt.tight_layout(h_pad=hpad[env], w_pad=wpad[env])
-            # plt.tight_layout()
-            # plt.constrained_layout()
-            cbar_ax = fig.add_axes([0.15, 0.0, 0.85, 0.02])
-            cbar_ax.set_title(
-                r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-1.8
-            )
-            vmin = -1 if normalized else 0
-            plt.colorbar(
-                cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=1), cmap=cmap),
-                cax=cbar_ax,
-                orientation="horizontal",
-            )
-            cbar_ax.tick_params(labelsize=6)
             print(f"plot, {f},{c}")
+
+    resizeMegaplot(env, normalized)
+    plt.figure(fig.number)
+    colorBar(fig, normalized, env)
+    plotPerformance(fig, env)
 
     title_type = "Normalized " if normalized else ""
     file_type = "normalized" if normalized else "unnormalized"
@@ -295,24 +286,14 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
 
     plt.margins(0)
     # annotations
-    if showPoints:
-        framesXY = (0.02, 0.9675)
-        plt.annotate(
-            "Frames:\nPoints:",
-            xy=framesXY,
-            xytext=framesXY,
-            textcoords="figure fraction",
-            fontsize=8,
-        )
-    else:
-        framesXY = (0.025, 0.985)
-        plt.annotate(
-            "Frames:",
-            xy=framesXY,
-            xytext=framesXY,
-            textcoords="figure fraction",
-            fontsize=8,
-        )
+    framesXY = (0.025, 0.985)
+    plt.annotate(
+        "Frames:",
+        xy=framesXY,
+        xytext=framesXY,
+        textcoords="figure fraction",
+        fontsize=8,
+    )
 
     framesXY = (0.01, 0.5)
     plt.annotate(
@@ -324,16 +305,10 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
         size=10,
     )
 
-    if showPoints:
-        framesXY = (0.54, 0.07)
-        plt.annotate(
-            "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
-        )
-    else:
-        framesXY = (0.53, 0.0725)
-        plt.annotate(
-            "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
-        )
+    framesXY = (0.53, 0.0725)
+    plt.annotate(
+        "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
+    )
 
     plt.savefig(
         f"storage/plots/sampled_jsdivmat/{env}_{file_type}.png",
