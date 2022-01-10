@@ -25,13 +25,17 @@ device = "cuda"
 print("CUDA:", torch.cuda.is_available())
 
 
+num_episodes = 3
 checkpoints = list(range(0, 100000, 10000))
 checkpoints.extend(list(range(100000, 1000000, 100000)))
 checkpoints.extend(list(range(1000000, 11000000, 1000000)))
-num_episodes = 3
 
 
-def main(env_name, fam=None):
+def main(env_name, fam, checkpoint=None):
+    checkpoints = list(range(0, 100000, 10000))
+    checkpoints.extend(list(range(100000, 1000000, 100000)))
+    checkpoints.extend(list(range(1000000, 11000000, 1000000)))
+
     if env_name == "SpaceInvaders":
         custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
     elif env_name == "Amidar":
@@ -45,47 +49,49 @@ def main(env_name, fam=None):
         env_name + "Toybox", device=device, custom_wrapper=custom_wrapper
     )
 
-    if fam is None:
-        families = model_names
+    dir = f"storage/results/performance/{env_name}/{fam}"
+    os.makedirs(dir, exist_ok=True)
+
+    if checkpoint is not None:
+        assert checkpoint in checkpoints, "checkpoint not available"
+        checkpoints = [checkpoint]
+        f = open(dir + "/returns.txt", "a+")
     else:
-        families = [fam]
-
-    for fam in families:
-        dir = f"storage/results/performance/{env_name}/{fam}"
-        os.makedirs(dir, exist_ok=True)
-
         f = open(dir + "/returns.txt", "w")
         f.write("frame,mean,std\n")
 
-        modelPath = f"storage/models/{env_name}/{fam}"
-        for check in checkpoints:
-            loadfiles = glob(modelPath + f"/*/preset{check}.pt")
-            print(check, loadfiles)
+    modelPath = f"storage/models/{env_name}/{fam}"
 
-            agents = [torch.load(loadfile) for loadfile in loadfiles]
+    for check in checkpoints:
+        loadfiles = glob(modelPath + f"/*/preset{check}.pt")
 
-            results = np.zeros((len(agents), num_episodes))
-            for p, preset in enumerate(agents):
-                make_experiment = get_experiment_type(preset)
-                experiment = make_experiment(
-                    preset,
-                    env,
-                    train_steps=0,
-                    logdir="runs",
-                    quiet=True,
-                    write_loss=False,
-                )
+        agents = [torch.load(loadfile) for loadfile in loadfiles]
 
-                test_returns = experiment.test(episodes=num_episodes, log=False)
-                results[p, :] = test_returns
+        results = np.zeros((len(agents), num_episodes))
+        for p, preset in enumerate(agents):
+            make_experiment = get_experiment_type(preset)
+            experiment = make_experiment(
+                preset,
+                env,
+                train_steps=0,
+                logdir="runs",
+                quiet=False,
+                write_loss=False,
+            )
 
-            mean = np.mean(results)
-            std = np.std(results)
+            test_returns = experiment.test(episodes=num_episodes, log=False)
+            experiment.close()
+            results[p, :] = test_returns
 
-            f.write(f"{check},{mean},{std}\n")
+        mean = np.mean(results)
+        std = np.std(results)
 
-        f.close()
-        call(["rm", "-rf", "runs/*"])
+        f.write(f"{check},{mean},{std}\n")
+        f.flush()
+        print(f"{env_name}, {fam}, {check} written")
+
+    f.close()
+    call(["rm", "-rf", "runs/*"])
 
 
 if __name__ == "__main__":
@@ -104,14 +110,21 @@ if __name__ == "__main__":
         type=str,
         help="Agent family:  a2c,c51, dqn, ddqn, ppo, rainbow, vsarsa, vqn",
     )
+
+    parser.add_argument(
+        "--checkpoint",
+        nargs=1,
+        type=int,
+        help="Checkpoint to load",
+    )
     parser.add_argument("--experiment_id", type=int)
 
     args = parser.parse_args()
 
-    if args.family:
-        main(args.env[0], args.family[0])
+    if args.checkpoint is not None:
+        main(args.env[0], args.family[0], args.checkpoint[0])
     else:
-        main(args.env[0])
+        main(args.env[0], args.family[0])
 
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")
     print("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉")

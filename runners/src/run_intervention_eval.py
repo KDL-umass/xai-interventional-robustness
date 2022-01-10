@@ -30,10 +30,22 @@ supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
 # supported_environments = ["SpaceInvaders"]
 # supported_environments = ["Amidar"]
 # supported_environments = ["Breakout"]
-# checkpoints = list(range(0, 100000, 10000))
-# checkpoints.extend(list(range(100000, 1000000, 100000)))
-# checkpoints.extend(list(range(1000000, 11000000, 1000000)))
-checkpoints = [50000, 100000, 500000, 1000000, 5000000, 10000000]
+checkpoints = list(range(0, 100000, 10000))
+checkpoints.extend(list(range(100000, 1000000, 100000)))
+checkpoints.extend(list(range(1000000, 11000000, 1000000)))
+
+
+def find_nearest(array, value):
+    # https://stackoverflow.com/a/2566508/13989862
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
+
+
+# checkpoints = [50000, 100000, 500000, 1000000, 5000000, 10000000]
+
+vals = np.linspace(5e4, 1e7, num=5, dtype=int)
+checkpoints = [find_nearest(checkpoints, val) for val in vals]
 
 # supported_environments = ["SpaceInvaders"]
 # model_names = ["dqn", "vsarsa", "vqn", "rainbow"]

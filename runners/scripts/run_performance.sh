@@ -1,3 +1,6 @@
-python -m runners.src.run_performance --env Amidar &
-python -m runners.src.run_performance --env Breakout &
-python -m runners.src.run_performance --env SpaceInvaders &
+python -m runners.src.run_performance --env Amidar --family a2c; python -m runners.src.run_performance --env Amidar --family c51; python -m runners.src.run_performance --env Amidar --family dqn; python -m runners.src.run_performance --env Amidar --family ddqn; python -m runners.src.run_performance --env Amidar --family ppo; python -m runners.src.run_performance --env Amidar --family rainbow; python -m runners.src.run_performance --env Amidar --family vqn; python -m runners.src.run_performance --env Amidar --family vsarsa &
+
+python -m runners.src.run_performance --env Breakout --family a2c; python -m runners.src.run_performance --env Breakout --family c51; python -m runners.src.run_performance --env Breakout --family dqn; python -m runners.src.run_performance --env Breakout --family ddqn; python -m runners.src.run_performance --env Breakout --family ppo;
+python -m runners.src.run_performance --env Breakout --family rainbow; python -m runners.src.run_performance --env Breakout --family vqn; python -m runners.src.run_performance --env Breakout --family vsarsa &
+
+python -m runners.src.run_performance --env SpaceInvaders --family a2c; python -m runners.src.run_performance --env SpaceInvaders --family c51; python -m runners.src.run_performance --env SpaceInvaders --family dqn; python -m runners.src.run_performance --env SpaceInvaders --family ddqn; python -m runners.src.run_performance --env SpaceInvaders --family ppo; python -m runners.src.run_performance --env SpaceInvaders --family rainbow; python -m runners.src.run_performance --env SpaceInvaders --family vqn; python -m runners.src.run_performance --env SpaceInvaders --family vsarsa &
