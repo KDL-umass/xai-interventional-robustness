@@ -95,7 +95,7 @@ def plotEachFamily(env):
     plt.title(f"Performance on {env}")
     plt.legend(model_names, bbox_to_anchor=(1, 1), loc="upper left")
     plt.tight_layout()
-    plt.savefig(f"storage/plots/performance/{env}.png", dpi=600)
+    plt.savefig(f"storage/plots/performance/{env}_performance.png", dpi=600)
 
 
 def plotAllFamilies(
