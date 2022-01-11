@@ -40,8 +40,8 @@ def get_js_divergence_matrix(data, vanilla):
     mat[:, 1:] = intv_mat
 
     # normalized
-    n_intv_mat = intv_mat / van_mat.reshape(-1, 1) - 1
-    n_van_mat = van_mat / van_mat - 1
+    n_intv_mat = intv_mat - van_mat.reshape(-1, 1)
+    n_van_mat = 0
     nmat = np.zeros((nstates, nintv + 1))
     nmat[:, 0] = n_van_mat
     nmat[:, 1:] = n_intv_mat
