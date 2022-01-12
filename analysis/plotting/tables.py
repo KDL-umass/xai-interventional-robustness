@@ -92,13 +92,11 @@ def makeTables(nAgents=11, nStates=30):
                 mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(
                     data, vdata
                 )
-                # van_mat = 1 - van_mat
-                # intv_mat = 1 - intv_mat
-                # n_intv_mat = (2 - (n_intv_mat + 1)) - 1
-                # if fam == "dqn":
-                #     plt.hist(intv_mat)
-                #     plt.title(f"{env}, {fam}, {check} normalized")
-                #     plt.show()
+
+                # invert!
+                van_mat = 1 - van_mat
+                intv_mat = 1 - intv_mat
+                n_intv_mat = (2 - (n_intv_mat + 1)) - 1
 
                 vanilla_dict[env][fam][check] = van_mat.mean()
                 normalized_dict[env][fam][check] = n_intv_mat.mean()
