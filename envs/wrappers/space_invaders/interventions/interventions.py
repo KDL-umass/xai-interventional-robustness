@@ -1,13 +1,7 @@
 from models.random import RandomAgent
-import os
 import gym
-import random, json
+import json
 import numpy as np
-import matplotlib.pyplot as plt
-from copy import deepcopy
-
-from toybox import Toybox, Input
-from toybox.interventions.space_invaders import SpaceInvadersIntervention
 
 from envs.wrappers.paths import (
     get_intervention_dir,
@@ -16,9 +10,6 @@ from envs.wrappers.paths import (
 )
 from envs.wrappers.space_invaders.interventions.reset_wrapper import (
     SpaceInvadersResetWrapper,
-)
-from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
-    SpaceInvadersFeatureVecWrapper,
 )
 
 from envs.wrappers.start_states import (
@@ -209,12 +200,8 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
     return count
 
 
-def get_single_intervened_environment(
-    state_num, intervention_number, want_feature_vec, lives
-):
+def get_single_intervened_environment(state_num, intervention_number, lives):
     env = gym.make(space_invaders_env_id)
-    if want_feature_vec:
-        env = SpaceInvadersFeatureVecWrapper(env)
     env = SpaceInvadersResetWrapper(
         env, state_num=state_num, intv=intervention_number, lives=lives
     )

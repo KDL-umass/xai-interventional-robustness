@@ -53,11 +53,6 @@ def get_drop_brick_col_interventions(env, state_num, count, use_trajectory_start
 
         write_intervention_json(state, state_num, count, use_trajectory_starts)
         count = count + 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "storage/states/interventions/Breakout/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -78,11 +73,6 @@ def get_drop_brick_row_interventions(env, state_num, count, use_trajectory_start
         write_intervention_json(state, state_num, count, use_trajectory_starts)
 
         count = count + 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "storage/states/interventions/Breakout/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -98,11 +88,6 @@ def get_shift_paddle_interventions(env, state_num, count, use_trajectory_starts)
         state["paddle"]["position"]["x"] = x
         write_intervention_json(state, state_num, count, use_trajectory_starts)
         count = count + 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "storage/states/interventions/Breakout/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -115,11 +100,6 @@ def get_paddle_speed_interventions(env, state_num, count, use_trajectory_starts)
         state["paddle_speed"] = speed
         write_intervention_json(state, state_num, count, use_trajectory_starts)
         count = count + 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "storage/states/interventions/Breakout/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -132,11 +112,6 @@ def get_paddle_width_interventions(env, state_num, count, use_trajectory_starts)
         state["paddle_width"] = width
         write_intervention_json(state, state_num, count, use_trajectory_starts)
         count = count + 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "storage/states/interventions/Breakout/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -157,7 +132,6 @@ def get_ball_radius_interventions(env, state_num, count, use_trajectory_starts):
         env.toybox.write_state_json(state)
         dir_path = "storage/states/interventions/Breakout/images/"
         env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -176,40 +150,32 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         )
 
         count = 0
-        # print("start")
         prevcount = count
         count = get_paddle_width_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"{prevcount} to {count-1} get_paddle_width_interventions")
+        print(f"{prevcount} to {count-1} get_paddle_width_interventions")
         prevcount = count
         count = get_paddle_speed_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"{prevcount} to {count-1} get_paddle_speed_interventions")
+        print(f"{prevcount} to {count-1} get_paddle_speed_interventions")
         prevcount = count
         count = get_shift_paddle_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"{prevcount} to {count-1} get_shift_paddle_interventions")
+        print(f"{prevcount} to {count-1} get_shift_paddle_interventions")
         prevcount = count
-
-        # TODO: BROKEN
-        # count = get_ball_radius_interventions(
-        #     env, state_num, count, use_trajectory_starts
-        # )
-        # print(f"{prevcount} to {count-1} get_ball_radius_interventions")
-        # prevcount = count
 
         count = get_drop_brick_row_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"{prevcount} to {count-1} get_drop_brick_row_interventions")
+        print(f"{prevcount} to {count-1} get_drop_brick_row_interventions")
         prevcount = count
         count = get_drop_brick_col_interventions(
             env, state_num, count, use_trajectory_starts
         )
-        # print(f"{prevcount} to {count-1} get_drop_brick_col_interventions")
+        print(f"{prevcount} to {count-1} get_drop_brick_col_interventions")
 
         print(f"Created {count} intervention states for state {state_num} in `{dir}`.")
     return count
@@ -219,8 +185,6 @@ def get_single_intervened_environment(
     state_num, intervention_number, want_feature_vec, lives
 ):
     env = gym.make(breakout_env_id)
-    # if want_feature_vec:
-    #     env = BreakoutFeatureVecWrapper(env)
     env = BreakoutResetWrapper(
         env, state_num=state_num, intv=intervention_number, lives=lives
     )

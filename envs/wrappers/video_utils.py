@@ -1,6 +1,5 @@
 import os
 import imageio
-import shutil
 
 
 def make_videos(dir_path, video_filename):

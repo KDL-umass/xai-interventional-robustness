@@ -48,10 +48,6 @@ def get_drop_one_enemy(env, state_num, count, use_trajectory_starts):
         state["enemies"][enemy]["caught"] = True
         write_intervention_json(state, state_num, count, use_trajectory_starts)
         count += 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Amidar/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
     return count
 
 
@@ -148,11 +144,6 @@ def get_remove_tile_interventions(env, state_num, count, use_trajectory_starts):
         state["board"]["tiles"][row][index] = "Empty"
         write_intervention_json(state, state_num, count, use_trajectory_starts)
         count += 1
-
-        # env.toybox.write_state_json(state)
-        # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Amidar/images/"
-        # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
-
     return count
 
 
@@ -203,10 +194,6 @@ def get_add_tile_interventions(env, state_num, count, use_trajectory_starts):
             state["board"]["tiles"][row][index] = "Unpainted"
             write_intervention_json(state, state_num, count, use_trajectory_starts)
             count += 1
-
-            # env.toybox.write_state_json(state)
-            # dir_path = "/Users/kavery/workspace/xai-interventional-robustness/storage/states/interventions/Amidar/images/"
-            # env.toybox.save_frame_image(dir_path + "{}.png".format(count))
     return count
 
 
@@ -225,18 +212,28 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         )
 
         count = 0
-
+        prevcount = count
         count = get_remove_tile_interventions(
             env, state_num, count, use_trajectory_starts
         )
+        print(f"{prevcount} to {count-1} remove_tile_interventions")
+        prevcount = count
         count = get_add_tile_interventions(env, state_num, count, use_trajectory_starts)
+        print(f"{prevcount} to {count-1} get_add_tile_interventions")
+        prevcount = count
         count = get_drop_one_enemy(env, state_num, count, use_trajectory_starts)
+        print(f"{prevcount} to {count-1} get_drop_one_enemy")
+        prevcount = count
         count = get_shift_enemy_interventions(
             env, state_num, count, use_trajectory_starts
         )
+        print(f"{prevcount} to {count-1} shift_enemy_interventions")
+        prevcount = count
         count = get_shift_agent_interventions(
             env, state_num, count, use_trajectory_starts
         )
+        print(f"{prevcount} to {count-1} shift_agent_interventions")
+        prevcount = count
 
         print(f"Created {count} intervention states for state {state_num} in `{dir}`.")
     return count
