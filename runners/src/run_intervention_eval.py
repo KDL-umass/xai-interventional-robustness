@@ -1,7 +1,6 @@
 import os
 import argparse
 import torch
-from pprint import pprint
 
 from runners.src.action_evaluation import *
 
@@ -25,40 +24,8 @@ def model_root(model, env):
 
 
 model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
-# model_names = ["vqn", "ppo"]
 supported_environments = ["SpaceInvaders", "Amidar", "Breakout"]
-# supported_environments = ["SpaceInvaders"]
-# supported_environments = ["Amidar"]
-# supported_environments = ["Breakout"]
-checkpoints = list(range(0, 100000, 10000))
-checkpoints.extend(list(range(100000, 1000000, 100000)))
-checkpoints.extend(list(range(1000000, 11000000, 1000000)))
-
-
-def find_nearest(array, value):
-    # https://stackoverflow.com/a/2566508/13989862
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-
-
-# checkpoints = [50000, 100000, 500000, 1000000, 5000000, 10000000]
-
-vals = np.linspace(5e4, 1e7, num=5, dtype=int)
-checkpoints = [find_nearest(checkpoints, val) for val in vals]
-
-# supported_environments = ["SpaceInvaders"]
-# model_names = ["dqn", "vsarsa", "vqn", "rainbow"]
-
-# supported_environments = ["Amidar"]
-# model_names = ["dqn", "vsarsa", "vqn"]
-# model_names = ["ppo"]
-
-# supported_environments = ["Breakout"]
-# model_names = ["vqn", "vsarsa", "dqn"]
-# model_names = ["a2c", "ppo"]
-# model_names = ["a2c", "dqn", "ddqn", "c51", "rainbow", "vsarsa", "vqn", "ppo"]
-# model_names = ["dqn"]
+from analysis.checkpoints import checkpoints
 
 model_locations = {
     fam: {
@@ -70,10 +37,6 @@ model_locations = {
     }
     for fam in model_names
 }
-
-# pprint(model_locations)
-
-# print(checkpoints)
 
 
 def load_agent(dir, device, checkpoint=None):
@@ -222,7 +185,6 @@ def evaluate_interventions(agent_family, environment, device):
 
 
 if __name__ == "__main__":
-    # get_performance()
     parser = argparse.ArgumentParser(
         description="Process experiment settings.", add_help=True
     )

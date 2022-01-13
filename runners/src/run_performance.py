@@ -3,15 +3,10 @@ import argparse
 import os
 from subprocess import call
 
-# from all.experiments import SlurmExperiment
 from all.experiments.run_experiment import get_experiment_type
 import numpy as np
 
-from runners.src.run_intervention_eval import model_names
-
-# from all.environments import AtariEnvironment
-# from all.presets import atari
-# from all.presets.atari import c51, rainbow, a2c, dqn, vac, vpg, vsarsa, vqn, ppo, ddqn
+from analysis.checkpoints import all_checkpoints
 import torch
 
 from envs.wrappers.all_toybox_wrapper import (
@@ -26,15 +21,10 @@ print("CUDA:", torch.cuda.is_available())
 
 
 num_episodes = 3
-checkpoints = list(range(0, 100000, 10000))
-checkpoints.extend(list(range(100000, 1000000, 100000)))
-checkpoints.extend(list(range(1000000, 11000000, 1000000)))
 
 
 def main(env_name, fam, checkpoint=None):
-    checkpoints = list(range(0, 100000, 10000))
-    checkpoints.extend(list(range(100000, 1000000, 100000)))
-    checkpoints.extend(list(range(1000000, 11000000, 1000000)))
+    checkpoints = all_checkpoints
 
     if env_name == "SpaceInvaders":
         custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)

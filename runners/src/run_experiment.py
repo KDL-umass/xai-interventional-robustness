@@ -1,8 +1,7 @@
 from all.experiments import SlurmExperiment, run_experiment
 from all.environments import AtariEnvironment
-from all.presets import atari
 import argparse
-from all.presets.atari import c51, rainbow, a2c, dqn, vac, vpg, vsarsa, vqn, ppo, ddqn
+from all.presets.atari import c51, rainbow, a2c, dqn, vsarsa, vqn, ppo, ddqn
 
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
@@ -23,7 +22,7 @@ agent_replicate_num = 1
 test_episodes = 100
 nodelist = ""
 loadfile = False  # replace with specific path if continuing from checkpoint
-# e.g. loadfile = "/mnt/nfs/scratch1/kavery/si_ppo_snapshots"
+# e.g. loadfile = "/.../snapshots"
 
 
 def main(env_name, fam):

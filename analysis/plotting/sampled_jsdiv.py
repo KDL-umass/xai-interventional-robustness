@@ -4,13 +4,12 @@ import sys
 import matplotlib
 from matplotlib import cm, rcParams
 from matplotlib.colors import Normalize
-from numpy.lib.npyio import save
 from analysis.plotting.performance import plotAllFamilies
-from analysis.plotting.tables import print_image_name_table, print_values_table
 
 from analysis.src.js_divergence import get_js_divergence_matrix
 from envs.wrappers.paths import get_num_interventions
 
+from runners.src.performance_plot import *
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,11 +17,10 @@ import numpy as np
 from runners.src.run_intervention_eval import (
     supported_environments,
     model_names,
-    checkpoints,
 )
-from runners.src.performance_plot import *
 
-# cmap = plt.get_cmap("magma").reversed()
+from analysis.checkpoints import checkpoints
+
 cmap = rcParams["image.cmap"]
 cmap = plt.get_cmap(cmap).reversed()
 
@@ -65,11 +63,6 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
     ax.set_yticklabels(list(range(0, mat.shape[1], 15)), fontsize=7)
 
     ax.tick_params(left=False, bottom=False)
-
-    # showPoints
-    # if title != "":
-    #     ax.set_xlabel(title, {"fontsize": 8})
-    #     ax.xaxis.set_label_position("top")
 
 
 def plot_js_divergence_matrix(
@@ -156,7 +149,7 @@ def individualPlots(normalized):
 
 
 def colorBar(fig, normalized, env):
-    cbar_ax = fig.add_axes([0.15, 0.0, 0.85, 0.02])
+    cbar_ax = fig.add_axes([0.1, 0.0, 0.80, 0.02])
     if env == "Breakout":
         cbar_ax.set_title(
             r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-2.2
@@ -176,23 +169,23 @@ def colorBar(fig, normalized, env):
 
 def plotPerformance(fig, env):
     gs = fig.add_gridspec(
-        len(model_names), 1, left=0.95, right=1.1, top=0.93, bottom=0.07
+        len(model_names), 1, left=0.95, right=1.1, top=0.95, bottom=0.07
     )
     plotAllFamilies(env, gs)
 
 
 def resizeMegaplot(env, normalized):
     # without showPoints
-    topshift = {"Breakout": 0.945, "Amidar": 0.935, "SpaceInvaders": 0.935}[env]
+    topshift = {"Breakout": 0.95, "Amidar": 0.95, "SpaceInvaders": 0.95}[env]
     bottomshift = {"Breakout": 0.07, "Amidar": 0.07, "SpaceInvaders": 0.07}[env]
     rightshift = {"Breakout": 0.9, "Amidar": 0.9, "SpaceInvaders": 0.9}[env]
     leftshift = {
-        "Breakout": 0.15,
+        "Breakout": 0.1,
         "Amidar": 0.13,
-        "SpaceInvaders": 0.05 if normalized else 0.15,
+        "SpaceInvaders": 0.1 if normalized else 0.1,
     }[env]
     hspace = {"Breakout": 0.2, "Amidar": 0.1, "SpaceInvaders": 0.1}[env]
-    wspace = {"Breakout": 0.2, "Amidar": 0.1, "SpaceInvaders": 0.2}[env]
+    wspace = {"Breakout": 0.2, "Amidar": 0.1, "SpaceInvaders": 0.0}[env]
 
     plt.subplots_adjust(
         top=topshift,
@@ -237,27 +230,19 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
             f"storage/models/{env}", env, fam, checkpoints
         )
 
-        # performanceOrder = int(np.floor(np.max(np.log10(performance))))
         performanceOrder = 1000
 
         # add jsdiv plots
         for c, check in enumerate(checkpoints):
             ax = axes[f, c]
-            if c == 0:
-                ax.set_ylabel(f"{fam.upper()}", {"fontsize": 8})
             if c == len(checkpoints) - 1:
                 ax.set_ylabel(f"{fam.upper()}", {"fontsize": 8})
                 ax.yaxis.set_label_position("right")
             if f == 0:
                 order = int(np.floor(np.log10(check)))
                 ax.set_title(f"{check // 10**order}e{order}", {"fontsize": 10})
-                # ax.set_xlabel(f"{check} Frames")
-                # ax.xaxis.set_label_position("top")
             if f == len(model_names) - 1:
                 ax.tick_params(labelbottom=True)
-                # ax.set_xlabel(f"State")
-            # else:
-            #     ax = None
 
             dir = f"storage/results/intervention_js_div/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
 
@@ -286,7 +271,7 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
 
     plt.margins(0)
     # annotations
-    framesXY = (0.025, 0.985)
+    framesXY = (0.02, 1.002 if env == "Breakout" else 0.999)
     plt.annotate(
         "Frames:",
         xy=framesXY,
@@ -295,7 +280,7 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
         fontsize=8,
     )
 
-    framesXY = (0.01, 0.5)
+    framesXY = (0.01, 0.46)
     plt.annotate(
         "Intervention",
         xy=framesXY,
@@ -305,19 +290,27 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
         size=10,
     )
 
-    framesXY = (0.53, 0.0725)
+    framesXY = (1.19, 0.45)
+    plt.annotate(
+        "Performance",
+        xy=framesXY,
+        xytext=framesXY,
+        textcoords="figure fraction",
+        rotation=-90,
+        size=10,
+    )
+
+    framesXY = (0.53, 0.08 if env == "Breakout" else 0.07)
     plt.annotate(
         "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
     )
 
+    # save
     plt.savefig(
         f"storage/plots/sampled_jsdivmat/{env}_{file_type}.png",
         bbox_inches="tight",
         dpi=600,
     )
-    # plt.subplot_tool(targetfig=fig)
-    # plt.show()
-    # plt.close(fig)
 
 
 if __name__ == "__main__":

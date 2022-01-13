@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from runners.src.run_intervention_eval import model_names, supported_environments
-from runners.src.run_intervention_eval import checkpoints
+from analysis.checkpoints import all_checkpoints as checkpoints
 
 prop_cycle = plt.rcParams["axes.prop_cycle"]
 colors = prop_cycle.by_key()["color"]
@@ -108,7 +108,7 @@ def plotAllFamilies(
     for i, fam in enumerate(model_names):
         plotFamily(env, fam, axes[i])
 
-    axes[0].set_title("Performance", fontsize=10)
+    # axes[0].set_title("Performance", fontsize=10)
     axes[len(model_names) - 1].set_xlabel("Frames", fontsize=10, labelpad=5)
 
     if show:

@@ -1,9 +1,6 @@
 import numpy as np
-import torch
-import os
 
 from analysis.src.js_divergence import js_divergence
-import matplotlib.pyplot as plt
 
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
@@ -87,13 +84,8 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
             )
 
         if histograms:
-            # print("n", envs[0].action_space.n)
-            # print("actions", actions)
             label_actions = np.argmax(actions, axis=1)
-            # print("label_actions", label_actions)
             str_label_actions = [str(i) for i in label_actions]
-            # print("str_label_actions", str_label_actions)
-            # print("env_labels[e]", env_labels[e])
             with open(dir + f"/actions.csv", "a+") as file:
                 output = (
                     str(env_labels[e][0])
@@ -103,43 +95,11 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
                     + ",".join(str_label_actions)
                     + "\n"
                 )
-                # print("out", output)
                 file.write(output)
-                # print(str(env_labels[e][0]) + ", " + str(env_labels[e][1]) + ", " + ",".join(str_label_actions) + "\n")
-
-            # create_histograms(dir)
 
         result_table[e, 3] = js_divergence(actions)
 
     return result_table
-
-
-def create_histograms(dir):
-    lines = np.genfromtxt(dir + f"/actions.csv", delimiter=",")
-
-    for line in lines:
-        state = line[0]
-        intervention = line[1]
-        actions = np.array(line[2:])
-
-        my_bins = [0, 1, 2, 3, 4, 5, 6]
-        h, _ = np.histogram(actions, bins=my_bins)
-        plt.bar(range(len(my_bins) - 1), h, width=1, edgecolor="k")
-        plt.axis([-0.5, 5.5, 0, 10])
-
-        if not os.path.exists(os.getcwd() + "/" + dir + "/histograms"):
-            os.makedirs(os.getcwd() + "/" + dir + "/histograms")
-        plt.savefig(
-            os.getcwd()
-            + "/"
-            + dir
-            + "/histograms/"
-            + str(state)
-            + "_"
-            + str(intervention)
-            + ".png"
-        )
-        plt.close()
 
 
 def get_action_distribution_header(envs, sample_jsdiv):

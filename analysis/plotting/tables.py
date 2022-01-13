@@ -7,28 +7,9 @@ import matplotlib.pyplot as plt
 from runners.src.run_intervention_eval import (
     supported_environments,
     model_names,
-    checkpoints,
 )
 
-
-def print_image_name_table(families, env):
-    print()
-    print("\\begin{tabular}{ccc}")
-    print("Family & Intervened & Normalized \\\\")
-    for fam in families:
-        print(
-            fam
-            + " & \\includegraphics[width=0.4\\textwidth]{plots/"
-            + env
-            + "/jsdiv_"
-            + fam
-            + ".png} & \includegraphics[width=0.4\\textwidth]{plots/"
-            + env
-            + "/jsdiv_"
-            + fam
-            + "_normalized.png}\\\\"
-        )
-    print("\\end{tabular}")
+from analysis.checkpoints import checkpoints
 
 
 def print_values_table(
@@ -38,7 +19,6 @@ def print_values_table(
     C = len(checkpoints)
     table = np.zeros((F, C, 3))
 
-    print("JS DIV")
     print()
     print("\\begin{tabular}{@{}lllll@{}}")
     print("\\toprule")
@@ -102,7 +82,6 @@ def makeTables(nAgents=11, nStates=30):
                 normalized_dict[env][fam][check] = n_intv_mat.mean()
                 unnormalized_dict[env][fam][check] = intv_mat.mean()
 
-        # print_image_name_table(model_names, env)
         print_values_table(
             env,
             model_names,

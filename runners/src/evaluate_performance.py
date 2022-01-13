@@ -1,12 +1,9 @@
 from models.random import RandomAgent
-from envs.wrappers.space_invaders.semantic_features.feature_vec_wrapper import (
-    SpaceInvadersFeatureVecWrapper,
-)
 import gym
 import torch
 import numpy as np
 import random
-import os, sys
+import os
 
 import torch.multiprocessing as mp
 
@@ -34,8 +31,6 @@ def get_env_list(want_feature_vec, vanilla, lives, environment="SpaceInvaders"):
             envlist = get_si_intervened_environments(want_feature_vec, lives)
         else:
             env = gym.make(space_invaders_env_id)
-            if want_feature_vec:
-                env = SpaceInvadersFeatureVecWrapper(env)
             envlist = [env]
 
     elif environment == "Amidar":
@@ -66,8 +61,6 @@ def run_episode(
     """Run episode with provided arguments."""
 
     agent = load_agent(agent_name, env, seed)
-
-    # TODO: Add agent wrappers here.
 
     done = False
 
