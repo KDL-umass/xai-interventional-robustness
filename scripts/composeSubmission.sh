@@ -32,4 +32,5 @@ rm sandbox/IJCAI22_SUBMISSION/submission/scripts/composeSubmission.sh
 
 # package
 cd sandbox/IJCAI22_SUBMISSION
+rm submission.zip
 zip -r submission.zip *
