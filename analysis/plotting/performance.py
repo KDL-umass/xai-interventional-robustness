@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from runners.src.run_intervention_eval import model_names, supported_environments
-from analysis.checkpoints import all_checkpoints as checkpoints
+from analysis.checkpoints import all_checkpoints, checkpoints
 
 prop_cycle = plt.rcParams["axes.prop_cycle"]
 colors = prop_cycle.by_key()["color"]
@@ -58,7 +58,8 @@ def plotData(env, fam, ax):
 
 def plotFamily(env, fam, ax=plt.gca()):
     plotData(env, fam, ax)
-    ax.set_yticks(getYAxisLims(env))
+    # ax.set_yticks(getYAxisLims(env))
+    ax.set_yticks([])
     ax.set_xticks(checkpoints)
     xlabs = ["" for c in checkpoints]
     xlabs[0] = "0"
@@ -90,7 +91,7 @@ def plotEachFamily(env):
     ax = plt.gca()
     for fam in model_names:
         plotData(env, fam, ax=ax)
-    plt.xlabel("Frames")
+    plt.xlabel("Frames", {"fontweight": "bold"})
     plt.ylabel("Points")
     plt.title(f"Performance on {env}")
     plt.legend(model_names, bbox_to_anchor=(1, 1), loc="upper left")
@@ -109,7 +110,9 @@ def plotAllFamilies(
         plotFamily(env, fam, axes[i])
 
     # axes[0].set_title("Performance", fontsize=10)
-    axes[len(model_names) - 1].set_xlabel("Frames", fontsize=10, labelpad=5)
+    axes[len(model_names) - 1].set_xlabel(
+        "Frames", fontsize=10, labelpad=5, fontweight="bold"
+    )
 
     if show:
         plt.show()

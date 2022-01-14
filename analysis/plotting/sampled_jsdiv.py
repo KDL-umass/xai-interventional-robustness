@@ -21,6 +21,7 @@ from runners.src.run_intervention_eval import (
 
 from analysis.checkpoints import checkpoints
 
+
 cmap = rcParams["image.cmap"]
 cmap = plt.get_cmap(cmap).reversed()
 
@@ -152,11 +153,15 @@ def colorBar(fig, normalized, env):
     cbar_ax = fig.add_axes([0.1, 0.0, 0.80, 0.02])
     if env == "Breakout":
         cbar_ax.set_title(
-            r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-2.2
+            r"Interventional Robustness ($\mathcal{R}$)",
+            {"fontsize": 8, "fontweight": "bold"},
+            y=-2.2,
         )
     else:
         cbar_ax.set_title(
-            r"Interventional Robustness ($\mathcal{R}$)", {"fontsize": 8}, y=-1.8
+            r"Interventional Robustness ($\mathcal{R}$)",
+            {"fontsize": 8, "fontweight": "bold"},
+            y=-1.8,
         )
     vmin = -1 if normalized else 0
     plt.colorbar(
@@ -236,8 +241,21 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
         for c, check in enumerate(checkpoints):
             ax = axes[f, c]
             if c == len(checkpoints) - 1:
-                ax.set_ylabel(f"{fam.upper()}", {"fontsize": 8})
                 ax.yaxis.set_label_position("right")
+                ax.set_ylabel(
+                    ylabel=f"{fam.upper()}",
+                    fontdict={
+                        "fontsize": 10,
+                        "fontweight": "bold",
+                        # "rotation_mode": "anchor",
+                        # "position": (-1000, 0.5),
+                        # "verticalalignment": "top",
+                        # "horizontalalignment": "center",
+                    },
+                    labelpad=10.0,
+                    loc="center",
+                    rotation=-90,
+                )
             if f == 0:
                 order = int(np.floor(np.log10(check)))
                 ax.set_title(f"{check // 10**order}e{order}", {"fontsize": 10})
@@ -267,20 +285,21 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
     title_type = "Normalized " if normalized else ""
     file_type = "normalized" if normalized else "unnormalized"
 
-    fig.suptitle(f"{title_type}Interventional Robustness: {env}", fontsize=11)
+    # fig.suptitle(f"{title_type}Interventional Robustness: {env}", fontsize=11)
 
     plt.margins(0)
     # annotations
-    framesXY = (0.02, 1.002 if env == "Breakout" else 0.999)
+    framesXY = (0.01, 1.002 if env == "Breakout" else 0.999)
     plt.annotate(
         "Frames:",
         xy=framesXY,
         xytext=framesXY,
         textcoords="figure fraction",
         fontsize=8,
+        fontweight="bold",
     )
 
-    framesXY = (0.01, 0.46)
+    framesXY = (0.03, 0.46)
     plt.annotate(
         "Intervention",
         xy=framesXY,
@@ -288,9 +307,10 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
         textcoords="figure fraction",
         rotation=90,
         size=10,
+        fontweight="bold",
     )
 
-    framesXY = (1.19, 0.45)
+    framesXY = (1.15, 0.45)
     plt.annotate(
         "Performance",
         xy=framesXY,
@@ -298,11 +318,17 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
         textcoords="figure fraction",
         rotation=-90,
         size=10,
+        fontweight="bold",
     )
 
     framesXY = (0.53, 0.08 if env == "Breakout" else 0.07)
     plt.annotate(
-        "State", xy=framesXY, xytext=framesXY, textcoords="figure fraction", size=10
+        "State",
+        xy=framesXY,
+        xytext=framesXY,
+        textcoords="figure fraction",
+        size=10,
+        fontweight="bold",
     )
 
     # save
