@@ -55,7 +55,6 @@ def agent_setup(
     environment,
     checkpoint,
     num_states_to_intervene_on,
-    sample_js_div,
     device,
 ):
     print(model_locations[agent_family][environment])
@@ -74,7 +73,6 @@ def agent_setup(
         len(agents),
         num_states_to_intervene_on,
         checkpoint,
-        sample_js_div,
     )
     os.makedirs(dir, exist_ok=True)
     return agents, dir
@@ -112,11 +110,7 @@ def state_setup(
 
 
 def evaluate_interventions(agent_family, environment, device):
-    action_distribution_samples = 5
     num_states_to_intervene_on = 1
-
-    sample_js_div = True  # use new js divergence sampling
-    js_div_samples = 5
 
     for checkpoint in checkpoints:
         print("Checkpoint", checkpoint)
@@ -126,7 +120,6 @@ def evaluate_interventions(agent_family, environment, device):
             environment,
             checkpoint,
             num_states_to_intervene_on,
-            sample_js_div,
             device,
         )
 
@@ -137,17 +130,14 @@ def evaluate_interventions(agent_family, environment, device):
             device,
         )
 
-        num_samples = js_div_samples if sample_js_div else action_distribution_samples
-
+        num_samples = 30
         evaluate_distributions(
             agent_family,
             environment,
-            checkpoint,
             agents,
             num_states_to_intervene_on,
             num_interventions,
             num_samples,
-            sample_js_div,
             device,
             dir,
         )

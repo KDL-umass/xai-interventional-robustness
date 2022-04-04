@@ -45,6 +45,14 @@ def policy_action_distribution(
     return dist
 
 
+def get_action_distribution_header(envs):
+    header = "agent,state,intv,"
+    for a in range(envs[0].action_space.n):
+        header += "action_" + str(a) + ","
+    header = header[:-1]  # remove last comma
+    return header
+
+
 def collect_action_distributions(agent_family, agents, envs, env_labels, samples):
     n = len(envs) * len(agents)
     dists = np.zeros((n, envs[0].action_space.n + 3))
@@ -62,7 +70,7 @@ def collect_action_distributions(agent_family, agents, envs, env_labels, samples
     return dists
 
 
-def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms=False):
+def get_js_divergence(agent_family, agents, envs, env_labels, dir):
     n = len(envs)
     m = len(agents)
     result_table = np.zeros((n, 4))  # env_labels + js_divergence = 4 cols
@@ -81,52 +89,34 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir="", histograms
                 end="",
             )
 
-        if histograms:
-            label_actions = np.argmax(actions, axis=1)
-            str_label_actions = [str(i) for i in label_actions]
-            with open(dir + f"/actions.csv", "a+") as file:
-                output = (
-                    str(env_labels[e][0])
-                    + ", "
-                    + str(env_labels[e][1])
-                    + ", "
-                    + ",".join(str_label_actions)
-                    + "\n"
-                )
-                file.write(output)
+        print("Saving action histograms...", end="")
+        label_actions = np.argmax(actions, axis=1)
+        str_label_actions = [str(i) for i in label_actions]
+        with open(dir + f"/actions.csv", "a+") as file:
+            output = (
+                str(env_labels[e][0])
+                + ", "
+                + str(env_labels[e][1])
+                + ", "
+                + ",".join(str_label_actions)
+                + "\n"
+            )
+            file.write(output)
+        print("done")
 
         result_table[e, 3] = js_divergence(actions)
 
     return result_table
 
 
-def get_action_distribution_header(envs, sample_jsdiv):
-    header = "agent,state,intv,"
-    if sample_jsdiv:
-        header += "jsdiv"
-        return header
-
-    else:
-        for a in range(envs[0].action_space.n):
-            header += "action_" + str(a) + ","
-        header = header[:-1]  # remove last comma
-        return header
-
-
-def average_js_divergence(
-    agent_family, agents, envs, env_labels, num_samples, dir, histograms
-):
+def average_js_divergence(agent_family, agents, envs, env_labels, num_samples, dir):
     if agent_family in agent_family_that_selects_max_action:
         # only need to run one iteration
-        return get_js_divergence(
-            agent_family, agents, envs, env_labels, dir, histograms
-        )
+        return get_js_divergence(agent_family, agents, envs, env_labels, dir)
 
     dists = []
     for i in range(num_samples):
-        dist = get_js_divergence(
-            agent_family, agents, envs, env_labels, dir, histograms
-        )
+        dist = get_js_divergence(agent_family, agents, envs, env_labels, dir)
         dists.append(dist)
         print(f"\nAJD: Sampling {round(i / (num_samples-1) * 100)}% complete")
     print()
@@ -134,18 +124,15 @@ def average_js_divergence(
     return dists
 
 
-def evaluate_action_distributions(
+def evaluate_js_divergence(
     agent_family,
     environment,
-    checkpoint,
     agents,
     num_states_to_intervene_on,
     interventions,
     num_samples,
-    sample_js_div,
     device,
     dir,
-    histograms,
 ):
 
     if environment == "SpaceInvaders":
@@ -171,20 +158,11 @@ def evaluate_action_distributions(
         for intv in interventions
     ]
 
-    if sample_js_div:
-        dists = average_js_divergence(
-            agent_family, agents, envs, env_labels, num_samples, dir, histograms
-        )
-    else:
-        dists = collect_action_distributions(
-            agent_family,
-            agents,
-            envs,
-            env_labels,
-            num_samples,
-        )
+    dists = average_js_divergence(
+        agent_family, agents, envs, env_labels, num_samples, dir
+    )
 
-    header = get_action_distribution_header(envs, sample_js_div)
+    header = "agent,state,intv,jsdiv"
 
     if len(interventions) == 1:
         np.savetxt(dir + f"/vanilla.txt", dists, header=header)
@@ -201,43 +179,33 @@ def evaluate_action_distributions(
 def evaluate_distributions(
     agent_family,
     environment,
-    checkpoint,
     agents,
     num_states_to_intervene_on,
     num_interventions,
     num_samples,
-    sample_js_div,
     device,
     dir,
 ):
     print("vanilla")
-    evaluate_action_distributions(
+    evaluate_js_divergence(
         agent_family,
         environment,
-        checkpoint,
         agents,
         num_states_to_intervene_on,
         [-1],
         num_samples,
-        sample_js_div,
         device,
         dir,
-        histograms=True,
     )
 
     print("interventions")
-    evaluate_action_distributions(
+    evaluate_js_divergence(
         agent_family,
         environment,
-        checkpoint,
         agents,
         num_states_to_intervene_on,
         list(range(num_interventions)),
         num_samples,
-        sample_js_div,
         device,
         dir,
-        histograms=True,
     )
-
-    pass
