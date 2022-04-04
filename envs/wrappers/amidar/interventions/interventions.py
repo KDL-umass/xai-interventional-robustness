@@ -20,7 +20,7 @@ from envs.wrappers.amidar.interventions.reset_wrapper import (
 
 from envs.wrappers.start_states import (
     get_start_env,
-    sample_start_states_from_trajectory,
+    sample_start_states,
 )
 
 
@@ -262,7 +262,5 @@ def get_all_intervened_environments(num_states, lives):
 if __name__ == "__main__":
     num_states = 1
     agent = RandomAgent(gym.make(amidar_env_id).action_space)
-    sample_start_states_from_trajectory(
-        agent, num_states, environment="Amidar", device="cpu"
-    )
+    sample_start_states(agent, num_states, environment="Amidar", device="cpu")
     create_intervention_states(num_states)

@@ -59,7 +59,7 @@ def get_start_env(state_num, lives, environment):
     return env
 
 
-def sample_start_states(num_states, horizon, environment):
+def sample_start_states_with_random_walk(num_states, horizon, environment):
     """
     Sample `num_states` start states using a random walk of `horizon` length in the `environment`
     """
@@ -99,7 +99,7 @@ def sample_start_states(num_states, horizon, environment):
     )
 
 
-def sample_start_states_from_trajectory(agent, num_states, environment, device):
+def sample_start_states(agent, num_states, environment, device):
     """
     Sample `num_states` start states uniform randomly from a trajectory produced by `agent` in `environment`.
     """

@@ -5,7 +5,7 @@ import torch
 from runners.src.action_evaluation import *
 
 from envs.wrappers.start_states import (
-    sample_start_states_from_trajectory,
+    sample_start_states,
 )
 import envs.wrappers.space_invaders.interventions.interventions as si_interventions
 import envs.wrappers.amidar.interventions.interventions as amidar_interventions
@@ -85,9 +85,7 @@ def state_setup(
     device,
 ):
     agent = agents.pop()  # first agent will be one sampled from
-    sample_start_states_from_trajectory(
-        agent, num_states_to_intervene_on, environment, device
-    )
+    sample_start_states(agent, num_states_to_intervene_on, environment, device)
 
     if environment == "SpaceInvaders":
         num_interventions = si_interventions.create_intervention_states(

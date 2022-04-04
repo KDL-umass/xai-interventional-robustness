@@ -14,7 +14,7 @@ from envs.wrappers.space_invaders.interventions.reset_wrapper import (
 
 from envs.wrappers.start_states import (
     get_start_env,
-    sample_start_states_from_trajectory,
+    sample_start_states,
 )
 
 
@@ -226,6 +226,4 @@ def get_all_intervened_environments(num_states, want_feature_vec, lives):
 if __name__ == "__main__":
     num_states = 1
     agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
-    sample_start_states_from_trajectory(
-        agent, num_states, "SpaceInvaders", device="cpu"
-    )
+    sample_start_states(agent, num_states, "SpaceInvaders", device="cpu")
