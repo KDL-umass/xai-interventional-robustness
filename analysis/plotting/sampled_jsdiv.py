@@ -26,7 +26,9 @@ cmap = rcParams["image.cmap"]
 cmap = plt.get_cmap(cmap).reversed()
 
 
-def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
+def subplot_js_divergence_matrix(
+    ax, data, vanilla, normalize, title="", transpose=True
+):
     font = {"size": 10}
     matplotlib.rc("font", **font)
 
@@ -40,7 +42,10 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
         mat = (2 - (mat + 1)) - 1
 
     plt.sca(ax)
-    im = ax.imshow(mat.T, interpolation="none", cmap=cmap)
+    if transpose:
+        im = ax.imshow(mat.T, interpolation="none", cmap=cmap)
+    else:
+        im = ax.imshow(mat, interpolation="none", cmap=cmap)
 
     ax.spines["bottom"].set_color("white")
     ax.spines["top"].set_color("white")
@@ -57,13 +62,22 @@ def subplot_js_divergence_matrix(ax, data, vanilla, normalize, title=""):
     else:
         im.set_clim(0, 1.0)
 
-    ax.set_xticks(list(range(0, mat.shape[0] + 1, 15)))
-    ax.set_xticklabels(list(range(0, mat.shape[0] + 1, 15)), fontsize=7)
+    if transpose:
+        ax.set_xticks(list(range(0, mat.shape[0] + 1, 15)))
+        ax.set_xticklabels(list(range(0, mat.shape[0] + 1, 15)), fontsize=7)
 
-    ax.set_yticks(list(range(0, mat.shape[1], 15)))
-    ax.set_yticklabels(list(range(0, mat.shape[1], 15)), fontsize=7)
+        ax.set_yticks(list(range(0, mat.shape[1], 15)))
+        ax.set_yticklabels(list(range(0, mat.shape[1], 15)), fontsize=7)
 
-    ax.tick_params(left=False, bottom=False)
+        ax.tick_params(left=False, bottom=False)
+    else:
+        ax.set_yticks(list(range(0, mat.shape[0] + 1, 15)))
+        ax.set_yticklabels(list(range(0, mat.shape[0] + 1, 15)), fontsize=7)
+
+        ax.set_xticks(list(range(0, mat.shape[1], 15)))
+        ax.set_xticklabels(list(range(0, mat.shape[1], 15)), fontsize=7)
+
+        ax.tick_params(left=False, bottom=False)
 
 
 def plot_js_divergence_matrix(
