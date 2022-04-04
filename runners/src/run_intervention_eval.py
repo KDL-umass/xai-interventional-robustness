@@ -5,14 +5,12 @@ import torch
 from runners.src.action_evaluation import *
 
 from envs.wrappers.start_states import (
-    sample_start_states,
     sample_start_states_from_trajectory,
 )
 import envs.wrappers.space_invaders.interventions.interventions as si_interventions
 import envs.wrappers.amidar.interventions.interventions as amidar_interventions
 import envs.wrappers.breakout.interventions.interventions as breakout_interventions
 from runners.src.result_paths import (
-    get_intervention_data_dir,
     get_trajectory_intervention_data_dir,
 )
 
@@ -56,9 +54,7 @@ def agent_setup(
     agent_family,
     environment,
     checkpoint,
-    use_trajectory_starts,
     num_states_to_intervene_on,
-    start_horizon,
     sample_js_div,
     device,
 ):
@@ -72,25 +68,14 @@ def agent_setup(
     if len(agents) > 11:
         [agents.pop() for _ in range(11, len(agents))]
 
-    if use_trajectory_starts:
-        dir = get_trajectory_intervention_data_dir(
-            agent_family,
-            environment,
-            len(agents),
-            num_states_to_intervene_on,
-            checkpoint,
-            sample_js_div,
-        )
-    else:
-        dir = get_intervention_data_dir(
-            agent_family,
-            environment,
-            len(agents),
-            num_states_to_intervene_on,
-            start_horizon,
-            checkpoint,
-            sample_js_div,
-        )
+    dir = get_trajectory_intervention_data_dir(
+        agent_family,
+        environment,
+        len(agents),
+        num_states_to_intervene_on,
+        checkpoint,
+        sample_js_div,
+    )
     os.makedirs(dir, exist_ok=True)
     return agents, dir
 
@@ -98,30 +83,25 @@ def agent_setup(
 def state_setup(
     agents,
     environment,
-    use_trajectory_starts,
     num_states_to_intervene_on,
-    start_horizon,
     device,
 ):
-    if use_trajectory_starts:
-        agent = agents.pop()  # first agent will be one sampled from
-        sample_start_states_from_trajectory(
-            agent, num_states_to_intervene_on, environment, device
-        )
-    else:
-        sample_start_states(num_states_to_intervene_on, start_horizon, environment)
+    agent = agents.pop()  # first agent will be one sampled from
+    sample_start_states_from_trajectory(
+        agent, num_states_to_intervene_on, environment, device
+    )
 
     if environment == "SpaceInvaders":
         num_interventions = si_interventions.create_intervention_states(
-            num_states_to_intervene_on, use_trajectory_starts
+            num_states_to_intervene_on
         )
     elif environment == "Amidar":
         num_interventions = amidar_interventions.create_intervention_states(
-            num_states_to_intervene_on, use_trajectory_starts
+            num_states_to_intervene_on
         )
     elif environment == "Breakout":
         num_interventions = breakout_interventions.create_intervention_states(
-            num_states_to_intervene_on, use_trajectory_starts
+            num_states_to_intervene_on
         )
     else:
         raise ValueError(
@@ -132,16 +112,13 @@ def state_setup(
 
 
 def evaluate_interventions(agent_family, environment, device):
-    action_distribution_samples = 30
-    num_states_to_intervene_on = 30
+    action_distribution_samples = 5
+    num_states_to_intervene_on = 1
 
     dist_type = "analytic"
 
-    start_horizon = 100  # sample from t=100
-    use_trajectory_starts = True
-
     sample_js_div = True  # use new js divergence sampling
-    js_div_samples = 30
+    js_div_samples = 5
 
     for checkpoint in checkpoints:
         print("Checkpoint", checkpoint)
@@ -150,9 +127,7 @@ def evaluate_interventions(agent_family, environment, device):
             agent_family,
             environment,
             checkpoint,
-            use_trajectory_starts,
             num_states_to_intervene_on,
-            start_horizon,
             sample_js_div,
             device,
         )
@@ -160,9 +135,7 @@ def evaluate_interventions(agent_family, environment, device):
         num_interventions = state_setup(
             agents,
             environment,
-            use_trajectory_starts,
             num_states_to_intervene_on,
-            start_horizon,
             device,
         )
 
@@ -173,7 +146,6 @@ def evaluate_interventions(agent_family, environment, device):
             environment,
             checkpoint,
             agents,
-            use_trajectory_starts,
             num_states_to_intervene_on,
             num_interventions,
             num_samples,

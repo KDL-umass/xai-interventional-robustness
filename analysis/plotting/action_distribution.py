@@ -131,8 +131,6 @@ def plot_max_action_divergence_matrix(data, title):
 if __name__ == "__main__":
     n_agents = 11
     nstates = 10
-    horizon = 100
-    use_trajectory_starts = True
     jsdivsampling = True
     folder = "intervention_js_div" if jsdivsampling else "intervention_action_dists"
 
@@ -140,10 +138,7 @@ if __name__ == "__main__":
     nintv = get_num_interventions(environment)
 
     for fam in ["a2c", "dqn", "ddqn", "c51", "rainbow"]:
-        if use_trajectory_starts:
-            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
-        else:
-            dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/t{horizon}_horizon"
+        dir = f"storage/results/{folder}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
 
         vdata = np.loadtxt(dir + "/vanilla.txt")
         data = np.loadtxt(dir + f"/{nintv}_interventions.txt")

@@ -1,8 +1,5 @@
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
-    customSpaceInvadersResetWrapper,
-    customAmidarResetWrapper,
-    customBreakoutResetWrapper,
     passThroughWrapper,
 )
 import os
@@ -26,11 +23,9 @@ from envs.wrappers.amidar.interventions.reset_wrapper import AmidarResetWrapper
 from envs.wrappers.breakout.interventions.reset_wrapper import BreakoutResetWrapper
 
 
-def get_start_env(state_num, lives, use_trajectory_starts, environment):
-    if not os.path.isfile(
-        get_start_state_path(state_num, use_trajectory_starts, environment)
-    ):
-        print(get_start_state_path(state_num, use_trajectory_starts, environment))
+def get_start_env(state_num, lives, environment):
+    if not os.path.isfile(get_start_state_path(state_num, environment)):
+        print(get_start_state_path(state_num, environment))
         raise RuntimeError(
             "Start states have not been created yet. Please sample start states."
         )
@@ -41,7 +36,6 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
             state_num,
             intv=-1,
             lives=lives,
-            use_trajectory_starts=use_trajectory_starts,
         )
     elif environment == "Amidar":
         env = gym.make(amidar_env_id)
@@ -50,7 +44,6 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
             state_num,
             intv=-1,
             lives=lives,
-            use_trajectory_starts=use_trajectory_starts,
         )
     elif environment == "Breakout":
         env = gym.make(breakout_env_id)
@@ -59,50 +52,11 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
             state_num,
             intv=-1,
             lives=lives,
-            use_trajectory_starts=use_trajectory_starts,
         )
     else:
         raise ValueError("Unknown environment specified.")
 
     return env
-
-
-def sample_start_states(num_states, horizon, environment):
-
-    if environment == "SpaceInvaders":
-        agt = RandomAgent(gym.make(space_invaders_env_id).action_space)
-    elif environment == "Amidar":
-        agt = RandomAgent(gym.make(amidar_env_id).action_space)
-    elif environment == "Breakout":
-        agt = RandomAgent(gym.make(breakout_env_id).action_space)
-    else:
-        raise ValueError("Unknown environment specified.")
-
-    for state_num in range(num_states):
-        env = ToyboxEnvironment(environment + "Toybox", passThroughWrapper)
-
-        obs = env.reset()
-        t = 0
-        while t < horizon:
-            t += 1
-            if state_num == 0:  # 0th state will always be the default game start
-                break
-
-            obs = env.step(agt.get_action(obs))
-            done = obs["done"]
-
-            if done:  # keep sampling until we get a state at that time step
-                t = 0
-                obs = env.reset()
-
-        state = env.toybox.state_to_json()
-
-        with open(get_start_state_path(state_num, False, environment), "w") as f:
-            json.dump(state, f)
-
-    print(
-        f"Created {num_states} start states near {get_start_state_path(state_num, False, environment)}"
-    )
 
 
 def sample_start_states_from_trajectory(agent, num_states, environment, device):
@@ -165,16 +119,16 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
         # write out sampled state
         state = env.toybox.state_to_json()
 
-        with open(get_start_state_path(state_num, True, environment), "w") as f:
+        with open(get_start_state_path(state_num, environment), "w") as f:
             json.dump(state, f)
 
     # 0th state is always standard start
 
     obs = env.reset()
     state = env.toybox.state_to_json()
-    with open(get_start_state_path(0, True, environment), "w") as f:
+    with open(get_start_state_path(0, environment), "w") as f:
         json.dump(state, f)
 
     print(
-        f"Created {num_states} start states from trajectory near {get_start_state_path(0, True, environment)}"
+        f"Created {num_states} start states from trajectory near {get_start_state_path(0, environment)}"
     )

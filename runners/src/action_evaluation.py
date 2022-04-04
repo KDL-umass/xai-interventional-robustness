@@ -141,7 +141,6 @@ def evaluate_action_distributions(
     environment,
     checkpoint,
     agents,
-    use_trajectory_starts,
     num_states_to_intervene_on,
     interventions,
     num_samples,
@@ -163,7 +162,7 @@ def evaluate_action_distributions(
         ToyboxEnvironment(
             environment + "Toybox",
             device=device,
-            custom_wrapper=custom_wrapper(state_num, intv, 3, use_trajectory_starts),
+            custom_wrapper=custom_wrapper(state_num, intv, 3),
         )
         for state_num in range(num_states_to_intervene_on)
         for intv in interventions
@@ -208,7 +207,6 @@ def evaluate_distributions(
     environment,
     checkpoint,
     agents,
-    use_trajectory_starts,
     num_states_to_intervene_on,
     num_interventions,
     num_samples,
@@ -223,7 +221,6 @@ def evaluate_distributions(
         environment,
         checkpoint,
         agents,
-        use_trajectory_starts,
         num_states_to_intervene_on,
         [-1],
         num_samples,
@@ -240,7 +237,6 @@ def evaluate_distributions(
         environment,
         checkpoint,
         agents,
-        use_trajectory_starts,
         num_states_to_intervene_on,
         list(range(num_interventions)),
         num_samples,

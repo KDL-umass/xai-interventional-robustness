@@ -18,7 +18,6 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
         state_num: int,
         intv: int,
         lives: int,
-        use_trajectory_starts: bool,
     ):
         super().__init__(tbenv)
         self.env = tbenv
@@ -28,7 +27,6 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
         self.intv = intv  # Intervention number 0 - ?
         self.state_num = state_num
         self.lives = lives
-        self.use_trajectory_starts = use_trajectory_starts
 
     def reset(self):
         super().reset()
@@ -41,16 +39,12 @@ class SpaceInvadersResetWrapper(gym.Wrapper):
         environment = "SpaceInvaders"
         if self.intv >= 0:
             with open(
-                f"{get_intervention_dir(self.state_num, self.use_trajectory_starts, environment)}/{self.intv}.json",
+                f"{get_intervention_dir(self.state_num, environment)}/{self.intv}.json",
             ) as f:
                 iv_state = json.load(f)
 
         else:
-            with open(
-                get_start_state_path(
-                    self.state_num, self.use_trajectory_starts, environment
-                )
-            ) as f:
+            with open(get_start_state_path(self.state_num, environment)) as f:
                 iv_state = json.load(f)
 
         iv_state["lives"] = self.lives
