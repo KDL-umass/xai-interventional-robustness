@@ -1,8 +1,5 @@
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
-    customSpaceInvadersResetWrapper,
-    customAmidarResetWrapper,
-    customBreakoutResetWrapper,
     passThroughWrapper,
 )
 import os
@@ -26,11 +23,9 @@ from envs.wrappers.amidar.interventions.reset_wrapper import AmidarResetWrapper
 from envs.wrappers.breakout.interventions.reset_wrapper import BreakoutResetWrapper
 
 
-def get_start_env(state_num, lives, use_trajectory_starts, environment):
-    if not os.path.isfile(
-        get_start_state_path(state_num, use_trajectory_starts, environment)
-    ):
-        print(get_start_state_path(state_num, use_trajectory_starts, environment))
+def get_start_env(state_num, lives, environment):
+    if not os.path.isfile(get_start_state_path(state_num, environment)):
+        print(get_start_state_path(state_num, environment))
         raise RuntimeError(
             "Start states have not been created yet. Please sample start states."
         )
@@ -41,7 +36,6 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
             state_num,
             intv=-1,
             lives=lives,
-            use_trajectory_starts=use_trajectory_starts,
         )
     elif environment == "Amidar":
         env = gym.make(amidar_env_id)
@@ -50,7 +44,6 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
             state_num,
             intv=-1,
             lives=lives,
-            use_trajectory_starts=use_trajectory_starts,
         )
     elif environment == "Breakout":
         env = gym.make(breakout_env_id)
@@ -59,7 +52,6 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
             state_num,
             intv=-1,
             lives=lives,
-            use_trajectory_starts=use_trajectory_starts,
         )
     else:
         raise ValueError("Unknown environment specified.")
@@ -67,8 +59,10 @@ def get_start_env(state_num, lives, use_trajectory_starts, environment):
     return env
 
 
-def sample_start_states(num_states, horizon, environment):
-
+def sample_start_states_with_random_walk(num_states, horizon, environment):
+    """
+    Sample `num_states` start states using a random walk of `horizon` length in the `environment`
+    """
     if environment == "SpaceInvaders":
         agt = RandomAgent(gym.make(space_invaders_env_id).action_space)
     elif environment == "Amidar":
@@ -105,7 +99,10 @@ def sample_start_states(num_states, horizon, environment):
     )
 
 
-def sample_start_states_from_trajectory(agent, num_states, environment, device):
+def sample_start_states(agent, num_states, environment, device):
+    """
+    Sample `num_states` start states uniform randomly from a trajectory produced by `agent` in `environment`.
+    """
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     elif environment == "Amidar":
@@ -139,6 +136,9 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
 
         state = trajectory[t]
 
+        # optionally make a random walk from this state
+        randomWalkLength = 0
+
         if environment == "SpaceInvaders":
             env = gym.make(space_invaders_env_id)
         elif environment == "Amidar":
@@ -151,7 +151,6 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
         obs = env.reset()
         env.toybox.write_state_json(state)
 
-        randomWalkLength = 0  # 5
         for _ in range(randomWalkLength):
             obs, _, done, _ = env.step(random_agent.get_action(obs))
 
@@ -162,19 +161,21 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
                 done = False
                 env.toybox.write_state_json(state)
 
+        #### end of random walk
+
         # write out sampled state
         state = env.toybox.state_to_json()
 
-        with open(get_start_state_path(state_num, True, environment), "w") as f:
+        with open(get_start_state_path(state_num, environment), "w") as f:
             json.dump(state, f)
 
     # 0th state is always standard start
 
     obs = env.reset()
     state = env.toybox.state_to_json()
-    with open(get_start_state_path(0, True, environment), "w") as f:
+    with open(get_start_state_path(0, environment), "w") as f:
         json.dump(state, f)
 
     print(
-        f"Created {num_states} start states from trajectory near {get_start_state_path(0, True, environment)}"
+        f"Created {num_states} start states from trajectory near {get_start_state_path(0, environment)}"
     )

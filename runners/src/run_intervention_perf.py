@@ -27,11 +27,11 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
     checkpoints = all_checkpoints
 
     if env_name == "SpaceInvaders":
-        custom_wrapper = customSpaceInvadersResetWrapper(0, intervention, 3, False)
+        custom_wrapper = customSpaceInvadersResetWrapper(0, intervention, 3)
     elif env_name == "Amidar":
-        custom_wrapper = customAmidarResetWrapper(0, intervention, 3, False)
+        custom_wrapper = customAmidarResetWrapper(0, intervention, 3)
     elif env_name == "Breakout":
-        custom_wrapper = customBreakoutResetWrapper(0, intervention, 3, False)
+        custom_wrapper = customBreakoutResetWrapper(0, intervention, 3)
     else:
         raise ValueError(f"Unrecognized env_name: {env_name}")
 
@@ -42,18 +42,18 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
     dir = f"storage/results/performance/{env_name}/{fam}"
     os.makedirs(dir, exist_ok=True)
 
-    # If returns file does not exist, then write the first line, else open in a+ mode. 
+    # If returns file does not exist, then write the first line, else open in a+ mode.
     # Parallelize wrt intervention
     returns_file = dir + "/returns_intv_" + str(intervention) + ".txt"
     if os.path.exists(returns_file):
         # Check if all the experimental results are complete, then return() (very hacky way)
-        if(len(open(returns_file, "r").readlines()) == 56):
+        if len(open(returns_file, "r").readlines()) == 56:
             print("Experiment is already done!")
-            return()
+            return ()
         # If not, continue
         else:
             f = open(returns_file, "a+")
-    else: 
+    else:
         f = open(returns_file, "w")
         f.write("env,family,agent,intervention,frame,mean,std\n")
     print("Created returns file")
@@ -70,7 +70,7 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
         loadfiles = glob(modelPath + f"/*/preset{check}.pt")
         print("Files: ", loadfiles)
 
-        # For now load to CPU; change to GPU when CUDA device initialization error works 
+        # For now load to CPU; change to GPU when CUDA device initialization error works
         agents = [torch.load(loadfile) for loadfile in loadfiles]
         print("Agents: ", agents)
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         "--intervention",
         nargs=1,
         type=int,
-        help="intervention number for each environment and family"
+        help="intervention number for each environment and family",
     )
 
     # Not using checkpoints, automatically run all experiments for all the checkpoints mentioned in the main() function
