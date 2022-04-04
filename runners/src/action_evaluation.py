@@ -45,9 +45,7 @@ def policy_action_distribution(
     return dist
 
 
-def collect_action_distributions(
-    agent_family, agents, envs, env_labels, samples, dist_type
-):
+def collect_action_distributions(agent_family, agents, envs, env_labels, samples):
     n = len(envs) * len(agents)
     dists = np.zeros((n, envs[0].action_space.n + 3))
     row = 0
@@ -56,7 +54,7 @@ def collect_action_distributions(
             dists[row, 0] = a
             dists[row, 1:3] = env_labels[e]
             dists[row, 3:] = policy_action_distribution(
-                agent_family, agt, env, env.reset(), samples, dist_type
+                agent_family, agt, env, env.reset(), samples
             )
             row += 1
             print(f"\r\r\t\tCAD: Sampling {round(row / n * 100)}% complete", end="")
@@ -145,7 +143,6 @@ def evaluate_action_distributions(
     interventions,
     num_samples,
     sample_js_div,
-    dist_type,
     device,
     dir,
     histograms,
@@ -185,7 +182,6 @@ def evaluate_action_distributions(
             envs,
             env_labels,
             num_samples,
-            dist_type,
         )
 
     header = get_action_distribution_header(envs, sample_js_div)
@@ -211,7 +207,6 @@ def evaluate_distributions(
     num_interventions,
     num_samples,
     sample_js_div,
-    dist_type,
     device,
     dir,
 ):
@@ -225,7 +220,6 @@ def evaluate_distributions(
         [-1],
         num_samples,
         sample_js_div,
-        dist_type,
         device,
         dir,
         histograms=True,
@@ -241,7 +235,6 @@ def evaluate_distributions(
         list(range(num_interventions)),
         num_samples,
         sample_js_div,
-        dist_type,
         device,
         dir,
         histograms=True,

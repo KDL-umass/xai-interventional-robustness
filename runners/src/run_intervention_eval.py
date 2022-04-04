@@ -115,8 +115,6 @@ def evaluate_interventions(agent_family, environment, device):
     action_distribution_samples = 5
     num_states_to_intervene_on = 1
 
-    dist_type = "analytic"
-
     sample_js_div = True  # use new js divergence sampling
     js_div_samples = 5
 
@@ -150,7 +148,6 @@ def evaluate_interventions(agent_family, environment, device):
             num_interventions,
             num_samples,
             sample_js_div,
-            dist_type,
             device,
             dir,
         )
