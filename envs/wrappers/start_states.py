@@ -59,7 +59,50 @@ def get_start_env(state_num, lives, environment):
     return env
 
 
+def sample_start_states(num_states, horizon, environment):
+    """
+    Sample `num_states` start states using a random walk of `horizon` length in the `environment`
+    """
+    if environment == "SpaceInvaders":
+        agt = RandomAgent(gym.make(space_invaders_env_id).action_space)
+    elif environment == "Amidar":
+        agt = RandomAgent(gym.make(amidar_env_id).action_space)
+    elif environment == "Breakout":
+        agt = RandomAgent(gym.make(breakout_env_id).action_space)
+    else:
+        raise ValueError("Unknown environment specified.")
+
+    for state_num in range(num_states):
+        env = ToyboxEnvironment(environment + "Toybox", passThroughWrapper)
+
+        obs = env.reset()
+        t = 0
+        while t < horizon:
+            t += 1
+            if state_num == 0:  # 0th state will always be the default game start
+                break
+
+            obs = env.step(agt.get_action(obs))
+            done = obs["done"]
+
+            if done:  # keep sampling until we get a state at that time step
+                t = 0
+                obs = env.reset()
+
+        state = env.toybox.state_to_json()
+
+        with open(get_start_state_path(state_num, False, environment), "w") as f:
+            json.dump(state, f)
+
+    print(
+        f"Created {num_states} start states near {get_start_state_path(state_num, False, environment)}"
+    )
+
+
 def sample_start_states_from_trajectory(agent, num_states, environment, device):
+    """
+    Sample `num_states` start states uniform randomly from a trajectory produced by `agent` in `environment`.
+    """
     if environment == "SpaceInvaders":
         random_agent = RandomAgent(gym.make(space_invaders_env_id).action_space)
     elif environment == "Amidar":
@@ -93,6 +136,9 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
 
         state = trajectory[t]
 
+        # optionally make a random walk from this state
+        randomWalkLength = 0
+
         if environment == "SpaceInvaders":
             env = gym.make(space_invaders_env_id)
         elif environment == "Amidar":
@@ -105,7 +151,6 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
         obs = env.reset()
         env.toybox.write_state_json(state)
 
-        randomWalkLength = 0  # 5
         for _ in range(randomWalkLength):
             obs, _, done, _ = env.step(random_agent.get_action(obs))
 
@@ -115,6 +160,8 @@ def sample_start_states_from_trajectory(agent, num_states, environment, device):
                 obs = env.reset()
                 done = False
                 env.toybox.write_state_json(state)
+
+        #### end of random walk
 
         # write out sampled state
         state = env.toybox.state_to_json()
