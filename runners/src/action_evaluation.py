@@ -89,20 +89,23 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir):
                 end="",
             )
 
-        print("Saving action histograms...", end="")
-        label_actions = np.argmax(actions, axis=1)
-        str_label_actions = [str(i) for i in label_actions]
-        with open(dir + f"/actions.csv", "a+") as file:
-            output = (
-                str(env_labels[e][0])
-                + ", "
-                + str(env_labels[e][1])
-                + ", "
-                + ",".join(str_label_actions)
-                + "\n"
-            )
-            file.write(output)
-        print("done")
+        #### UNCOMMENT TO SAVE ACTION HISTOGRAMS ####
+        #### COMMENTED OUT TO IMPROVE RUNTIME
+        # print("Saving action histograms...", end="")
+        # label_actions = np.argmax(actions, axis=1)
+        # str_label_actions = [str(i) for i in label_actions]
+        # with open(dir + f"/actions.csv", "a+") as file:
+        #     output = (
+        #         str(env_labels[e][0])
+        #         + ", "
+        #         + str(env_labels[e][1])
+        #         + ", "
+        #         + ",".join(str_label_actions)
+        #         + "\n"
+        #     )
+        #     file.write(output)
+        # print("done")
+        #### END ACTION HISTOGRAMS
 
         result_table[e, 3] = js_divergence(actions)
 
