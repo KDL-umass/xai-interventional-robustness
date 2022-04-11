@@ -6,7 +6,7 @@ from subprocess import call
 from all.experiments.run_experiment import get_experiment_type
 import numpy as np
 
-from analysis.checkpoints import all_checkpoints
+from analysis.checkpoints import all_checkpoints, checkpoints as paper_checkpoints
 import torch
 
 from envs.wrappers.all_toybox_wrapper import (
@@ -16,16 +16,17 @@ from envs.wrappers.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 
-device = "cuda"
 print("CUDA:", torch.cuda.is_available())
+if torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
 
 
 num_episodes = 5
 
 
 def main(env_name, fam, intervention=-1, checkpoint=None):
-    checkpoints = all_checkpoints
-
     if env_name == "SpaceInvaders":
         custom_wrapper = customSpaceInvadersResetWrapper(0, intervention, 3)
     elif env_name == "Amidar":
@@ -39,7 +40,7 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
         env_name + "Toybox", device=device, custom_wrapper=custom_wrapper
     )
 
-    dir = f"storage/results/performance/{env_name}/{fam}"
+    dir = f"storage/results/intervention_performance/{env_name}/{fam}"
     os.makedirs(dir, exist_ok=True)
 
     # If returns file does not exist, then write the first line, else open in a+ mode.
@@ -59,19 +60,20 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
     print("Created returns file")
 
     if checkpoint is not None:
-        assert checkpoint in checkpoints, "checkpoint not available"
+        assert checkpoint in all_checkpoints, "checkpoint not available"
         checkpoints = [checkpoint]
+    else:
+        checkpoints = paper_checkpoints
 
     modelPath = f"storage/models/{env_name}/{fam}"
 
-    checkpoints = [50000, 3000000, 5000000, 8000000, 10000000]
-
     for check in checkpoints:
         loadfiles = glob(modelPath + f"/*/preset{check}.pt")
-        print("Files: ", loadfiles)
 
-        # For now load to CPU; change to GPU when CUDA device initialization error works
-        agents = [torch.load(loadfile) for loadfile in loadfiles]
+        agents = [
+            torch.load(loadfile, map_location=torch.device(device))
+            for loadfile in loadfiles
+        ]
         print("Agents: ", agents)
 
         results = np.zeros((len(agents), num_episodes))
