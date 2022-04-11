@@ -21,14 +21,13 @@ from envs.wrappers.amidar.interventions.reset_wrapper import (
 from envs.wrappers.start_states import (
     get_start_env,
     sample_start_states,
-    sample_start_states_from_trajectory,
 )
 
 
-def write_intervention_json(state, state_num, count, use_trajectory_starts):
+def write_intervention_json(state, state_num, count):
     environment = "Amidar"
     with open(
-        f"{get_intervention_dir(state_num, use_trajectory_starts, environment)}/{count}.json",
+        f"{get_intervention_dir(state_num, environment)}/{count}.json",
         "w",
     ) as outfile:
         json.dump(state, outfile)
@@ -37,7 +36,7 @@ def write_intervention_json(state, state_num, count, use_trajectory_starts):
 # ENEMY INTERVENTIONS
 
 
-def get_drop_one_enemy(env, state_num, count, use_trajectory_starts):
+def get_drop_one_enemy(env, state_num, count):
     """Drop one enemy interventions."""
     state = env.toybox.state_to_json()
     num_enemies = len(state["enemies"])
@@ -46,12 +45,12 @@ def get_drop_one_enemy(env, state_num, count, use_trajectory_starts):
         state = Toybox("amidar").state_to_json()
         # state["enemies"][enemy].remove(enemy)
         state["enemies"][enemy]["caught"] = True
-        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        write_intervention_json(state, state_num, count)
         count += 1
     return count
 
 
-def get_shift_enemy_interventions(env, state_num, count, use_trajectory_starts):
+def get_shift_enemy_interventions(env, state_num, count):
     """Start the enemy in different positions."""
     state = env.toybox.state_to_json()
     num_enemies = len(state["enemies"])
@@ -63,7 +62,7 @@ def get_shift_enemy_interventions(env, state_num, count, use_trajectory_starts):
         # state["enemies"][enemy].remove(enemy)
         state["enemies"][i]["position"]["x"] = x[i]
         state["enemies"][i]["position"]["y"] = y[i]
-        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        write_intervention_json(state, state_num, count)
         count += 1
 
         env.toybox.write_state_json(state)
@@ -74,7 +73,7 @@ def get_shift_enemy_interventions(env, state_num, count, use_trajectory_starts):
 
 
 # AGENT INTERVENTIONS #
-def get_shift_agent_interventions(env, state_num, count, use_trajectory_starts):
+def get_shift_agent_interventions(env, state_num, count):
     """Start the enemy in different positions."""
     state = env.toybox.state_to_json()
     num_enemies = len(state["enemies"])
@@ -85,7 +84,7 @@ def get_shift_agent_interventions(env, state_num, count, use_trajectory_starts):
         state = Toybox("amidar").state_to_json()
         state["player"]["position"]["x"] = x[i]
         state["player"]["position"]["y"] = y[i]
-        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        write_intervention_json(state, state_num, count)
         count += 1
 
         env.toybox.write_state_json(state)
@@ -98,7 +97,7 @@ def get_shift_agent_interventions(env, state_num, count, use_trajectory_starts):
 # TILE INTERVENTTIONS #
 
 
-def get_remove_tile_interventions(env, state_num, count, use_trajectory_starts):
+def get_remove_tile_interventions(env, state_num, count):
     """Drop a tile."""
     state = env.toybox.state_to_json()
     num_rows = len(state["board"]["tiles"])
@@ -142,12 +141,12 @@ def get_remove_tile_interventions(env, state_num, count, use_trajectory_starts):
         index = erase[row]
         assert state["board"]["tiles"][row][index] == "Unpainted"
         state["board"]["tiles"][row][index] = "Empty"
-        write_intervention_json(state, state_num, count, use_trajectory_starts)
+        write_intervention_json(state, state_num, count)
         count += 1
     return count
 
 
-def get_add_tile_interventions(env, state_num, count, use_trajectory_starts):
+def get_add_tile_interventions(env, state_num, count):
     """Add a tile."""
     state = env.toybox.state_to_json()
     num_rows = len(state["board"]["tiles"])
@@ -192,14 +191,14 @@ def get_add_tile_interventions(env, state_num, count, use_trajectory_starts):
             index = erase[row]
             # assert state["board"]["tiles"][row][index] == "Empty"
             state["board"]["tiles"][row][index] = "Unpainted"
-            write_intervention_json(state, state_num, count, use_trajectory_starts)
+            write_intervention_json(state, state_num, count)
             count += 1
     return count
 
 
-def create_intervention_states(num_states: int, use_trajectory_starts: bool):
+def create_intervention_states(num_states: int):
     """Create JSON states for all interventions."""
-    dir = get_root_intervention_dir(use_trajectory_starts, "Amidar")
+    dir = get_root_intervention_dir("Amidar")
 
     for state_num in range(
         num_states
@@ -207,31 +206,24 @@ def create_intervention_states(num_states: int, use_trajectory_starts: bool):
         env = get_start_env(
             state_num,
             lives=3,
-            use_trajectory_starts=use_trajectory_starts,
             environment="Amidar",
         )
 
         count = 0
         prevcount = count
-        count = get_remove_tile_interventions(
-            env, state_num, count, use_trajectory_starts
-        )
+        count = get_remove_tile_interventions(env, state_num, count)
         print(f"{prevcount} to {count-1} remove_tile_interventions")
         prevcount = count
-        count = get_add_tile_interventions(env, state_num, count, use_trajectory_starts)
+        count = get_add_tile_interventions(env, state_num, count)
         print(f"{prevcount} to {count-1} get_add_tile_interventions")
         prevcount = count
-        count = get_drop_one_enemy(env, state_num, count, use_trajectory_starts)
+        count = get_drop_one_enemy(env, state_num, count)
         print(f"{prevcount} to {count-1} get_drop_one_enemy")
         prevcount = count
-        count = get_shift_enemy_interventions(
-            env, state_num, count, use_trajectory_starts
-        )
+        count = get_shift_enemy_interventions(env, state_num, count)
         print(f"{prevcount} to {count-1} shift_enemy_interventions")
         prevcount = count
-        count = get_shift_agent_interventions(
-            env, state_num, count, use_trajectory_starts
-        )
+        count = get_shift_agent_interventions(env, state_num, count)
         print(f"{prevcount} to {count-1} shift_agent_interventions")
         prevcount = count
 
@@ -269,12 +261,6 @@ def get_all_intervened_environments(num_states, lives):
 
 if __name__ == "__main__":
     num_states = 1
-    sample_start_states(num_states, 0, "Amidar")
-    create_intervention_states(num_states, False)
-
-    num_states = 1
     agent = RandomAgent(gym.make(amidar_env_id).action_space)
-    sample_start_states_from_trajectory(
-        agent, num_states, environment="Amidar", device="cpu"
-    )
-    create_intervention_states(num_states, True)
+    sample_start_states(agent, num_states, environment="Amidar", device="cpu")
+    create_intervention_states(num_states)
