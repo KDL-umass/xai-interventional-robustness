@@ -51,7 +51,7 @@ Pillow==7.1.2
 protobuf==3.17.3
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-pybullet==3.1.7
+pybullet==3.2.2
 pycparser==2.20
 pygame==2.0.0
 pyglet==1.5.15
@@ -83,7 +83,7 @@ threadpoolctl==2.2.0
 toml==0.10.2
 torch==1.8.1
 torch-testing==0.0.2
--e git+git://github.com/toybox-rs/Toybox.git@7b81f0802d9826b78f0af2e7f90289b579f3103f#egg=toybox
+-e git+https://github.com/toybox-rs/Toybox.git@7b81f0802d9826b78f0af2e7f90289b579f3103f#egg=toybox
 tqdm==4.61.2
 typed-ast==1.4.3
 typing-extensions==3.10.0.0

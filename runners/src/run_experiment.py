@@ -27,11 +27,11 @@ loadfile = False  # replace with specific path if continuing from checkpoint
 
 def main(env_name, fam):
     if env_name == "SpaceInvaders":
-        custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3, False)
+        custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3)
     elif env_name == "Amidar":
-        custom_wrapper = customAmidarResetWrapper(0, -1, 3, False)
+        custom_wrapper = customAmidarResetWrapper(0, -1, 3)
     elif env_name == "Breakout":
-        custom_wrapper = customBreakoutResetWrapper(0, -1, 3, False)
+        custom_wrapper = customBreakoutResetWrapper(0, -1, 3)
     else:
         raise ValueError(f"Unrecognized env_name: {env_name}")
 

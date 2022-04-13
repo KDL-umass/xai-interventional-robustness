@@ -100,7 +100,10 @@ def plotEachFamily(env):
 
 
 def plotAllFamilies(
-    env, gridspec=plt.figure(1).add_gridspec(len(model_names), 1), show=False
+    env,
+    gridspec=plt.figure(1).add_gridspec(len(model_names), 1),
+    show=False,
+    label=True,
 ):
     with open(f"storage/plots/performance/{env}/order.txt") as f:
         model_names = [l.strip() for l in f.readlines()]
@@ -110,9 +113,10 @@ def plotAllFamilies(
         plotFamily(env, fam, axes[i])
 
     # axes[0].set_title("Performance", fontsize=10)
-    axes[len(model_names) - 1].set_xlabel(
-        "Frames", fontsize=10, labelpad=5, fontweight="bold"
-    )
+    if label:
+        axes[len(model_names) - 1].set_xlabel(
+            "Frames", fontsize=10, labelpad=5, fontweight="bold"
+        )
 
     if show:
         plt.show()

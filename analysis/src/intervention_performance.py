@@ -2,10 +2,15 @@ from tabnanny import check
 import pandas as pd 
 import numpy as np 
 import argparse, os, glob
+from analysis.checkpoints import all_checkpoints, checkpoints as paper_checkpoints
 
 def main(env_name, fam, intervention=-1, checkpoint=None):
 
-    checkpoints = [50000, 3000000, 5000000, 8000000, 10000000]
+    if checkpoint is not None:
+        assert checkpoint in all_checkpoints, "checkpoint not available"
+        checkpoints = [checkpoint]
+    else:
+        checkpoints = paper_checkpoints
     df_list = []
     for checkpoint in checkpoints:
         dir = f"storage/results/intervention_js_div/{env_name}/{fam}/11_agents/30_states/trajectory/check_{checkpoint}/"
@@ -22,7 +27,7 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
     df_r = pd.concat(df_list, ignore_index=True)
     
     df_list = []
-    dir = f"storage/results/performance/{env_name}/{fam}"
+    dir = f"storage/results/intervention_performance/{env_name}/{fam}"
     loadfiles = glob.glob(dir + "/*.txt")
     for file in loadfiles: 
         d = pd.read_csv(file, sep=',')
@@ -46,7 +51,7 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
     df = df.drop(columns = ['agent'])
 
     df = pd.merge(df, df_r, how="left", on=["intervention","frame"])
-    file = f"storage/results/intervention_performance/{env_name}_{fam}_intvperf.csv"
+    file = f"storage/results/intervention_performance_results/{env_name}_{fam}_intvperf.csv"
     df.to_csv(file)
 
 if __name__ == "__main__":

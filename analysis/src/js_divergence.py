@@ -7,6 +7,7 @@ def shannon(dist):
 
 
 def js_divergence(dists):
+    """Standard JS Divergence, bounded b/t [0,log_2(10)]"""
     weight = 1 / len(dists)  # equally weight distributions
     left = shannon(np.sum(weight * dists, axis=0))  # sum along columns
     right = sum([weight * shannon(dist) for dist in dists])
@@ -18,10 +19,14 @@ def get_js_divergence_matrix(data, vanilla):
     Returns mat, nmat, van_mat, intv_mat
     according to (intervention) data and vanilla data provided,
     normalize bounds to [-1,1] with vanilla set to 0.
+
+    `mat` is normalized between [0,1].
+    `nmat` is normalized between [-1,1], where 0 is the unintervened state's jsdiv.
     """
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
     samples = data[:, 3]
+    nAgents = 10
 
     nstates = np.max(state).astype(int) + 1
     assert nstates == len(vanilla)
@@ -31,9 +36,9 @@ def get_js_divergence_matrix(data, vanilla):
     intv_mat = np.zeros((nstates, nintv))
     for s in range(nstates):
         for i in range(nintv):
-            intv_mat[s, i] = samples[s * nintv + i] / np.log2(10)
+            intv_mat[s, i] = samples[s * nintv + i] / np.log2(nAgents)
 
-    van_mat = vanilla[:, 3] / np.log2(10)
+    van_mat = vanilla[:, 3] / np.log2(nAgents)
 
     mat = np.zeros((nstates, nintv + 1))
     mat[:, 0] = van_mat

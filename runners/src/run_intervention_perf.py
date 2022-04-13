@@ -6,7 +6,7 @@ from subprocess import call
 from all.experiments.run_experiment import get_experiment_type
 import numpy as np
 
-from analysis.checkpoints import all_checkpoints
+from analysis.checkpoints import all_checkpoints, checkpoints as paper_checkpoints
 import torch
 
 from envs.wrappers.all_toybox_wrapper import (
@@ -16,22 +16,23 @@ from envs.wrappers.all_toybox_wrapper import (
     customSpaceInvadersResetWrapper,
 )
 
-device = "cuda"
 print("CUDA:", torch.cuda.is_available())
+if torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
 
 
-num_episodes = 5
+num_episodes = 30
 
 
 def main(env_name, fam, intervention=-1, checkpoint=None):
-    checkpoints = all_checkpoints
-
     if env_name == "SpaceInvaders":
-        custom_wrapper = customSpaceInvadersResetWrapper(0, intervention, 3, False)
+        custom_wrapper = customSpaceInvadersResetWrapper(0, intervention, 3)
     elif env_name == "Amidar":
-        custom_wrapper = customAmidarResetWrapper(0, intervention, 3, False)
+        custom_wrapper = customAmidarResetWrapper(0, intervention, 3)
     elif env_name == "Breakout":
-        custom_wrapper = customBreakoutResetWrapper(0, intervention, 3, False)
+        custom_wrapper = customBreakoutResetWrapper(0, intervention, 3)
     else:
         raise ValueError(f"Unrecognized env_name: {env_name}")
 
@@ -39,39 +40,35 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
         env_name + "Toybox", device=device, custom_wrapper=custom_wrapper
     )
 
-    dir = f"storage/results/performance/{env_name}/{fam}"
+    dir = f"storage/results/intervention_performance/{env_name}/{fam}"
     os.makedirs(dir, exist_ok=True)
 
-    # If returns file does not exist, then write the first line, else open in a+ mode. 
+    # If returns file does not exist, then write the first line, else open in a+ mode.
     # Parallelize wrt intervention
     returns_file = dir + "/returns_intv_" + str(intervention) + ".txt"
     if os.path.exists(returns_file):
-        # Check if all the experimental results are complete, then return() (very hacky way; update to see if all the results exist)
-        if(len(open(returns_file, "r").readlines()) == 56):
-            print("Experiment is already done!")
-            return()
-        # If not, continue
-        else:
-            f = open(returns_file, "a+")
-    else: 
-        f = open(returns_file, "w")
-        f.write("env,family,agent,intervention,frame,mean,std\n")
+        print("File already exists; check if experiment is incomplete")
+        print("Starting Over")
+        
+    f = open(returns_file, "w")
+    f.write("env,family,agent,intervention,frame,mean,std\n")
     print("Created returns file")
 
     if checkpoint is not None:
-        assert checkpoint in checkpoints, "checkpoint not available"
+        assert checkpoint in all_checkpoints, "checkpoint not available"
         checkpoints = [checkpoint]
+    else:
+        checkpoints = paper_checkpoints
 
     modelPath = f"storage/models/{env_name}/{fam}"
 
-    checkpoints = [50000, 3000000, 5000000, 8000000, 10000000]
-
     for check in checkpoints:
         loadfiles = glob(modelPath + f"/*/preset{check}.pt")
-        print("Files: ", loadfiles)
 
-        # For now load to CPU; change to GPU when CUDA device initialization error works 
-        agents = [torch.load(loadfile) for loadfile in loadfiles]
+        agents = [
+            torch.load(loadfile, map_location=torch.device(device))
+            for loadfile in loadfiles
+        ]
         print("Agents: ", agents)
 
         results = np.zeros((len(agents), num_episodes))
@@ -126,7 +123,7 @@ if __name__ == "__main__":
         "--intervention",
         nargs=1,
         type=int,
-        help="intervention number for each environment and family"
+        help="intervention number for each environment and family",
     )
 
     # Not using checkpoints, automatically run all experiments for all the checkpoints mentioned in the main() function
