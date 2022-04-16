@@ -51,7 +51,7 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
         print("Starting Over")
         
     f = open(returns_file, "w")
-    f.write("env,family,agent,intervention,frame,mean,std\n")
+    f.write("env,family,agent,intervention,frame,mean,std,median\n")
     print("Created returns file")
 
     if checkpoint is not None:
@@ -93,8 +93,9 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
 
             mean = np.mean(results[p, :])
             std = np.std(results[p, :])
+            median = np.median(results[p, :])
 
-            f.write(f"{env_name},{fam},{p+1},{intervention},{check},{mean},{std}\n")
+            f.write(f"{env_name},{fam},{p+1},{intervention},{check},{mean},{std},{median}\n")
             f.flush()
             print(f"{env_name}, {fam}, {check} written")
 
