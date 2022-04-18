@@ -30,25 +30,28 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
     dir = f"storage/results/intervention_performance/{env_name}/{fam}"
     loadfiles = glob.glob(dir + "/*.txt")
     for file in loadfiles: 
-        d = pd.read_csv(file, sep=',')
-        if d.empty: 
+        try: 
+            d = pd.read_csv(file, sep=',')
+            if len(d)!=55: 
+                if fam == "c51": 
+                    d = d.loc[d["agent"].isin([1,2,3,4,5,6,7,8,9,10,11])]
+                    df_list.append(d)
+                elif fam == "ddqn": 
+                    d = d.loc[d["agent"].isin([1,2,3,4,5,6,7,8,9,10,11])]
+                    df_list.append(d)
+                else: 
+                    print("Length: ", len(d), " File: ", file)
+            else:
+                df_list.append(d) 
+        except pd.errors.EmptyDataError:
             print("Failed: ", file)
-        elif len(d)!=55: 
-            if fam == "c51": 
-                d = d.loc[d["agent"].isin([1,2,3,4,5,6,7,8,9,10,11])]
-                df_list.append(d)
-            elif fam == "ddqn": 
-                d = d.loc[d["agent"].isin([1,2,3,4,5,6,7,8,9,10,11])]
-                df_list.append(d)
-            else: 
-                print("Length: ", len(d), " File: ", file)
-        else:
-            df_list.append(d)            
-
+                   
     df_p = pd.concat(df_list, ignore_index=True)
-    df = df_p.groupby(["intervention","frame"]).mean()
-    df = df.rename(columns = {"mean":"mean_performance", "std":"mean_std"})
-    df = df.drop(columns = ['agent'])
+    df_p = df_p.groupby(["intervention","frame"]).agg({"mean": np.mean, "std":np.mean, "median": lambda x: x.tolist()}).reset_index()
+
+    # df = df_p.groupby(["intervention","frame"]).mean()
+    df = df_p.rename(columns = {"mean":"mean_performance", "std":"mean_std", "median":"median_performance"})
+    # df = df.drop(columns = ['agent'])
 
     df = pd.merge(df, df_r, how="left", on=["intervention","frame"])
     file = f"storage/results/intervention_performance_results/{env_name}_{fam}_intvperf.csv"
