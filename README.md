@@ -65,7 +65,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-Install the local ALL
+We used a fork of ALL, which can be found here: https://github.com/KDL-umass/autonomous-learning-library. After cloning the ALL repo locally, install it using the following commands: 
 
 ```
 cd ..
