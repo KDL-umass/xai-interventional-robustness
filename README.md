@@ -1,6 +1,6 @@
 # Source Code: Measuring the Interventional Robustness of Reinforcement Learning Agents
 
-Experiments IJCAI '22 submission
+Experiments
 
 ## Summary
 
