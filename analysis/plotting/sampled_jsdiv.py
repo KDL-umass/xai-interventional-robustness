@@ -179,7 +179,7 @@ def colorBar(fig, normalized, env):
             y=-1.8,
         )
     vmin = -norm_color_bound if normalized else 0
-    vmax = norm_color_bound if normalized else 0
+    vmax = norm_color_bound if normalized else 1.0
     plt.colorbar(
         cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=vmax), cmap=cmap),
         cax=cbar_ax,
