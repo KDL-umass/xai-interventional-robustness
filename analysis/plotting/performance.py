@@ -106,15 +106,15 @@ def plotAllFamilies(
     label=True,
 ):
     with open(f"storage/plots/performance/{env}/order.txt") as f:
-        model_names = [l.strip() for l in f.readlines()]
+        ordered_model_names = [l.strip() for l in f.readlines()]
     axes = gridspec.subplots(sharex=True, sharey=True)
 
-    for i, fam in enumerate(model_names):
+    for i, fam in enumerate(ordered_model_names):
         plotFamily(env, fam, axes[i])
 
     # axes[0].set_title("Performance", fontsize=10)
     if label:
-        axes[len(model_names) - 1].set_xlabel(
+        axes[len(ordered_model_names) - 1].set_xlabel(
             "Frames", fontsize=10, labelpad=5, fontweight="bold"
         )
 

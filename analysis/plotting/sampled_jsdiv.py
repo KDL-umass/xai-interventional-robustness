@@ -24,6 +24,7 @@ from analysis.checkpoints import checkpoints
 
 cmap = rcParams["image.cmap"]
 cmap = plt.get_cmap(cmap).reversed()
+norm_color_bound = 0.5
 
 
 def subplot_js_divergence_matrix(
@@ -58,7 +59,7 @@ def subplot_js_divergence_matrix(
     ax.spines["left"].set_linewidth(0)
 
     if normalize:
-        im.set_clim(-1.0, 1.0)
+        im.set_clim(-norm_color_bound, norm_color_bound)
     else:
         im.set_clim(0, 1.0)
 
@@ -93,7 +94,7 @@ def plot_js_divergence_matrix(
     im = plt.matshow(mat.T, interpolation="none", aspect="auto", cmap=cmap)
 
     if normalize:
-        im.set_clim(-1.0, 1.0)
+        im.set_clim(-norm_color_bound, norm_color_bound)
     else:
         im.set_clim(0, 1.0)
 
@@ -106,7 +107,7 @@ def plot_js_divergence_matrix(
     cbar = plt.colorbar(im)
     cbar.set_label(r"Interventional Robustness ($\mathcal{R}$)")
     if normalize:
-        plt.clim(-1.0, 1.0)
+        plt.clim(-norm_color_bound, norm_color_bound)
     else:
         plt.clim(0, 1.0)
 
@@ -177,9 +178,10 @@ def colorBar(fig, normalized, env):
             {"fontsize": 8, "fontweight": "bold"},
             y=-1.8,
         )
-    vmin = -1 if normalized else 0
+    vmin = -norm_color_bound if normalized else 0
+    vmax = norm_color_bound if normalized else 1.0
     plt.colorbar(
-        cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=1), cmap=cmap),
+        cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=vmax), cmap=cmap),
         cax=cbar_ax,
         orientation="horizontal",
     )
