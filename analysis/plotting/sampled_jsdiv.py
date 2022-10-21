@@ -113,12 +113,17 @@ def plot_js_divergence_matrix(
 
     os.makedirs(f"storage/plots/sampled_jsdivmat/{env}", exist_ok=True)
     if fname is not None:
+        print(f"{env}/{fname} at 1000 dpi")
         plt.savefig(
-            f"storage/plots/sampled_jsdivmat/{env}/{fname}.png", bbox_inches="tight"
+            f"storage/plots/sampled_jsdivmat/{env}/{fname}.png",
+            bbox_inches="tight",
+            dpi=1000,
         )
     else:
         plt.savefig(
-            f"storage/plots/sampled_jsdivmat/{env}/{title}.png", bbox_inches="tight"
+            f"storage/plots/sampled_jsdivmat/{env}/{title}.png",
+            bbox_inches="tight",
+            dpi=1000,
         )
     plt.close(plt.gcf())
 
