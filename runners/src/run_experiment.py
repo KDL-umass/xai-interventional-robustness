@@ -75,7 +75,7 @@ def main(env_name, fam):
                 logdir=logdir,
                 write_loss=True,
                 loadfile="" if load == "" else load + "preset10000000.pt",
-                sbatch_args={"partition": "1080ti-long"},
+                sbatch_args={"partition": "gypsum-1080ti", "time": "3-00:00:00"},
                 nodelist=nodelist,
             )
         else:
