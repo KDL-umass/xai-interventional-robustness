@@ -6,7 +6,7 @@ from matplotlib import cm, rcParams
 from matplotlib.colors import Normalize
 from analysis.plotting.performance import plotAllFamilies
 
-from analysis.src.js_divergence import get_js_divergence_matrix
+from analysis.src.ce import get_ce_matrix
 from envs.wrappers.paths import get_num_interventions
 
 from runners.src.performance_plot import *
@@ -27,13 +27,13 @@ cmap = plt.get_cmap(cmap).reversed()
 norm_color_bound = 0.5
 
 
-def subplot_js_divergence_matrix(
+def subplot_ce_matrix(
     ax, data, vanilla, normalize, title="", transpose=True
 ):
     font = {"size": 10}
     matplotlib.rc("font", **font)
 
-    mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(data, vanilla)
+    mat, nmat, van_mat, intv_mat, n_intv_mat = get_ce_matrix(data, vanilla)
 
     # invert!
     mat = 1 - mat
@@ -81,10 +81,10 @@ def subplot_js_divergence_matrix(
         ax.tick_params(left=False, bottom=False)
 
 
-def plot_js_divergence_matrix(
+def plot_ce_matrix(
     data, vanilla, title, normalize, env, family="", checkpoint="", fname=None
 ):
-    mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(data, vanilla)
+    mat, nmat, van_mat, intv_mat, n_intv_mat = get_ce_matrix(data, vanilla)
     if normalize:
         mat = nmat
 
@@ -111,17 +111,17 @@ def plot_js_divergence_matrix(
     else:
         plt.clim(0, 1.0)
 
-    os.makedirs(f"storage/plots/sampled_jsdivmat/{env}", exist_ok=True)
+    os.makedirs(f"storage/plots/sampled_cemat/{env}", exist_ok=True)
     if fname is not None:
         print(f"{env}/{fname} at 1000 dpi")
         plt.savefig(
-            f"storage/plots/sampled_jsdivmat/{env}/{fname}.png",
+            f"storage/plots/sampled_cemat/{env}/{fname}.png",
             bbox_inches="tight",
             dpi=1000,
         )
     else:
         plt.savefig(
-            f"storage/plots/sampled_jsdivmat/{env}/{title}.png",
+            f"storage/plots/sampled_cemat/{env}/{title}.png",
             bbox_inches="tight",
             dpi=1000,
         )
@@ -147,9 +147,9 @@ def individualPlots(normalized):
 
             for c, check in enumerate(checkpoints):
                 if check == "":
-                    dir = f"storage/results/intervention_js_div/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
+                    dir = f"storage/results/intervention_ce/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory"
                 else:
-                    dir = f"storage/results/intervention_js_div/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory/check_{check}"
+                    dir = f"storage/results/intervention_ce/{env}/{fam}/{n_agents}_agents/{nstates}_states/trajectory/check_{check}"
 
                 vdata = np.loadtxt(dir + f"/vanilla.txt")
                 data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
@@ -157,7 +157,7 @@ def individualPlots(normalized):
                 title_type = "Normalized " if normalized else ""
                 file_type = "normalized" if normalized else "unnormalized"
                 name = f"{title_type}Interventional Robustness\nfor {fam} at {check} frames, {env}"
-                plot_js_divergence_matrix(
+                plot_ce_matrix(
                     data,
                     vdata,
                     name,
@@ -165,7 +165,7 @@ def individualPlots(normalized):
                     env,
                     family=fam,
                     checkpoint=check,
-                    fname=f"jsdiv_{fam}{check}_{file_type}",
+                    fname=f"ce_{fam}{check}_{file_type}",
                 )
 
 
@@ -258,7 +258,7 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
 
         performanceOrder = 1000
 
-        # add jsdiv plots
+        # add ce plots
         for c, check in enumerate(checkpoints):
             ax = axes[f, c]
             if c == len(checkpoints) - 1:
@@ -283,12 +283,12 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
             if f == len(model_names) - 1:
                 ax.tick_params(labelbottom=True)
 
-            dir = f"storage/results/intervention_js_div/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
+            dir = f"storage/results/intervention_ce/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
 
             vdata = np.loadtxt(dir + f"/vanilla.txt")
             data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
 
-            subplot_js_divergence_matrix(
+            subplot_ce_matrix(
                 ax,
                 data,
                 vdata,
@@ -354,7 +354,7 @@ def megaPlot(normalized, nAgents=11, nStates=30, env=None):
 
     # save
     plt.savefig(
-        f"storage/plots/sampled_jsdivmat/{env}_{file_type}.png",
+        f"storage/plots/sampled_cemat/{env}_{file_type}.png",
         bbox_inches="tight",
         dpi=600,
     )

@@ -156,3 +156,5 @@ out/
 xai_ir
 ir
 experiment.sh
+
+**/.DS_Store

@@ -13,8 +13,10 @@ pip install -r requirements.txt
 pip install -e .
 cd ../autonomous-learning-library/
 pip install -e .
-cd $root
+cd ../xai-interventional-robustness/
 # intialize states
 python -m envs.wrappers.space_invaders.interventions.interventions
 python -m envs.wrappers.breakout.interventions.interventions
 python -m envs.wrappers.amidar.interventions.interventions
+
+python setup.py install

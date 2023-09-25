@@ -1,6 +1,6 @@
 import numpy as np
 
-from analysis.src.js_divergence import js_divergence
+from analysis.src.ce import norm_sym_cross_entropy
 
 from envs.wrappers.all_toybox_wrapper import (
     ToyboxEnvironment,
@@ -70,10 +70,10 @@ def collect_action_distributions(agent_family, agents, envs, env_labels, samples
     return dists
 
 
-def get_js_divergence(agent_family, agents, envs, env_labels, dir):
+def get_ce(agent_family, agents, envs, env_labels, dir):
     n = len(envs)
     m = len(agents)
-    result_table = np.zeros((n, 4))  # env_labels + js_divergence = 4 cols
+    result_table = np.zeros((n, 4))  # env_labels + ce = 4 cols
 
     for e, env in enumerate(envs):
         result_table[e, 1:3] = env_labels[e]
@@ -107,19 +107,19 @@ def get_js_divergence(agent_family, agents, envs, env_labels, dir):
         # print("done")
         #### END ACTION HISTOGRAMS
 
-        result_table[e, 3] = js_divergence(actions)
+        result_table[e, 3] = norm_sym_cross_entropy(actions)
 
     return result_table
 
 
-def average_js_divergence(agent_family, agents, envs, env_labels, num_samples, dir):
+def average_ce(agent_family, agents, envs, env_labels, num_samples, dir):
     if agent_family in agent_family_that_selects_max_action:
         # only need to run one iteration
-        return get_js_divergence(agent_family, agents, envs, env_labels, dir)
+        return get_ce(agent_family, agents, envs, env_labels, dir)
 
     dists = []
     for i in range(num_samples):
-        dist = get_js_divergence(agent_family, agents, envs, env_labels, dir)
+        dist = get_ce(agent_family, agents, envs, env_labels, dir)
         dists.append(dist)
         print(f"\nAJD: Sampling {round(i / (num_samples-1) * 100)}% complete")
     print()
@@ -127,7 +127,7 @@ def average_js_divergence(agent_family, agents, envs, env_labels, num_samples, d
     return dists
 
 
-def evaluate_js_divergence(
+def evaluate_ce(
     agent_family,
     environment,
     agents,
@@ -161,11 +161,11 @@ def evaluate_js_divergence(
         for intv in interventions
     ]
 
-    dists = average_js_divergence(
+    dists = average_ce(
         agent_family, agents, envs, env_labels, num_samples, dir
     )
 
-    header = "agent,state,intv,jsdiv"
+    header = "agent,state,intv,ce"
 
     if len(interventions) == 1:
         np.savetxt(dir + f"/vanilla.txt", dists, header=header)
@@ -190,7 +190,7 @@ def evaluate_distributions(
     dir,
 ):
     print("vanilla")
-    evaluate_js_divergence(
+    evaluate_ce(
         agent_family,
         environment,
         agents,
@@ -202,7 +202,7 @@ def evaluate_distributions(
     )
 
     print("interventions")
-    evaluate_js_divergence(
+    evaluate_ce(
         agent_family,
         environment,
         agents,

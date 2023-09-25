@@ -1,5 +1,5 @@
 import numpy as np
-from analysis.src.js_divergence import get_js_divergence_matrix
+from analysis.src.ce import get_ce_matrix
 from envs.wrappers.paths import get_num_interventions
 
 import matplotlib.pyplot as plt
@@ -64,12 +64,12 @@ def makeTables(nAgents=11, nStates=30):
             normalized_dict[env][fam] = {}
 
             for check in checkpoints:
-                dir = f"storage/results/intervention_js_div/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
+                dir = f"storage/results/intervention_ce/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
 
                 vdata = np.loadtxt(dir + f"/vanilla.txt")
                 data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
 
-                mat, nmat, van_mat, intv_mat, n_intv_mat = get_js_divergence_matrix(
+                mat, nmat, van_mat, intv_mat, n_intv_mat = get_ce_matrix(
                     data, vdata
                 )
 

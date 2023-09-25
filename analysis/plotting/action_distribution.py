@@ -14,7 +14,7 @@ cmap = plt.get_cmap(cmap).reversed()
 matplotlib.rc("font", **font)
 
 import numpy as np
-from analysis.src.js_divergence import js_divergence
+from analysis.src.ce import norm_sym_cross_entropy
 
 
 def plot_action_dist(data, title, xmin, xmax):
@@ -33,7 +33,7 @@ def variance_max_actions(dists):
     return np.std(np.argmax(dists, axis=1))
 
 
-def plot_js_divergence_matrix(data, vanilla, title, normalize):
+def plot_ce_matrix(data, vanilla, title, normalize):
     agent = data[:, 0]
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
@@ -48,7 +48,7 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
         van_wh = np.where(van_s)[0]
         van_agent = vanilla[van_wh, 3:]
         assert len(vanilla[van_wh, 0]) == len(np.unique(vanilla[van_wh, 0]))
-        norm_van = js_divergence(van_agent) / np.log2(10)
+        norm_van = norm_sym_cross_entropy(van_agent) / np.log2(10)
         mat[s, 0] = norm_van
         if normalize == True:
             mat[s, 0] = 0.0
@@ -59,7 +59,7 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
             wh = np.where(si)[0]
             agents = data[wh, 3:]
             assert len(data[wh, 0]) == len(np.unique(data[wh, 0]))
-            mat[s, i + 1] = js_divergence(agents) / np.log2(10)
+            mat[s, i + 1] = norm_sym_cross_entropy(agents) / np.log2(10)
             if normalize == True:
                 mat[s, i + 1] -= norm_van
             avg += mat[s, i + 1]
@@ -79,8 +79,8 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
 
-    os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
+    os.makedirs("storage/plots/sampled_cemat", exist_ok=True)
+    plt.savefig(f"storage/plots/sampled_cemat/{title}.png")
 
 
 # def plot_individual_distributions(agents, mat):
@@ -92,12 +92,12 @@ def plot_js_divergence_matrix(data, vanilla, title, normalize):
 #     plt.title(mat)
 #     plt.xlabel("actions")
 #     plt.ylabel("runs")
-#     os.makedirs(f"storage/plots/jsdivmat/distributions - {title}", exist_ok=True)
-#     plt.savefig(f"storage/plots/jsdivmat/distributions - {title}/{i}_{s}.png")
+#     os.makedirs(f"storage/plots/cemat/distributions - {title}", exist_ok=True)
+#     plt.savefig(f"storage/plots/cemat/distributions - {title}/{i}_{s}.png")
 #     plt.close()
 
 
-def plot_max_action_divergence_matrix(data, title):
+def plot_max_action_ce_matrix(data, title):
     agent = data[:, 0]
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed
@@ -124,15 +124,15 @@ def plot_max_action_divergence_matrix(data, title):
     plt.xlabel("Intervention Number")
     plt.ylabel("State of Interest")
 
-    os.makedirs("storage/plots/sampled_jsdivmat", exist_ok=True)
-    plt.savefig(f"storage/plots/sampled_jsdivmat/{title}.png")
+    os.makedirs("storage/plots/sampled_cemat", exist_ok=True)
+    plt.savefig(f"storage/plots/sampled_cemat/{title}.png")
 
 
 if __name__ == "__main__":
     n_agents = 11
     nstates = 10
-    jsdivsampling = True
-    folder = "intervention_js_div" if jsdivsampling else "intervention_action_dists"
+    cesampling = True
+    folder = "intervention_ce" if cesampling else "intervention_action_dists"
 
     environment = "SpaceInvaders"
     nintv = get_num_interventions(environment)
@@ -142,19 +142,19 @@ if __name__ == "__main__":
 
         vdata = np.loadtxt(dir + "/vanilla.txt")
         data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
-        plot_js_divergence_matrix(
+        plot_ce_matrix(
             data,
             vdata,
             f"Normalized JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=True,
         )
-        plot_js_divergence_matrix(
+        plot_ce_matrix(
             data,
             vdata,
             f"JS Divergence over Actions for {fam}, {n_agents} Agents",
             normalize=False,
         )
-        plot_max_action_divergence_matrix(
+        plot_max_action_ce_matrix(
             data,
-            f"Max action divergence matrix for {fam}, {n_agents} Agents, ({nstates} states)",
+            f"Max action ce matrix for {fam}, {n_agents} Agents, ({nstates} states)",
         )

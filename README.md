@@ -31,7 +31,7 @@ And finally plots and tables found in the paper and supplementary materials can 
 ./scripts/generateArtifacts.sh
 ```
 
-This will produce plots in `storage/plots/sampled_jsdivmat/` and `storage/plots/performance/` for the environments and agents used.
+This will produce plots in `storage/plots/sampled_cemat/` and `storage/plots/performance/` for the environments and agents used.
 It will also print the tables found in the Appendix of the interventional robustness measure values.
 
 ## Prerequisites
