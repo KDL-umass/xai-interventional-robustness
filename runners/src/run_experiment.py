@@ -25,13 +25,13 @@ loadfile = False  # replace with specific path if continuing from checkpoint
 # e.g. loadfile = "/.../snapshots"
 
 
-def main(env_name, fam):
+def main(env_name, fam, intv=-1):
     if env_name == "SpaceInvaders":
-        custom_wrapper = customSpaceInvadersResetWrapper(0, -1, 3)
+        custom_wrapper = customSpaceInvadersResetWrapper(0, intv, 3)
     elif env_name == "Amidar":
-        custom_wrapper = customAmidarResetWrapper(0, -1, 3)
+        custom_wrapper = customAmidarResetWrapper(0, intv, 3)
     elif env_name == "Breakout":
-        custom_wrapper = customBreakoutResetWrapper(0, -1, 3)
+        custom_wrapper = customBreakoutResetWrapper(0, intv, 3)
     else:
         raise ValueError(f"Unrecognized env_name: {env_name}")
 
@@ -106,6 +106,14 @@ if __name__ == "__main__":
         type=str,
         help="Agent family:  a2c,c51, dqn, ddqn, ppo, rainbow, vsarsa, vqn",
     )
+    parser.add_argument(
+        "--intv",
+        nargs=1,
+        type=int,
+        default=-1,
+        help="Intervention number 0-?",
+    )
+
     parser.add_argument("--experiment_id", type=int)
 
     args = parser.parse_args()
@@ -114,4 +122,4 @@ if __name__ == "__main__":
     assert args.family is not None, "FAMILY must be specified"
 
     print(f"Training {args.family[0]} on {args.env[0]}")
-    main(args.env[0], args.family[0])
+    main(args.env[0], args.family[0], args.intv[0])

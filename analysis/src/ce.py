@@ -44,9 +44,9 @@ def get_ce_matrix(data, vanilla):
     intv_mat = np.zeros((nstates, nintv))
     for s in range(nstates):
         for i in range(nintv):
-            intv_mat[s, i] = samples[s * nintv + i] / np.log2(nAgents)
+            intv_mat[s, i] = samples[s * nintv + i] #/ np.log2(nAgents)
 
-    van_mat = vanilla[:, 3] / np.log2(nAgents)
+    van_mat = vanilla[:, 3] #/ np.log2(nAgents)
 
     mat = np.zeros((nstates, nintv + 1))
     mat[:, 0] = van_mat
