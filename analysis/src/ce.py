@@ -1,25 +1,24 @@
 import numpy as np
 
 
-def norm_cross_entropy(pj, pi):
+def norm_cross_entropy(pi, pj):
     ce_sum = 0
     for i in range(len(pi)):
-        ce_sum += (pj[i]+1e-12)*np.log2((pi[i]+1e-12))
-    norm = 0 
-    for i in range(len(pi)):
-        for j in range(len(pi)):
-            norm += (pj[j]+1e-12)*np.log2((pi[i]+1e-12))
-    return (-1*ce_sum)/(-1*norm)
+        ce_sum += (pi[i]+1e-100)*np.log2((pj[i]+1e-100)) 
+    return -1*ce_sum
 
 
 def norm_sym_cross_entropy(dists):
     n = len(dists)
     ces = 0
+    norm_dist = np.diag(np.full(10,1.0))
+    norm = 0
     for i in range(n):
         for j in range(n):
             if j != i:
                 ces += norm_cross_entropy(dists[i], dists[j])
-    return (2/(n*(n-1))) * ces
+                norm_dist += norm_cross_entropy(dists[i], dists[j])
+    return (1/(n*(n-1))) * ces / norm
 
 
 def get_ce_matrix(data, vanilla):
@@ -29,7 +28,7 @@ def get_ce_matrix(data, vanilla):
     normalize bounds to [-1,1] with vanilla set to 0.
 
     `mat` is normalized between [0,1].
-    `nmat` is normalized between [-1,1], where 0 is the unintervened state's normized symmetric cross entropy.
+    `nmat` is normalized between [-1,1], where 0 is the unintervened state's normalized symmetric cross entropy.
     """
     state = data[:, 1]  # 0 indexed
     intv = data[:, 2]  # 0 indexed

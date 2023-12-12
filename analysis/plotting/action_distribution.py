@@ -48,7 +48,7 @@ def plot_ce_matrix(data, vanilla, title, normalize):
         van_wh = np.where(van_s)[0]
         van_agent = vanilla[van_wh, 3:]
         assert len(vanilla[van_wh, 0]) == len(np.unique(vanilla[van_wh, 0]))
-        norm_van = norm_sym_cross_entropy(van_agent) / np.log2(10)
+        norm_van = norm_sym_cross_entropy(van_agent) #/ np.log2(10)
         mat[s, 0] = norm_van
         if normalize == True:
             mat[s, 0] = 0.0
@@ -59,7 +59,7 @@ def plot_ce_matrix(data, vanilla, title, normalize):
             wh = np.where(si)[0]
             agents = data[wh, 3:]
             assert len(data[wh, 0]) == len(np.unique(data[wh, 0]))
-            mat[s, i + 1] = norm_sym_cross_entropy(agents) / np.log2(10)
+            mat[s, i + 1] = norm_sym_cross_entropy(agents) #/ np.log2(10)
             if normalize == True:
                 mat[s, i + 1] -= norm_van
             avg += mat[s, i + 1]

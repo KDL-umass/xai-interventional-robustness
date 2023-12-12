@@ -84,10 +84,10 @@ def get_ce(agent_family, agents, envs, env_labels, dir):
             actions[a, :] = policy_action_distribution(
                 agent_family, agt, env, intv_obs, 1, "empirical"
             )
-            print(
-                f"\r\r\tGJD: Sampling {round((e*m + a) / (n*m-1) * 100)}% complete",
-                end="",
-            )
+            # print(
+            #     f"\r\r\tGJD: Sampling {round((e*m + a) / (n*m-1) * 100)}% complete",
+            #     end="",
+            # )
 
         #### UNCOMMENT TO SAVE ACTION HISTOGRAMS ####
         #### COMMENTED OUT TO IMPROVE RUNTIME
@@ -107,6 +107,7 @@ def get_ce(agent_family, agents, envs, env_labels, dir):
         # print("done")
         #### END ACTION HISTOGRAMS
 
+        print(actions)
         result_table[e, 3] = norm_sym_cross_entropy(actions)
 
     return result_table
