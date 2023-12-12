@@ -6,7 +6,7 @@ from matplotlib import cm, rcParams
 from matplotlib.colors import Normalize
 from analysis.plotting.performance import plotAllFamilies
 
-from analysis.src.js_divergence import get_js_divergence_matrix
+from analysis.src.ce import get_ce_matrix
 from envs.wrappers.paths import get_num_interventions
 
 from runners.src.performance_plot import *
@@ -21,7 +21,7 @@ from runners.src.run_intervention_eval import (
 
 from analysis.checkpoints import checkpoints
 
-from analysis.plotting.sampled_jsdiv import *
+from analysis.plotting.sampled_ce import *
 
 cmap = rcParams["image.cmap"]
 cmap = plt.get_cmap(cmap).reversed()
@@ -126,7 +126,7 @@ def horizontalMegaPlot(normalized, nAgents=11, nStates=30, env=None):
 
         performanceOrder = 1000
 
-        # add jsdiv plots
+        # add ce plots
         for c, check in enumerate(checkpoints):
             ax = axes[c, f]
             if c == 0:
@@ -158,12 +158,12 @@ def horizontalMegaPlot(normalized, nAgents=11, nStates=30, env=None):
                 )
                 # ax.tick_params(labelbottom=True)
 
-            dir = f"storage/results/intervention_js_div/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
+            dir = f"storage/results/intervention_ce/{env}/{fam}/{nAgents}_agents/{nStates}_states/trajectory/check_{check}"
 
             vdata = np.loadtxt(dir + f"/vanilla.txt")
             data = np.loadtxt(dir + f"/{nintv}_interventions.txt")
 
-            subplot_js_divergence_matrix(
+            subplot_ce_matrix(
                 ax,
                 data,
                 vdata,
@@ -231,7 +231,7 @@ def horizontalMegaPlot(normalized, nAgents=11, nStates=30, env=None):
 
     # save
     plt.savefig(
-        f"storage/plots/sampled_jsdivmat/{env}_{file_type}_horizontal.png",
+        f"storage/plots/sampled_cemat/{env}_{file_type}_horizontal.png",
         bbox_inches="tight",
         dpi=600,
     )

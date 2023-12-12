@@ -13,10 +13,10 @@ def main(env_name, fam, intervention=-1, checkpoint=None):
         checkpoints = paper_checkpoints
     df_list = []
     for checkpoint in checkpoints:
-        dir = f"storage/results/intervention_js_div/{env_name}/{fam}/11_agents/30_states/trajectory/check_{checkpoint}/"
+        dir = f"storage/results/intervention_ce/{env_name}/{fam}/11_agents/30_states/trajectory/check_{checkpoint}/"
         number = {'Amidar':69, 'SpaceInvaders':88, 'Breakout':38}
         file = dir + f"{number[env_name]}_interventions.txt"
-        d = pd.read_csv(file, sep=' ', skiprows=0, header=0, names = ["agent","state","intervention","js_div"])
+        d = pd.read_csv(file, sep=' ', skiprows=0, header=0, names = ["agent","state","intervention","ce"])
         d = d.astype({"intervention":int,"state":int})
         d = d[d["state"]==0]
         d = d.drop(columns=['agent','state'])

@@ -74,7 +74,7 @@ def get_shift_enemy_interventions(env, state_num, count):
 
 # AGENT INTERVENTIONS #
 def get_shift_agent_interventions(env, state_num, count):
-    """Start the enemy in different positions."""
+    """Start the agent in different positions."""
     state = env.toybox.state_to_json()
     num_enemies = len(state["enemies"])
     x = [1984, 0, 1700, 1984]

@@ -4,7 +4,7 @@ import argparse
 
 
 def getDir(env, fam, check):
-    return f"storage/results/intervention_js_div/{env}/{fam}/11_agents/30_states/trajectory/check_{check}"
+    return f"storage/results/intervention_ce/{env}/{fam}/11_agents/30_states/trajectory/check_{check}"
 
 
 def create_histograms(env, fam, check, state, intv):

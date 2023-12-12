@@ -154,5 +154,9 @@ sandbox/*
 runs/
 out/
 xai_ir
+xai-env
+xai_env
 ir
 experiment.sh
+
+**/.DS_Store
