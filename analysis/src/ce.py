@@ -4,7 +4,7 @@ import numpy as np
 def norm_cross_entropy(pi, pj):
     ce_sum = 0
     for i in range(len(pi)):
-        ce_sum += (pi[i]+1e-100)*np.log2((pj[i]+1e-100)) 
+        ce_sum += (pi[i]+1e-12)*np.log2((pj[i]+1e-12)) 
     return -1*ce_sum
 
 
