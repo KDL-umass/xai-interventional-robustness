@@ -11,13 +11,12 @@ def norm_cross_entropy(pi, pj):
 def norm_sym_cross_entropy(dists):
     n = len(dists)
     ces = 0
-    norm_dist = np.diag(np.full(10,1.0))
     norm = 0
     for i in range(n):
         for j in range(n):
             if j != i:
                 ces += norm_cross_entropy(dists[i], dists[j])
-                norm_dist += norm_cross_entropy(dists[i], dists[j])
+    norm = norm_cross_entropy([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     return (1/(n*(n-1))) * ces / norm
 
 
